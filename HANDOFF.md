@@ -38,7 +38,7 @@ Commands, run in `app/`: `npm ci`, `npm test` (33 tests), `npm run build`, `npm 
 ## Immediate task: generate the model-reading audio
 
 The user has added ElevenLabs keys to this cloud environment: `ELEVENLABS_API_KEY` and
-`ELEVENLABS_VOICE_ID`, with `ELEVENLABS_MODEL` optional (default `eleven_multilingual_v2`).
+`ELEVENLABS_VOICE_ID`, with `ELEVENLABS_MODEL` optional (default `eleven_v4`, since 5 Oct 2026; the voice used is `fwBvoY941Q2wcOnBTlbP`).
 **Never print or commit the keys.**
 
 1. In `app/`, run `npm ci`.

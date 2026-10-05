@@ -59,7 +59,7 @@ async function elevenlabs(text) {
     headers: { 'xi-api-key': key, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       text,
-      model_id: process.env.ELEVENLABS_MODEL || 'eleven_multilingual_v2',
+      model_id: process.env.ELEVENLABS_MODEL || 'eleven_v4',
       voice_settings: { stability: 0.6, similarity_boost: 0.75, style: 0.15, use_speaker_boost: true },
     }),
   });
