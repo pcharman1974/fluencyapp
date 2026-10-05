@@ -8,7 +8,7 @@
 // Options: --voice <id or name>  --only pages|words  --force (redo files that already exist)
 // Keys come from the environment (or app/.env):
 //   ElevenLabs: ELEVENLABS_API_KEY, optional ELEVENLABS_VOICE_ID, ELEVENLABS_MODEL (default eleven_v4),
-//               ELEVENLABS_STABILITY (0.5), ELEVENLABS_SIMILARITY (0.75), ELEVENLABS_STYLE (0.15), ELEVENLABS_LANGUAGE (en)
+//               ELEVENLABS_STABILITY (0.4), ELEVENLABS_SIMILARITY (0.75), ELEVENLABS_STYLE (0.15), ELEVENLABS_LANGUAGE (en)
 //   Azure:      AZURE_SPEECH_KEY, AZURE_SPEECH_REGION, optional AZURE_TTS_VOICE
 //
 // Writes content/<story>/audio/: page-01.mp3 ..., words/<word>.mp3, and manifest.json (timings).
@@ -64,9 +64,9 @@ async function elevenlabs(text) {
       text,
       model_id: process.env.ELEVENLABS_MODEL || 'eleven_v4',
       language_code: process.env.ELEVENLABS_LANGUAGE || 'en',
-      // Match the ElevenLabs website's sliders: stability 0.5 = halfway, similarity 0.75 = 75%.
+      // Match the ElevenLabs website's sliders: stability 0.4 = 40%, similarity 0.75 = 75%.
       voice_settings: {
-        stability: num(process.env.ELEVENLABS_STABILITY, 0.5),
+        stability: num(process.env.ELEVENLABS_STABILITY, 0.4),
         similarity_boost: num(process.env.ELEVENLABS_SIMILARITY, 0.75),
         style: num(process.env.ELEVENLABS_STYLE, 0.15),
         use_speaker_boost: true,
