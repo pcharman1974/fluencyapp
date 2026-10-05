@@ -1,0 +1,19 @@
+# Render Blueprint: Dashboard > New > Blueprint > pick this repo.
+services:
+  - type: web
+    name: power-reader
+    runtime: node
+    plan: free            # sleeps after ~15 min idle; first visit then takes up to a minute
+    region: frankfurt     # nearest Render region to the UK
+    rootDir: app
+    buildCommand: npm ci && npm run build
+    startCommand: node server/index.js
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: APP_PASSWORD
+        sync: false       # Render asks for this when you create the service
+      - key: AZURE_SPEECH_KEY
+        sync: false       # leave blank until you have one
+      - key: AZURE_SPEECH_REGION
+        value: uksouth
