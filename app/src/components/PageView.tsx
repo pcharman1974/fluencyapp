@@ -63,6 +63,10 @@ export default function PageView({ story, base, pageNo, focusWords, recording, p
   // No model reading available (no recording and no device voice): don't hold the pupil up.
   useEffect(() => { if (modelFirst && audioLoaded && !recorded && !canSpeak()) { setListened(true); onListened?.(); } }, [modelFirst, audioLoaded, recorded, pageNo]);
 
+  // Tricky words are boxed while listening, so pupils notice them; plain when it's their turn to read
+  // aloud, so they read them unprompted; back again once the page is done.
+  const showVocab = !plain && !recording && !(modelFirst && listened && !turnDone);
+
   const wordStarts = useMemo(() => {
     const starts: number[] = []; const re = /\S+/g; let m;
     while ((m = re.exec(page.text))) starts.push(m.index);
@@ -132,7 +136,7 @@ export default function PageView({ story, base, pageNo, focusWords, recording, p
           {showPicture && <img className="page-img" src={base + page.image} alt={page.imageAlt} />}
           <div className="page-body">
             <Ruler on={ruler}>
-              <ReadingText text={page.text} vocab={plain ? {} : vocab} highlightIndex={speaking} focusWords={focusWords}
+              <ReadingText text={page.text} vocab={showVocab ? vocab : {}} highlightIndex={speaking} focusWords={focusWords}
                 onWordTap={(word, def) => def && !recording && setPopup({ word, def })} />
             </Ruler>
           </div>

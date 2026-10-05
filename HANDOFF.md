@@ -86,6 +86,9 @@ The user has added ElevenLabs keys to this cloud environment: `ELEVENLABS_API_KE
   score (Azure prosody, a guide) and words a minute last. No listen-back and no self-evaluation
   (both judged too much for teenagers; old 'selfcheck' records still show in the data log). A new
   personal best needs at least 95% of words right, and only accurate readings set the best.
+- **Tricky-word boxes show while listening, not while reading aloud** (decided 5 Oct 2026): boxed
+  during the model reading so pupils notice them, plain at "Your turn" and while the microphone is on
+  (they read them unprompted), back once the page is done so meanings can be tapped.
 - **Running record after "Your best reading"** (decided 5 Oct 2026): the passage with each word marked:
   read right (plain), said something else (what was said above it), missed out (faded, dash above),
   added word (+word where it came), not reached (grey). Teachers see the same record, in classic terms,
