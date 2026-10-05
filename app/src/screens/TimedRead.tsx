@@ -32,9 +32,9 @@ export default function TimedRead({ story, reader, state, go, onAward }: Props) 
   const startedAt = useRef(0);
   const session = useRef<{ stop(): Promise<SpeechResult> } | null>(null);
   const saved = useRef(false);
-  const recorder = useRef<QaRecorder | null>(null);
+  const recorder = useRef<Promise<QaRecorder | null> | null>(null);
   const audio = useRef<Blob | null>(null);
-  useEffect(() => () => recorder.current?.cancel(), []);
+  useEffect(() => () => { recorder.current?.then(r => r?.cancel()); }, []);
   const [history] = useState(() => getAttempts(reader).filter(a => a.storyId === story.id));
 
   const azure = providers.find(p => p.id === 'azure')!;
@@ -63,14 +63,15 @@ export default function TimedRead({ story, reader, state, go, onAward }: Props) 
     setProblem('');
     // Marked automatically: the real speech check if the server has one, otherwise demo data.
     const provider: SpeechProvider = speechReady ? azure : demo;
+    recorder.current = startRecording(); // alongside the speech check, so the clock isn't held up
     try {
       session.current = await provider.start(tokens.map(t => t.display).join(' '), setHeardCount);
     } catch {
+      recorder.current?.then(r => r?.cancel()); recorder.current = null;
       setProblem('The microphone or speech service could not start. Check the microphone is allowed for this page, then try again.');
       setPhase('setup');
       return;
     }
-    recorder.current = await startRecording();
     startedAt.current = Date.now();
     setElapsed(0);
     setPhase('reading');
@@ -79,7 +80,7 @@ export default function TimedRead({ story, reader, state, go, onAward }: Props) 
   async function finish() {
     const secs = Math.min(DURATION, (Date.now() - startedAt.current) / 1000);
     setElapsed(secs);
-    audio.current = (await recorder.current?.stop()) ?? null; recorder.current = null;
+    audio.current = (await (await recorder.current)?.stop()) ?? null; recorder.current = null;
     if (!session.current) return;
     setPhase('analysing');
     const heard = await session.current.stop();

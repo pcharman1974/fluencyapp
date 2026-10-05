@@ -23,19 +23,21 @@ export default function ReadAloud({ text, provider, label = 'Read aloud', doneLa
   const session = useRef<{ stop(): Promise<SpeechResult> } | null>(null);
   const started = useRef(0);
   const tick = useRef<number>(0);
-  const recorder = useRef<QaRecorder | null>(null);
-  useEffect(() => () => { recorder.current?.cancel(); clearInterval(tick.current); }, []);
+  // Test recording starts alongside the speech check, never holding it up.
+  const recorder = useRef<Promise<QaRecorder | null> | null>(null);
+  useEffect(() => () => { recorder.current?.then(r => r?.cancel()); clearInterval(tick.current); }, []);
 
   const start = async () => {
     if (!provider) return;
     setProblem('');
+    recorder.current = qa ? startRecording() : null;
     try {
       session.current = await provider.start(text, undefined, { kind: 'page' });
     } catch {
+      recorder.current?.then(r => r?.cancel()); recorder.current = null;
       setProblem('The microphone could not start. Check it is allowed for this page.');
       return;
     }
-    recorder.current = qa ? await startRecording() : null;
     started.current = Date.now(); setSecs(0);
     tick.current = window.setInterval(() => setSecs(Math.floor((Date.now() - started.current) / 1000)), 500);
     setState('recording'); onRecording?.(true);
@@ -45,7 +47,7 @@ export default function ReadAloud({ text, provider, label = 'Read aloud', doneLa
     clearInterval(tick.current);
     setState('checking');
     const elapsed = (Date.now() - started.current) / 1000;
-    const [result, audio] = await Promise.all([session.current!.stop(), recorder.current?.stop() ?? Promise.resolve(null)]);
+    const [result, audio] = await Promise.all([session.current!.stop(), recorder.current?.then(r => r?.stop() ?? null) ?? Promise.resolve(null)]);
     session.current = null; recorder.current = null;
     onRecording?.(false);
     setState('idle');
