@@ -3,10 +3,11 @@ import type { Story } from '../types';
 import type { Screen } from '../App';
 import PageView from '../components/PageView';
 import ReadAloud from '../components/ReadAloud';
+import RunningRecord from '../components/RunningRecord';
 import StoryCards, { cardsCollected } from '../components/StoryCards';
 import { CheckBanner } from './Practice';
 import { GoalRing, Badge, TodayBar } from '../components/Rewards';
-import { bestReread, dayKey, PB_ACCURACY, sessionDays, sessionsInWeek, trickyWords, WEEKLY_TARGET, type Award, type BadgeId, type SelfAnswer, type SpeechScores } from '../lib/rewards';
+import { bestReread, dayKey, PB_ACCURACY, sessionDays, sessionsInWeek, trickyWords, WEEKLY_TARGET, type Award, type BadgeId, type SpeechScores } from '../lib/rewards';
 import type { SpeechProvider } from '../lib/speech';
 import type { Reader, RecordResult } from '../lib/useReader';
 import { checkDetail, type PageCheck } from '../lib/verify';
@@ -179,8 +180,9 @@ function ReRead({ story, base, page: pageNo, reader, provider, stepper, onAward,
           <p className="big-msg">{!accurate
             ? 'Some words were tricky this time. Go for every word right first, then make it smooth.'
             : pb ? 'Smoother than ever, and just as accurate. Brilliant reading!'
-            : 'Well read! Now think about how it sounded.'}</p>
-          <SelfCheck key={check.wcpm + ':' + check.durationSec} onDone={a => onAward(reader.record({ type: 'selfcheck', storyId: story.id, page: pageNo, ...a }))} />
+            : 'Well read! Smooth reading with expression is what makes a great reader.'}</p>
+          <h3>What you read</h3>
+          <RunningRecord record={check.record} />
           <div className="stats">
             <div className="stat"><span className="stat-value">{Math.round(check.accuracy * 100)}%</span><span className="stat-label">Words right</span></div>
             {scores?.prosody !== undefined && <div className="stat"><span className="stat-value">{scores.prosody}</span><span className="stat-label">Expression <span className="tag">{provider?.demo ? 'demo' : 'guide'}</span></span></div>}
@@ -216,37 +218,3 @@ function ReRead({ story, base, page: pageNo, reader, provider, stepper, onAward,
   );
 }
 
-/** The pupil's own quick check on how their best reading sounded (prosody), in child-friendly words. */
-function SelfCheck({ onDone }: { onDone: (a: { smooth: SelfAnswer; pauses: SelfAnswer; meaning: SelfAnswer }) => void }) {
-  const [a, setA] = useState<Partial<Record<'smooth' | 'pauses' | 'meaning', SelfAnswer>>>({});
-  const [saved, setSaved] = useState(false);
-  const qs = [
-    ['smooth', 'Did it sound smooth, like talking?'],
-    ['pauses', 'Did you pause at full stops?'],
-    ['meaning', 'Did your voice show the meaning?'],
-  ] as const;
-  const choose = (k: 'smooth' | 'pauses' | 'meaning', v: SelfAnswer) => {
-    if (saved) return;
-    const next = { ...a, [k]: v };
-    setA(next);
-    if (next.smooth && next.pauses && next.meaning) { setSaved(true); onDone(next as { smooth: SelfAnswer; pauses: SelfAnswer; meaning: SelfAnswer }); }
-  };
-  return (
-    <div className="selfcheck">
-      <h3>How did it sound?</h3>
-      {qs.map(([k, q]) => (
-        <div key={k} className="selfcheck-row">
-          <span>{q}</span>
-          <div className="seg" role="group" aria-label={q}>
-            {(['yes', 'nearly', 'not-yet'] as const).map(v => (
-              <button key={v} className={a[k] === v ? 'on' : ''} aria-pressed={a[k] === v} disabled={saved && a[k] !== v} onClick={() => choose(k, v)}>
-                {v === 'yes' ? 'Yes' : v === 'nearly' ? 'Nearly' : 'Not yet'}
-              </button>
-            ))}
-          </div>
-        </div>
-      ))}
-      {saved && <p className="hint">Thanks! Thinking about how you read helps you read better.</p>}
-    </div>
-  );
-}

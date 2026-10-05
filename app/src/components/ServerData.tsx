@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { deleteRecording, listRecordings, listRecords, qaEnabled, type QaRecording } from '../lib/qa';
 import { download } from '../lib/dataLog';
+import RunningRecord from './RunningRecord';
+import type { RecordMark } from '../lib/verify';
 
 const TYPE = { page: 'Page read', reread: 'Re-read', warmup: 'Warm-up word', timed: 'Timed read' } as const;
 const stamp = (iso: string) => new Date(iso).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -67,6 +69,7 @@ export default function ServerData() {
                   {r.provider && ` · ${r.provider}`}
                 </p>
                 {r.heard !== undefined && <p className="dl-details"><b>Speech check heard:</b> {r.heard || '(nothing)'}</p>}
+                {Array.isArray(c.record) && <RunningRecord record={c.record as RecordMark[]} audience="teacher" />}
                 {r.audio ? <audio controls preload="none" src={`api/qa/recordings/${r.id}/audio`} className="dl-audio" /> : <p className="hint">No recording (microphone recording not available on this device).</p>}
                 <details className="dl-raw"><summary>All fields</summary><pre>{JSON.stringify(r, null, 2)}</pre></details>
               </li>

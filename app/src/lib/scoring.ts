@@ -50,6 +50,8 @@ export interface Alignment {
   words: AlignedWord[];   // one per reference word, up to lastWordIndex
   lastWordIndex: number;  // -1 if nothing recognised
   insertions: string[];
+  /** Each extra word and where it came: before reference word `at` (its index). For running records. */
+  inserted: { at: number; text: string }[];
 }
 
 // Costs: a misreading that looks like the target (england's -> english) is cheaper than one
@@ -87,6 +89,7 @@ export function alignHeard(ref: Token[], heard: HeardWord[], opts: { checkBelow?
 
   const words: AlignedWord[] = [];
   const insertions: string[] = [];
+  const inserted: { at: number; text: string }[] = [];
   let i = bestI, j = m;
   while (i > 0 || j > 0) {
     if (i > 0 && j > 0) {
@@ -108,13 +111,15 @@ export function alignHeard(ref: Token[], heard: HeardWord[], opts: { checkBelow?
       i--; continue;
     }
     insertions.push(h[j - 1].text);
+    inserted.push({ at: i < n ? ref[i].index : (ref.at(-1)?.index ?? -1) + 1, text: h[j - 1].text });
     j--;
   }
-  words.reverse(); insertions.reverse();
+  words.reverse(); insertions.reverse(); inserted.reverse();
   // Last word reached = last reference word that was actually voiced.
   let last = -1;
   for (const w of words) if (w.status !== 'skipped') last = w.refIndex;
-  return { words: words.filter(w => w.refIndex <= last), lastWordIndex: last, insertions };
+  // Extra words after the last word reached are just chatter at the end, not insertions.
+  return { words: words.filter(w => w.refIndex <= last), lastWordIndex: last, insertions, inserted: inserted.filter(x => x.at <= last) };
 }
 
 export function errorsFromAlignment(a: Alignment): number[] {

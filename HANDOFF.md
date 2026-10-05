@@ -82,11 +82,15 @@ The user has added ElevenLabs keys to this cloud environment: `ELEVENLABS_API_KE
   EEF's guided oral reading. Echo reading (Rasinski: sentence by sentence) is the agreed next step.
 - **"Your best reading" replaces "Beat your best"** (decided 5 Oct 2026): encourages fluent reading with
   expression, not speed (Rasinski: rehearsal is for a meaningful reading, not a fast one). Storyteller
-  tips before reading; afterwards the pupil answers a 3-question
-  self-check (smooth / pauses / meaning; +2 Power, saved as a 'selfcheck' record; no listen-back, too
-  much for teenagers), and sees words
-  right first, an Expression score (Azure prosody, a guide) and words a minute last. A new personal
-  best needs at least 95% of words right, and only accurate readings set the best.
+  tips before reading; afterwards the pupil sees feedback only: words right first, an Expression
+  score (Azure prosody, a guide) and words a minute last. No listen-back and no self-evaluation
+  (both judged too much for teenagers; old 'selfcheck' records still show in the data log). A new
+  personal best needs at least 95% of words right, and only accurate readings set the best.
+- **Running record after "Your best reading"** (decided 5 Oct 2026): the passage with each word marked:
+  read right (plain), said something else (what was said above it), missed out (faded, dash above),
+  added word (+word where it came), not reached (grey). Teachers see the same record, in classic terms,
+  beside each saved recording. Self-corrections and words told by an adult can't be detected, so they
+  aren't marked. Built in `lib/verify.ts` (`runningRecord`) from the speech-check alignment.
 - **The app opens on "Who's reading?" every time** (decided 5 Oct 2026), for shared school devices:
   "I've read before" (tap your number; the last reader is highlighted) or "I'm new" (make up a
   4-digit number). Numbers are unique: the server claims a new number atomically

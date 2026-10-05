@@ -1,5 +1,5 @@
 // "Did they read it?" Checks a page read aloud against the page text.
-import { alignHeard, scoreReading } from './scoring';
+import { alignHeard, scoreReading, type Alignment } from './scoring';
 import { tokenise } from './text';
 import type { SpeechResult } from './speech';
 import type { CheckDetail } from './rewards';
@@ -19,6 +19,29 @@ export interface PageCheck {
   durationSec: number;
   misread: string[];  // words read wrongly or skipped, for warm-ups
   message: string;
+  /** Running record: every word of the text, marked as read, plus where extra words came. */
+  record: RecordMark[];
+}
+
+/** One mark in a running record. 'sub' = said something else (said), 'omit' = missed out, 'unread' = not reached, 'ins' = extra word added. */
+export type RecordMark =
+  | { kind: 'ok' | 'omit' | 'unread'; word: string }
+  | { kind: 'sub'; word: string; said: string }
+  | { kind: 'ins'; said: string };
+
+/** Builds the running record from an alignment: words in order, with insertions where they came. */
+export function runningRecord(ref: { index: number; display: string }[], a: Alignment): RecordMark[] {
+  const byIndex = new Map(a.words.map(w => [w.refIndex, w]));
+  const out: RecordMark[] = [];
+  for (const t of ref) {
+    for (const x of a.inserted) if (x.at === t.index) out.push({ kind: 'ins', said: x.text });
+    const w = byIndex.get(t.index);
+    if (t.index > a.lastWordIndex) out.push({ kind: 'unread', word: t.display });
+    else if (!w || w.status === 'skipped') out.push({ kind: 'omit', word: t.display });
+    else if (w.status === 'misread') out.push({ kind: 'sub', word: t.display, said: w.heard ?? '' });
+    else out.push({ kind: 'ok', word: t.display });
+  }
+  return out;
 }
 
 export function checkPage(text: string, result: SpeechResult, elapsedSec: number): PageCheck {
@@ -45,7 +68,7 @@ export function checkPage(text: string, result: SpeechResult, elapsedSec: number
   } else if (wpm < MIN_WPM) {
     verified = false; message = 'There were long gaps in the reading. Try the page again.';
   }
-  return { verified, coverage, accuracy: attempted ? correct / attempted : 0, wpm, wcpm, words: ref.length, durationSec: duration, misread, message };
+  return { verified, coverage, accuracy: attempted ? correct / attempted : 0, wpm, wcpm, words: ref.length, durationSec: duration, misread, message, record: runningRecord(ref, a) };
 }
 
 /** The fields of a page check that are saved with each read, for checking later. */

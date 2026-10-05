@@ -508,10 +508,6 @@ main.full { max-width: none; padding: 0; }
 /* Your best reading */
 .storyteller { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 16px; background: #FFF6EF; color: var(--lwc-navy-deep); }
 .storyteller span { background: #fff; border: 2px solid #F1B48A; border-radius: 99px; padding: 4px 12px; font-weight: 700; font-size: .95rem; }
-.selfcheck { max-width: 640px; margin: 12px auto; text-align: left; display: flex; flex-direction: column; gap: 10px; }
-.selfcheck h3 { margin: 0; text-align: center; }
-.selfcheck-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; font-weight: 700; color: var(--lwc-navy-deep); }
-.selfcheck .seg button:disabled { opacity: .45; }
 .stat.small .stat-value { font-size: 1.3rem; }
 
 /* Who's reading? */
@@ -527,3 +523,21 @@ main.full { max-width: none; padding: 0; }
 .two-steps .step-turn { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 .two-steps .step-turn .btn { min-height: 44px; padding: 8px 18px; font-size: 1.05rem; }
 @media (max-width: 820px) { .two-steps { flex-direction: column; } }
+
+/* Running record */
+.rr { text-align: left; margin: 12px 0; }
+.rr-text { font-family: var(--font-reading); font-size: 1.2rem; line-height: 1.2; display: flex; flex-wrap: wrap; gap: 6px 7px; margin: 0; }
+.rr-w { display: inline-flex; flex-direction: column; align-items: center; }
+.rr-above { font-size: .72rem; font-weight: 800; min-height: 1em; color: #B45309; white-space: nowrap; }
+.rr-word { padding: 1px 3px; border-radius: 4px; }
+.rr-w.sub .rr-word { background: #FFEDD5; color: #7C2D12; text-decoration: underline wavy #EA580C; text-underline-offset: 4px; font-weight: 700; }
+.rr-w.omit .rr-word { color: #9AA8B1; text-decoration: line-through; }
+.rr-w.omit .rr-above { color: #B91C1C; }
+.rr-w.unread .rr-word { color: #C3CDD3; }
+.rr-w.ins { color: #1D6FB0; }
+.rr-w.ins .rr-above { color: #1D6FB0; }
+.rr-caret { font-weight: 800; line-height: 1; }
+.rr-key { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 6px 18px; color: #33444F; font-size: .9rem; }
+.rr-key li { display: inline-flex; align-items: center; gap: 6px; }
+.rr-key .rr-w .rr-word { font-size: .9rem; }
+.rr-ins-key { color: #1D6FB0; font-weight: 800; }
