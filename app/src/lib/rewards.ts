@@ -10,7 +10,7 @@ export interface CheckDetail {
 export type ReadingEvent =
   | ({ type: 'page'; date: string; storyId: string; page: number; verified: boolean; coverage: number; accuracy: number; words: number; durationSec: number; misread: string[] } & Partial<CheckDetail>)
   | ({ type: 'reread'; date: string; storyId: string; page: number; verified: boolean; wcpm: number } & Partial<CheckDetail>)
-  | { type: 'timed'; date: string; storyId: string; wcpm: number; errorWords: string[] }
+  | { type: 'timed'; date: string; storyId: string; wcpm: number; errorWords: string[]; seconds?: number }
   | ({ type: 'warmup'; date: string; word: string; correct: boolean } & Partial<CheckDetail>)
   | { type: 'points'; date: string; amount: number; reason: string }
   | { type: 'badge'; date: string; id: BadgeId };
@@ -18,8 +18,13 @@ export type ReadingEvent =
 export const POINTS = {
   perTenWords: 1, minPerPage: 2, reread: 5, personalBest: 10, timedRead: 10,
   weeklyGoal: 25, storyFinished: 20, warmupWord: 1,
+  dailyGoal: 15,   // filling today's reading bar
+  extraMinute: 2,  // each further full minute of reading that day
 };
-export const WEEKLY_TARGET = 3; // sessions a week
+// Regular and often: a few minutes most days beats one long go a week.
+export const DAILY_TARGET_MIN = 5;   // minutes of checked reading aloud that fill the day's bar
+export const MAX_EXTRA_MINUTES = 15; // extra-minute Power stops after this many, so it can't be farmed
+export const WEEKLY_TARGET = 3;      // days a week with the bar filled ("sessions")
 
 // Each level has its own colour: warm gold at the start, through orange, to deep navy at the top.
 export const LEVELS = [
@@ -43,9 +48,9 @@ export const BADGES: { id: BadgeId; name: string; how: string }[] = [
   { id: 'story-finished', name: 'Story finished', how: 'Read every page of a story aloud' },
   { id: 'personal-best', name: 'Personal best', how: 'Beat your best on a re-read' },
   { id: 're-reader', name: 'Re-reader', how: 'Do 5 re-reads' },
-  { id: 'goal-week', name: 'Goal week', how: 'Read 3 times in one week' },
+  { id: 'goal-week', name: 'Goal week', how: 'Fill your reading bar on 3 days in one week' },
   { id: 'streak-3', name: '3-week streak', how: 'Hit your weekly goal 3 weeks running' },
-  { id: 'sessions-10', name: '10 sessions', how: 'Practise on 10 different days' },
+  { id: 'sessions-10', name: '10 sessions', how: 'Fill your reading bar on 10 days' },
   { id: 'word-fixer', name: 'Word fixer', how: 'Get 10 warm-up words right' },
 ];
 
@@ -78,18 +83,24 @@ export function levelFor(points: number) {
   return { ...cur, next, toNext: next ? next.min - points : 0, progress: next ? (points - cur.min) / (next.min - cur.min) : 1 };
 }
 
-/** A day counts as a session with 2+ checked pages, a checked re-read, or a timed read. */
+/** Seconds of checked reading aloud in one event: counted page reads, counted re-reads and timed reads. */
+export function readingSeconds(e: ReadingEvent): number {
+  if (e.type === 'page' && e.verified) return e.durationSec;
+  if (e.type === 'reread' && e.verified) return e.durationSec ?? 0;
+  if (e.type === 'timed') return e.seconds ?? 60;
+  return 0;
+}
+
+/** Seconds of checked reading aloud on each day. */
+export function readingByDay(ev: ReadingEvent[]): Map<string, number> {
+  const m = new Map<string, number>();
+  for (const e of ev) { const s = readingSeconds(e); if (s > 0) m.set(dayKey(e.date), (m.get(dayKey(e.date)) ?? 0) + s); }
+  return m;
+}
+
+/** A day counts as a session once its reading bar is full: DAILY_TARGET_MIN minutes of checked reading aloud. */
 export function sessionDays(ev: ReadingEvent[]): Set<string> {
-  const pages = new Map<string, number>();
-  const days = new Set<string>();
-  for (const e of ev) {
-    if (e.type === 'page' && e.verified) {
-      const k = dayKey(e.date); pages.set(k, (pages.get(k) ?? 0) + 1);
-      if (pages.get(k)! >= 2) days.add(k);
-    }
-    if ((e.type === 'reread' && e.verified) || e.type === 'timed') days.add(dayKey(e.date));
-  }
-  return days;
+  return new Set([...readingByDay(ev)].filter(([, s]) => s >= DAILY_TARGET_MIN * 60).map(([d]) => d));
 }
 
 export function sessionsInWeek(ev: ReadingEvent[], nowIso: string): number {
@@ -162,7 +173,18 @@ export function award(before: ReadingEvent[], e: ReadingEvent, ctx: { storyPages
     if (prev !== undefined && e.wcpm > prev) pts.push({ amount: POINTS.personalBest, reason: 'New personal best' });
   }
   if (e.type === 'timed') pts.push({ amount: POINTS.timedRead, reason: 'Timed read' });
-  if (e.type === 'warmup' && e.correct) pts.push({ amount: POINTS.warmupWord, reason: `Warm-up: ${e.word}` });
+  if (e.type === 'warmup' && e.correct) pts.push({ amount: POINTS.warmupWord, reason: `Practice word: ${e.word}` });
+
+  // Today's reading bar: a bonus when it fills, then Power for each extra full minute (up to a cap).
+  const secs = readingSeconds(e);
+  if (secs > 0) {
+    const target = DAILY_TARGET_MIN * 60;
+    const was = readingByDay(before).get(dayKey(e.date)) ?? 0, now = was + secs;
+    if (was < target && now >= target) pts.push({ amount: POINTS.dailyGoal, reason: "Filled today's reading bar" });
+    const extra = (t: number) => Math.min(MAX_EXTRA_MINUTES, Math.max(0, Math.floor((t - target) / 60)));
+    const more = extra(now) - extra(was);
+    if (more > 0) pts.push({ amount: more * POINTS.extraMinute, reason: `Extra reading: ${more} more minute${more === 1 ? '' : 's'}` });
+  }
 
   // Weekly goal, once per week.
   const wk = weekKey(e.date);

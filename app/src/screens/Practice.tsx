@@ -3,6 +3,7 @@ import type { Story } from '../types';
 import type { Screen } from '../App';
 import PageView from '../components/PageView';
 import ReadAloud from '../components/ReadAloud';
+import { TodayBar } from '../components/Rewards';
 import type { SpeechProvider } from '../lib/speech';
 import type { Reader, RecordResult } from '../lib/useReader';
 import type { Award } from '../lib/rewards';
@@ -32,7 +33,7 @@ export default function Practice({ story, base, startPage = 1, focusWords, reade
   return (
     <PageView story={story} base={base} pageNo={pageNo} focusWords={focusWords} recording={recording}
       onClose={() => go({ name: 'home' })}
-      banner={<CheckBanner check={check} demo={provider?.demo} hasReader={hasReader} />}
+      banner={<>{hasReader && <TodayBar events={reader.events} compact />}<CheckBanner check={check} demo={provider?.demo} hasReader={hasReader} /></>}
       footer={<>
         <button className="btn btn-ghost" disabled={pageNo === 1 || recording} onClick={() => turn(pageNo - 1)}>← Last</button>
         <div className="nav-mid">

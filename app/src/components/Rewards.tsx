@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { BADGES, levelFor, sessionsInWeek, totalPoints, weekStreak, WEEKLY_TARGET, type Award, type BadgeId, type ReadingEvent } from '../lib/rewards';
+import { BADGES, dayKey, DAILY_TARGET_MIN, levelFor, MAX_EXTRA_MINUTES, POINTS, readingByDay, sessionsInWeek, totalPoints, weekStreak, WEEKLY_TARGET, type Award, type BadgeId, type ReadingEvent } from '../lib/rewards';
 
 /** Ring that fills one third per session this week. */
 export function GoalRing({ done, size = 96 }: { done: number; size?: number }) {
   const r = 40, c = 2 * Math.PI * r, frac = Math.min(done, WEEKLY_TARGET) / WEEKLY_TARGET;
   return (
-    <svg className="goal-ring" width={size} height={size} viewBox="0 0 100 100" role="img" aria-label={`${Math.min(done, WEEKLY_TARGET)} of ${WEEKLY_TARGET} sessions this week`}>
+    <svg className="goal-ring" width={size} height={size} viewBox="0 0 100 100" role="img" aria-label={`Reading bar filled on ${Math.min(done, WEEKLY_TARGET)} of ${WEEKLY_TARGET} days this week`}>
       <circle cx="50" cy="50" r={r} className="ring-bg" />
       {[0, 1, 2].map(i => <line key={i} x1="50" y1="4" x2="50" y2="16" className="ring-tick" transform={`rotate(${i * 120} 50 50)`} />)}
       <circle cx="50" cy="50" r={r} className="ring-fg" strokeDasharray={`${c * frac} ${c}`} transform="rotate(-90 50 50)" />
@@ -63,13 +63,39 @@ export function WeekSummary({ events, holidays }: { events: ReadingEvent[]; holi
   const now = new Date().toISOString();
   const done = sessionsInWeek(events, now), streak = weekStreak(events, now, holidays);
   return (
-    <div className="week">
-      <GoalRing done={done} />
-      <div>
-        <strong className="week-title">{done >= WEEKLY_TARGET ? 'Weekly goal done!' : `${WEEKLY_TARGET - done} more session${WEEKLY_TARGET - done === 1 ? '' : 's'} this week`}</strong>
-        <span className="hint">Practise {WEEKLY_TARGET} times a week to hit your goal.</span>
-        <span className="streak">{streak > 0 ? `${streak}-week streak` : 'Start a week streak'}</span>
+    <div className="week-wrap">
+      <TodayBar events={events} />
+      <div className="week">
+        <GoalRing done={done} />
+        <div>
+          <strong className="week-title">{done >= WEEKLY_TARGET ? 'Weekly goal done!' : `Fill your bar on ${WEEKLY_TARGET - done} more day${WEEKLY_TARGET - done === 1 ? '' : 's'} this week`}</strong>
+          <span className="hint">{DAILY_TARGET_MIN} minutes of reading aloud, at least {WEEKLY_TARGET} days a week. Little and often.</span>
+          <span className="streak">{streak > 0 ? `${streak}-week streak` : 'Start a week streak'}</span>
+        </div>
       </div>
+    </div>
+  );
+}
+
+const mmss = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+
+/** Today's reading bar: fills with minutes of checked reading aloud. Full at DAILY_TARGET_MIN; extra minutes earn more Power. */
+export function TodayBar({ events, compact }: { events: ReadingEvent[]; compact?: boolean }) {
+  const secs = readingByDay(events).get(dayKey(new Date().toISOString())) ?? 0;
+  const target = DAILY_TARGET_MIN * 60, full = secs >= target;
+  const extra = Math.min(MAX_EXTRA_MINUTES, Math.max(0, Math.floor((secs - target) / 60)));
+  const label = full
+    ? `Bar full! ${Math.floor(secs / 60)} minutes today${extra ? ` · +${extra * POINTS.extraMinute} extra Power` : ''}`
+    : `${mmss(secs)} of ${DAILY_TARGET_MIN}:00 today`;
+  return (
+    <div className={'today' + (compact ? ' compact' : '') + (full ? ' full' : '')}>
+      {!compact && <div className="today-head"><strong>Today's reading</strong><span>{label}</span></div>}
+      <div className="today-track" role="progressbar" aria-label="Today's reading" aria-valuemin={0} aria-valuemax={DAILY_TARGET_MIN} aria-valuenow={Math.min(DAILY_TARGET_MIN, Math.round(secs / 6) / 10)} aria-valuetext={label}>
+        <div className="today-fill" style={{ width: Math.min(100, (secs / target) * 100) + '%' }} />
+        {Array.from({ length: DAILY_TARGET_MIN - 1 }, (_, i) => <span key={i} className="today-tick" style={{ left: ((i + 1) / DAILY_TARGET_MIN) * 100 + '%' }} />)}
+      </div>
+      {compact && <span className="today-label">{label}</span>}
+      {!compact && <span className="hint">{full ? `Keep going: +${POINTS.extraMinute} Power for every extra minute.` : `Only reading that passes the check counts. Filling the bar earns +${POINTS.dailyGoal} Power.`}</span>}
     </div>
   );
 }

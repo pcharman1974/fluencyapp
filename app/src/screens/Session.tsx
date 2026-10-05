@@ -6,8 +6,8 @@ import ReadAloud from '../components/ReadAloud';
 import Gauge from '../components/Gauge';
 import StoryCards, { cardsCollected } from '../components/StoryCards';
 import { CheckBanner } from './Practice';
-import { GoalRing, Badge } from '../components/Rewards';
-import { bestReread, sessionsInWeek, trickyWords, type Award, type BadgeId } from '../lib/rewards';
+import { GoalRing, Badge, TodayBar } from '../components/Rewards';
+import { bestReread, dayKey, sessionDays, sessionsInWeek, trickyWords, WEEKLY_TARGET, type Award, type BadgeId } from '../lib/rewards';
 import type { SpeechProvider } from '../lib/speech';
 import type { Reader, RecordResult } from '../lib/useReader';
 import { checkDetail, type PageCheck } from '../lib/verify';
@@ -28,7 +28,7 @@ export default function Session({ story, base, reader, provider, go, onAward }: 
     const got = cardsCollected(reader.events, story.id);
     const unread = story.pages.map(p => p.page).filter(p => !got.has(p));
     const pages = (unread.length ? unread : story.pages.map(p => p.page)).slice(0, PAGES_PER_SESSION);
-    // Warm-up: 2 chosen words from today's pages, then 2 the pupil got wrong before.
+    // Word practice at the end: 2 chosen words from today's pages, then 2 the pupil got wrong before.
     const chosen = pages.flatMap(p => story.pages[p - 1].warmupWords ?? []).slice(0, 2);
     const tricky = trickyWords(reader.events, 6).filter(w => !chosen.some(c => c.toLowerCase() === w.toLowerCase())).slice(0, 2);
     const words = [...chosen.map(w => ({ word: w, why: "From today's pages" })), ...tricky.map(w => ({ word: w, why: 'Tricky last time' }))];
@@ -44,30 +44,34 @@ export default function Session({ story, base, reader, provider, go, onAward }: 
     onAward(a);
   };
 
+  // Start with reading; practise words at the end.
   const steps: { id: Step; name: string }[] = [
     { id: 'mic', name: 'Mic check' },
-    ...(plan.words.length ? [{ id: 'warmup' as Step, name: 'Warm up' }] : []),
-    { id: 'read', name: 'Read' }, { id: 'reread', name: 'Beat your best' }, { id: 'done', name: 'Done' },
+    { id: 'read', name: 'Read' }, { id: 'reread', name: 'Beat your best' },
+    ...(plan.words.length ? [{ id: 'warmup' as Step, name: 'Word practice' }] : []),
+    { id: 'done', name: 'Done' },
   ];
-  const stepper = (
+  const stepper = (<>
     <ol className="stepper" aria-label="Session steps">
       {steps.map(s => <li key={s.id} className={s.id === step ? 'on' : steps.findIndex(x => x.id === s.id) < steps.findIndex(x => x.id === step) ? 'past' : ''}>{s.name}</li>)}
     </ol>
-  );
+    <TodayBar events={reader.events} compact />
+  </>);
 
   if (step === 'mic') return (
     <div className="timed">
       <div className="session-top"><button className="icon-btn" aria-label="Close" onClick={() => go({ name: 'home' })}>✕</button>{stepper}</div>
-      <MicCheck provider={provider} onDone={() => setStep(plan.words.length ? 'warmup' : 'read')} />
+      <MicCheck provider={provider} onDone={() => setStep('read')} />
     </div>
   );
-  if (step === 'warmup') return <WarmUp storyBase={base} words={plan.words} provider={provider} reader={reader} stepper={stepper} onAward={take} onDone={() => setStep('read')} go={go} />;
+  if (step === 'warmup') return <WarmUp storyBase={base} words={plan.words} provider={provider} reader={reader} stepper={stepper} onAward={take} onDone={() => setStep('done')} go={go} />;
   if (step === 'read') return <ReadPages story={story} base={base} pages={plan.pages} reader={reader} provider={provider} stepper={stepper}
     onAward={take} onPage={p => earned.current.pages.push(p)} onDone={() => setStep('reread')} go={go} />;
   if (step === 'reread') return <ReRead story={story} base={base} page={earned.current.pages[0] ?? plan.pages[0]} reader={reader} provider={provider}
-    stepper={stepper} onAward={take} onDone={() => setStep('done')} go={go} />;
+    stepper={stepper} onAward={take} onDone={() => setStep(plan.words.length ? 'warmup' : 'done')} go={go} />;
 
   const week = sessionsInWeek(reader.events, new Date().toISOString());
+  const todayFull = sessionDays(reader.events).has(dayKey(new Date().toISOString()));
   return (
     <div className="timed session-done">
       {stepper}
@@ -77,8 +81,10 @@ export default function Session({ story, base, reader, provider, go, onAward }: 
         <p className="result-label">Power earned</p>
         <div className="done-row">
           <GoalRing done={week} size={120} />
-          <p className="big-msg">{week >= 3 && startedWeek.current < 3 ? 'Weekly goal hit!' : week >= 3 ? 'Goal already hit this week. Extra reading still earns Power.' : `${3 - week} more this week for your goal`}</p>
+          <p className="big-msg">{week >= WEEKLY_TARGET && startedWeek.current < WEEKLY_TARGET ? 'Weekly goal hit!' : week >= WEEKLY_TARGET ? 'Goal already hit this week. Extra reading still earns Power.' : `Fill your bar on ${WEEKLY_TARGET - week} more day${WEEKLY_TARGET - week === 1 ? '' : 's'} this week`}</p>
         </div>
+        <TodayBar events={reader.events} />
+        {!todayFull && <button className="btn btn-navy" onClick={() => go({ name: 'practice' })}>Keep reading to fill today's bar</button>}
         {earned.current.badges.length > 0 && <div className="badges">{[...new Set(earned.current.badges)].map(id => <Badge key={id} id={id} earned />)}</div>}
         {earned.current.pages.length > 0 && <>
           <h3>Story cards collected</h3>
@@ -108,7 +114,7 @@ function WarmUp({ storyBase, words, provider, reader, stepper, onAward, onDone, 
     <div className="timed">
       <div className="session-top"><button className="icon-btn" aria-label="Close" onClick={() => go({ name: 'home' })}>✕</button>{stepper}</div>
       <section className="panel warmup">
-        <p className="hint">Warm-up word {i + 1} of {words.length}</p>
+        <p className="hint">Practice word {i + 1} of {words.length}</p>
         <span className={'why ' + (why.startsWith('Tricky') ? 'tricky' : 'new')}>{why}</span>
         <p className="warm-word">{word}</p>
         {result === null && <p className="hint">Press Say it and read the word aloud. Then you can move on.</p>}
@@ -118,7 +124,7 @@ function WarmUp({ storyBase, words, provider, reader, stepper, onAward, onDone, 
           <ReadAloud key={i + ':' + result} text={word} provider={provider} label="Say it" doneLabel="Done" qa={{ type: 'warmup', word }}
             onResult={(c) => { const ok = c.accuracy === 1 && c.coverage === 1; setResult(ok); onAward(reader.record({ type: 'warmup', word, correct: ok, ...checkDetail(c, provider?.id), message: ok ? '✓ Got it!' : 'Not quite. Press Hear it, then try again.' })); }} />
           {/* Say the word (and get it checked) before moving on. */}
-          <button className="btn btn-navy" disabled={result === null} title={result === null ? 'Say the word first' : undefined} onClick={next}>{i + 1 < words.length ? 'Next word →' : 'Start reading →'}</button>
+          <button className="btn btn-navy" disabled={result === null} title={result === null ? 'Say the word first' : undefined} onClick={next}>{i + 1 < words.length ? 'Next word →' : 'Finish →'}</button>
         </div>
       </section>
     </div>

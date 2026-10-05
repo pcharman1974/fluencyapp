@@ -476,3 +476,18 @@ main.full { max-width: none; padding: 0; }
 .reader-pick strong { font: 800 1.15rem var(--font-family); color: var(--lwc-navy); }
 .reader-pick span { color: #4A5B66; font-size: .85rem; }
 .reader-pick:hover, .reader-pick.on { border-color: var(--lwc-orange); background: #FFF6EF; }
+
+/* Today's reading bar */
+.week-wrap { display: flex; flex-direction: column; gap: 14px; }
+.today { display: flex; flex-direction: column; gap: 6px; }
+.today-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.today-head strong { font: 800 1.1rem var(--font-family); color: var(--lwc-navy); }
+.today-head span { color: #33444F; font-weight: 700; font-variant-numeric: tabular-nums; }
+.today-track { position: relative; height: 18px; background: #E1E8EC; border-radius: 99px; overflow: hidden; }
+.today-fill { height: 100%; background: var(--lwc-orange); border-radius: 99px; transition: width .6s; }
+.today.full .today-fill { background: linear-gradient(90deg, var(--lwc-orange), var(--lwc-gold)); }
+.today-tick { position: absolute; top: 3px; bottom: 3px; width: 2px; margin-left: -1px; background: rgba(255,255,255,.75); }
+.today.compact { flex-direction: row; align-items: center; gap: 10px; padding: 6px 12px; background: #fff; }
+.today.compact .today-track { flex: 1; height: 12px; }
+.today-label { font-size: .85rem; font-weight: 700; color: #33444F; white-space: nowrap; font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) { .today-fill { transition: none; } }

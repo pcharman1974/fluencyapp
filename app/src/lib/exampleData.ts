@@ -30,11 +30,11 @@ export function exampleClass(now = new Date()): { code: string; events: ReadingE
         if (day > now) continue;
         // Fluency drifts up with practice: about `gain` WCPM per timed read so far.
         const level = p.startWcpm + p.gain * timedCount;
-        for (let k = 0; k < 3; k++) {
+        for (let k = 0; k < 7; k++) { // about 8 minutes: fills the 5-minute bar even with a failed check or two
           const fail = rand() < p.failRate;
           raw.push({ type: 'page', date: new Date(day.getTime() + k * 120e3).toISOString(), storyId: 'secret-stones', page,
             verified: !fail, coverage: fail ? 0.3 + rand() * 0.4 : 0.9 + rand() * 0.1, accuracy: 0.85 + rand() * 0.15,
-            words: 75 + Math.round(rand() * 25), durationSec: 50 + rand() * 30, misread: rand() < 0.4 ? [WORDS[Math.floor(rand() * WORDS.length)]] : [],
+            words: 75 + Math.round(rand() * 25), durationSec: 60 + rand() * 25, misread: rand() < 0.4 ? [WORDS[Math.floor(rand() * WORDS.length)]] : [],
             wcpm: Math.round(level - 6 + rand() * 10) });
           if (!fail) page = page % 10 + 1;
         }

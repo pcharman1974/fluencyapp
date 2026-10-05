@@ -64,7 +64,7 @@ export default function Teacher({ story, go }: Props) {
       </div>
       <section className="panel">
         <h2>Class reading this week</h2>
-        <p className="hint">Week starting {new Date(thisWeek + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })} · Goal: {WEEKLY_TARGET} sessions per pupil.
+        <p className="hint">Week starting {new Date(thisWeek + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })} · Goal: reading bar filled (5 minutes of checked reading aloud) on {WEEKLY_TARGET} days per pupil.
           {' '}Prototype: shows pupils who have used this device{showExamples ? ', plus example pupils' : ''}.</p>
         <div className="t-summary">
           <div><b>{onTrack} of {sorted.length}</b><span>pupils have hit their goal</span></div>
@@ -128,7 +128,7 @@ function PupilDetail({ p, events, story, onBack }: { p: PupilSummary; events: Re
         <div className="t-detail">
           <div className="t-week"><GoalRing done={p.sessionsThisWeek} size={110} /><span className={'status ' + p.status}>{STATUS[p.status].icon} {STATUS[p.status].label}</span></div>
           <div className="t-chart">
-            <h3>Sessions per week</h3>
+            <h3>Days with a full reading bar, per week</h3>
             <WeeksChart weeks={p.weeks} />
           </div>
         </div>

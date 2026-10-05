@@ -65,8 +65,13 @@ The user has added ElevenLabs keys to this cloud environment: `ELEVENLABS_API_KE
 
 - **Reward practice and personal improvement, never speed against other pupils.** No
   leaderboards ranking pupils by ability.
-- **Weekly goal is 3 sessions.** A day counts as a session if it has at least 2 checked pages, a
-  checked re-read or a timed read. Streaks are counted in weeks, and holiday weeks are skipped.
+- **Regular and often: 5 minutes a day, at least 3 days a week** (decided 5 Oct 2026). A day counts
+  as a session once its reading bar is full: 5 minutes of checked reading aloud (counted page reads,
+  counted re-reads, timed reads). Filling the bar earns +15 Power; each extra full minute that day
+  earns +2, up to 15 extra minutes. Weekly goal is 3 such days. Streaks are counted in weeks, and
+  holiday weeks are skipped. Constants in `app/src/lib/rewards.ts`.
+- **Session order: read first, then beat your best, then word practice at the end** (decided
+  5 Oct 2026). A practice word must be tried once before moving on.
 - **Model reading is pre-recorded once per story**, not generated live: fixed cost, quality
   reviewed before release, no pupil data sent to the voice supplier.
 - **Orange buttons use deep navy text,** because white on the brand orange fails contrast.

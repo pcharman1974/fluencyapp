@@ -111,7 +111,7 @@ export default function TimedRead({ story, reader, state, go, onAward }: Props) 
     };
     saveAttempt(attempt);
     sendRecording(reader, { type: 'timed', storyId: story.id }, { attempt, heard: heard.words.map(w => w.text).join(' '), provider: heard.provider }, audio.current);
-    onAward(state.record({ type: 'timed', storyId: story.id, wcpm: r.wcpm, errorWords }));
+    onAward(state.record({ type: 'timed', storyId: story.id, wcpm: r.wcpm, errorWords, seconds: r.seconds }));
     saved.current = true;
   }
 

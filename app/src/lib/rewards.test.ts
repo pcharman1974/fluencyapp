@@ -32,16 +32,29 @@ describe('points and goals', () => {
   it('gives nothing for an unverified page', () => {
     expect(award([], page('2026-10-05T10:00:00', 1, { verified: false })).points).toEqual([]);
   });
-  it('counts a session as 2+ checked pages in a day and awards the weekly goal once at 3', () => {
+  it('counts a session as a day with 5+ minutes of checked reading and awards the weekly goal once at 3', () => {
+    const p = (date: string, n: number) => page(date, n, { durationSec: 160 });
     const ev = run([
-      page('2026-10-05T10:00:00', 1), page('2026-10-05T10:05:00', 2),
-      page('2026-10-07T10:00:00', 3), page('2026-10-07T10:05:00', 4),
-      page('2026-10-09T10:00:00', 5), page('2026-10-09T10:05:00', 6),
-      page('2026-10-09T10:10:00', 7),
+      p('2026-10-05T10:00:00', 1), p('2026-10-05T10:05:00', 2),
+      p('2026-10-07T10:00:00', 3), p('2026-10-07T10:05:00', 4),
+      p('2026-10-09T10:00:00', 5), p('2026-10-09T10:05:00', 6),
+      p('2026-10-09T10:10:00', 7),
     ]);
     expect(sessionsInWeek(ev, '2026-10-09T12:00:00')).toBe(3);
     expect(ev.filter(e => e.type === 'points' && e.reason === 'Weekly goal')).toHaveLength(1);
     expect(ev.some(e => e.type === 'badge' && e.id === 'goal-week')).toBe(true);
+  });
+  it("fills today's bar at 5 minutes, then gives Power for each extra minute up to a cap", () => {
+    const at = (min: number, secs: number, verified = true) => page(`2026-10-05T10:${String(min).padStart(2, '0')}:00`, min, { durationSec: secs, verified });
+    const pts = (ev: ReadingEvent[], why: RegExp) => ev.filter(e => e.type === 'points' && why.test(e.reason)).reduce((t, e) => t + (e as { amount: number }).amount, 0);
+    // 4 min, then a failed page (doesn't count), then 2 more minutes: bar fills, 1 extra minute.
+    let ev = run([at(1, 240), at(2, 200, false), at(3, 120)]);
+    expect(pts(ev, /Filled today/)).toBe(15);
+    expect(pts(ev, /Extra reading/)).toBe(2);
+    expect(sessionsInWeek(ev, '2026-10-05T12:00:00')).toBe(1);
+    // A very long day stops earning extra-minute Power after 15 minutes.
+    ev = run([at(1, 300), at(2, 3600)]);
+    expect(pts(ev, /Extra reading/)).toBe(30);
   });
   it('rewards a personal best only when beating an earlier re-read', () => {
     const ev = run([
@@ -59,7 +72,7 @@ describe('points and goals', () => {
 });
 
 describe('streaks', () => {
-  const goalWeek = (monday: string) => [0, 2, 4].map(d => ({ type: 'timed' as const, date: new Date(new Date(monday + 'T10:00:00').getTime() + d * 864e5).toISOString(), storyId: 's', wcpm: 80, errorWords: [] }));
+  const goalWeek = (monday: string) => [0, 2, 4].map(d => page(new Date(new Date(monday + 'T10:00:00').getTime() + d * 864e5).toISOString(), 1, { durationSec: 300 }));
   it('counts consecutive goal weeks and skips holiday weeks', () => {
     const ev = [...goalWeek('2026-09-14'), ...goalWeek('2026-09-21'), ...goalWeek('2026-10-05')];
     expect(weekStreak(ev, '2026-10-06T12:00:00')).toBe(1);                 // gap week 28 Sep breaks it
@@ -116,12 +129,12 @@ describe('teacher summary', () => {
   const now = '2026-10-09T15:00:00'; // Friday
   it('summarises a week of use', () => {
     const ev = run([
-      page('2026-10-05T10:00:00', 1), page('2026-10-05T10:05:00', 2),
-      page('2026-10-07T10:00:00', 3, { verified: false }), page('2026-10-07T10:03:00', 3), page('2026-10-07T10:06:00', 4),
+      page('2026-10-05T10:00:00', 1, { durationSec: 160 }), page('2026-10-05T10:05:00', 2, { durationSec: 160 }),
+      page('2026-10-07T10:00:00', 3, { verified: false }), page('2026-10-07T10:03:00', 3, { durationSec: 160 }), page('2026-10-07T10:06:00', 4, { durationSec: 160 }),
     ]);
     const s = summarise('7B-14', ev, now, []);
     expect(s).toMatchObject({ sessionsThisWeek: 2, status: 'behind', pagesThisWeek: 4, checksThisWeek: 5, failedThisWeek: 1 });
-    expect(s.minutesThisWeek).toBe(3); // 4 pages x 50s
+    expect(s.minutesThisWeek).toBe(11); // 4 counted pages x 160s
     expect(s.weeks.at(-1)).toMatchObject({ week: '2026-10-05', sessions: 2 });
   });
   it('flags pupils who have not started or keep failing checks, and marks holiday weeks', () => {

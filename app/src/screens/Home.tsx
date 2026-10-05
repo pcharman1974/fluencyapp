@@ -25,7 +25,7 @@ export default function Home({ story, base, readerCode, reader, setReader, go }:
       <section className="hero">
         <div>
           <h1>Read it. Practise it. Beat your best.</h1>
-          <p>Practise reading aloud three times a week. Every page you read earns Power, unlocks a story card and moves you up a level.</p>
+          <p>Read aloud for 5 minutes a day, at least 3 days a week. Little and often wins. Every page you read earns Power, unlocks a story card and moves you up a level.</p>
         </div>
         <img className="hero-mascot" src={gerbil} alt="" />
       </section>
@@ -53,7 +53,7 @@ export default function Home({ story, base, readerCode, reader, setReader, go }:
           <p className="byline">Written by {story.author} · {cards}/{story.pages.length} story cards collected</p>
           <div className="steps">
             <button className="btn btn-orange btn-big" onClick={() => go({ name: 'session' })}>Start today's session</button>
-            <p className="hint centre-text">About 10 minutes: warm up, read 3 pages aloud, then beat your best.</p>
+            <p className="hint centre-text">Read 3 pages aloud, beat your best, then practise a few words. About 5 to 10 minutes.</p>
             <div className="row wrap even">
               <button className="btn btn-ghost" onClick={() => go({ name: 'practice' })}>Practise any page</button>
               <button className="btn btn-navy" onClick={() => go({ name: 'timed' })}>Timed read</button>
