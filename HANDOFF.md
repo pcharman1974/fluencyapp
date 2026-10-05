@@ -82,8 +82,9 @@ The user has added ElevenLabs keys to this cloud environment: `ELEVENLABS_API_KE
   EEF's guided oral reading. Echo reading (Rasinski: sentence by sentence) is the agreed next step.
 - **"Your best reading" replaces "Beat your best"** (decided 5 Oct 2026): encourages fluent reading with
   expression, not speed (Rasinski: rehearsal is for a meaningful reading, not a fast one). Storyteller
-  tips before reading; afterwards the pupil listens back to their own reading, answers a 3-question
-  self-check (smooth / pauses / meaning; +2 Power, saved as a 'selfcheck' record), and sees words
+  tips before reading; afterwards the pupil answers a 3-question
+  self-check (smooth / pauses / meaning; +2 Power, saved as a 'selfcheck' record; no listen-back, too
+  much for teenagers), and sees words
   right first, an Expression score (Azure prosody, a guide) and words a minute last. A new personal
   best needs at least 95% of words right, and only accurate readings set the best.
 - **The timed read is a bonus activity, always one minute** (decided 5 Oct 2026): +10 Power, counts

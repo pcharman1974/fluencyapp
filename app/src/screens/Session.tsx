@@ -162,12 +162,10 @@ function ReRead({ story, base, page: pageNo, reader, provider, stepper, onAward,
 }) {
   const [check, setCheck] = useState<PageCheck | null>(null);
   const [scores, setScores] = useState<SpeechScores | undefined>();
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [recording, setRecording] = useState(false);
   const [prevBest] = useState(() => bestReread(reader.events, story.id, pageNo));
   const page = story.pages[pageNo - 1];
-  useEffect(() => () => { if (audioUrl) URL.revokeObjectURL(audioUrl); }, [audioUrl]);
-  const again = () => { setCheck(null); setScores(undefined); setAudioUrl(null); };
+  const again = () => { setCheck(null); setScores(undefined); };
 
   if (check?.verified) {
     const accurate = check.accuracy >= PB_ACCURACY;
@@ -180,13 +178,7 @@ function ReRead({ story, base, page: pageNo, reader, provider, stepper, onAward,
           <p className="big-msg">{!accurate
             ? 'Some words were tricky this time. Go for every word right first, then make it smooth.'
             : pb ? 'Smoother than ever, and just as accurate. Brilliant reading!'
-            : 'Well read! Listen back and think about how it sounded.'}</p>
-          {audioUrl && (
-            <div className="listen-back">
-              <h3>Listen to yourself</h3>
-              <audio controls src={audioUrl} />
-            </div>
-          )}
+            : 'Well read! Now think about how it sounded.'}</p>
           <SelfCheck key={check.wcpm + ':' + check.durationSec} onDone={a => onAward(reader.record({ type: 'selfcheck', storyId: story.id, page: pageNo, ...a }))} />
           <div className="stats">
             <div className="stat"><span className="stat-value">{Math.round(check.accuracy * 100)}%</span><span className="stat-label">Words right</span></div>
@@ -212,11 +204,10 @@ function ReRead({ story, base, page: pageNo, reader, provider, stepper, onAward,
         {check && <CheckBanner check={check} />}</>}
       footer={<>
         <span className="hint nav-hint">Your best reading, all by yourself.</span>
-        <ReadAloud key={String(!!check)} text={page.text} provider={provider} onRecording={setRecording} label={check ? 'Try again' : 'Start'} keepAudio
+        <ReadAloud key={String(!!check)} text={page.text} provider={provider} onRecording={setRecording} label={check ? 'Try again' : 'Start'}
           qa={{ type: 'reread', storyId: story.id, page: pageNo }}
-          onResult={(c, result, audio) => {
+          onResult={(c, result) => {
             setCheck(c); setScores(result.scores);
-            if (audio) setAudioUrl(URL.createObjectURL(audio));
             onAward(reader.record({ type: 'reread', storyId: story.id, page: pageNo, verified: c.verified, ...checkDetail(c, provider?.id), scores: result.scores }));
           }} />
         <button className="btn btn-ghost" disabled={recording} onClick={onDone}>Skip</button>

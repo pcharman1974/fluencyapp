@@ -13,12 +13,10 @@ interface Props {
   onResult: (check: PageCheck, result: SpeechResult, audio: Blob | null) => void;
   /** What is being read, for the testing data store (recording plus check result). */
   qa?: QaContext;
-  /** Keep a recording so the pupil can listen back to themselves (stays on the device unless test data is on). */
-  keepAudio?: boolean;
 }
 
 /** "Read aloud" button: listens while the pupil reads, then checks the reading against the text. */
-export default function ReadAloud({ text, provider, label = 'Read aloud', doneLabel = "I've finished", onRecording, onResult, qa, keepAudio }: Props) {
+export default function ReadAloud({ text, provider, label = 'Read aloud', doneLabel = "I've finished", onRecording, onResult, qa }: Props) {
   const [state, setState] = useState<'idle' | 'recording' | 'checking'>('idle');
   const [secs, setSecs] = useState(0);
   const [problem, setProblem] = useState('');
@@ -32,7 +30,7 @@ export default function ReadAloud({ text, provider, label = 'Read aloud', doneLa
   const start = async () => {
     if (!provider) return;
     setProblem('');
-    recorder.current = qa || keepAudio ? startRecording(keepAudio) : null;
+    recorder.current = qa ? startRecording() : null;
     try {
       session.current = await provider.start(text, undefined, { kind: 'page' });
     } catch {
