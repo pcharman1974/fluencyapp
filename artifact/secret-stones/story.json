@@ -175,5 +175,9 @@
     "generation": "All the people born at about the same time, such as you and your classmates."
   },
   "glossaryNote": "Definitions drafted for the prototype; to be checked by the content team.",
-  "warmupNote": "warmupWords: harder words from each page, practised before reading it. Draft picks; to be chosen by the content team."
+  "warmupNote": "warmupWords: harder words from each page, practised before reading it. Draft picks; to be chosen by the content team.",
+  "ttsReplacements": {
+    "4m": "4 metres"
+  },
+  "ttsNote": "ttsReplacements: how to say printed text that a voice may misread. Used only when generating audio; page text is unchanged."
 }

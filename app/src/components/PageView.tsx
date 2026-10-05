@@ -3,12 +3,15 @@ import type { Story } from '../types';
 import ReadingText, { Ruler } from './ReadingText';
 import { canSpeak, speak, stopSpeaking } from '../lib/voice';
 import { normalise } from '../lib/text';
+import { loadManifest, playPage, playWord, stopAudio, type AudioManifest } from '../lib/pageAudio';
 
 const SIZES = [22, 25, 28, 32, 36, 42];
 const PREFS = 'btc.practice.prefs.v1';
-function loadPrefs(): { size: number; picture: boolean } {
-  try { return { size: 2, picture: true, ...JSON.parse(localStorage.getItem(PREFS) || '{}') }; } catch { return { size: 2, picture: true }; }
+function loadPrefs(): { size: number; picture: boolean; steady: boolean } {
+  const d = { size: 2, picture: true, steady: false };
+  try { return { ...d, ...JSON.parse(localStorage.getItem(PREFS) || '{}') }; } catch { return d; }
 }
+const STEADY_RATE = 0.85; // slower model reading; pitch is kept
 
 interface Props {
   story: Story;
@@ -32,13 +35,19 @@ export default function PageView({ story, base, pageNo, focusWords, recording, p
   const [ruler, setRuler] = useState(false);
   const [speaking, setSpeaking] = useState<number | undefined>();
   const [popup, setPopup] = useState<{ word: string; def?: string } | null>(null);
+  const [steady, setSteady] = useState(loadPrefs().steady);
+  const [audio, setAudio] = useState<AudioManifest | null>(null);
+  useEffect(() => { loadManifest(base).then(setAudio); }, [base]);
+  const storyBase = base; // the story's own folder
   const page = story.pages[pageNo - 1];
+  const recorded = audio?.pages[pageNo];
+  const stopAll = () => { stopSpeaking(); stopAudio(); };
   const vocab = useMemo(() => Object.fromEntries(Object.entries(story.glossary).map(([k, v]) => [normalise(k), v])), [story]);
 
-  useEffect(() => { try { localStorage.setItem(PREFS, JSON.stringify({ size, picture })); } catch { /* ignore */ } }, [size, picture]);
-  useEffect(() => () => stopSpeaking(), []);
-  useEffect(() => { stopSpeaking(); setSpeaking(undefined); setPopup(null); document.querySelector('.reader-scroll')?.scrollTo(0, 0); }, [pageNo]);
-  useEffect(() => { if (recording) { stopSpeaking(); setSpeaking(undefined); setPopup(null); } }, [recording]);
+  useEffect(() => { try { localStorage.setItem(PREFS, JSON.stringify({ size, picture, steady })); } catch { /* ignore */ } }, [size, picture, steady]);
+  useEffect(() => () => stopAll(), []);
+  useEffect(() => { stopAll(); setSpeaking(undefined); setPopup(null); document.querySelector('.reader-scroll')?.scrollTo(0, 0); }, [pageNo]);
+  useEffect(() => { if (recording) { stopAll(); setSpeaking(undefined); setPopup(null); } }, [recording]);
 
   const wordStarts = useMemo(() => {
     const starts: number[] = []; const re = /\S+/g; let m;
@@ -47,9 +56,14 @@ export default function PageView({ story, base, pageNo, focusWords, recording, p
   }, [page]);
 
   const listen = () => {
-    if (speaking !== undefined) { stopSpeaking(); setSpeaking(undefined); return; }
+    if (speaking !== undefined) { stopAll(); setSpeaking(undefined); return; }
     setSpeaking(0);
+    if (recorded) {
+      playPage(storyBase + recorded.file, recorded.words, { rate: steady ? STEADY_RATE : 1, onWord: setSpeaking, onEnd: () => setSpeaking(undefined) });
+      return;
+    }
     speak(page.text, {
+      rate: steady ? 0.75 : 0.9,
       onWord: c => { let i = 0; while (i + 1 < wordStarts.length && wordStarts[i + 1] <= c) i++; setSpeaking(i); },
       onEnd: () => setSpeaking(undefined),
     });
@@ -67,10 +81,14 @@ export default function PageView({ story, base, pageNo, focusWords, recording, p
         </div>
         {<button className={'icon-btn wide' + (picture ? ' on' : '')} aria-pressed={picture} onClick={() => setPicture(!picture)}>Picture</button>}
         <button className={'icon-btn wide' + (ruler ? ' on' : '')} aria-pressed={ruler} onClick={() => setRuler(!ruler)}>Ruler</button>
-        {canSpeak() && !plain && <button className={'icon-btn wide' + (speaking !== undefined ? ' on' : '')} disabled={recording} onClick={listen}
-          title={recording ? 'Listen is off while you read aloud' : undefined}>
-          {speaking !== undefined ? 'Stop' : 'Listen'}
-        </button>}
+        {(canSpeak() || recorded) && !plain && <>
+          <button className={'icon-btn wide' + (speaking !== undefined ? ' on' : '')} disabled={recording} onClick={listen}
+            title={recording ? 'Listen is off while you read aloud' : undefined}>
+            {speaking !== undefined ? 'Stop' : 'Listen'}
+          </button>
+          <button className={'icon-btn wide speed' + (steady ? ' on' : '')} aria-pressed={steady} disabled={speaking !== undefined || recording}
+            onClick={() => setSteady(!steady)} title="Listen speed">{steady ? 'Steady' : 'Normal'}</button>
+        </>}
       </div>
       {banner}
       <div className="reader-scroll">
@@ -89,7 +107,10 @@ export default function PageView({ story, base, pageNo, focusWords, recording, p
           <strong>{normalise(popup.word)}</strong>
           <p>{popup.def}</p>
           <div className="row">
-            {canSpeak() && <button className="btn btn-navy" onClick={() => speak(normalise(popup.word), { rate: 0.75 })}>Hear it</button>}
+            {(canSpeak() || audio?.words[normalise(popup.word)]) && <button className="btn btn-navy" onClick={() => {
+              const f = audio?.words[normalise(popup.word)];
+              f ? playWord(storyBase + f) : speak(normalise(popup.word), { rate: 0.75 });
+            }}>Hear it</button>}
             <button className="btn btn-ghost" onClick={() => setPopup(null)}>Close</button>
           </div>
         </div>

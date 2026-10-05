@@ -10,7 +10,8 @@
     "test": "vitest run",
     "server": "node server/index.js",
     "build:artifact": "tsc --noEmit && vite build --mode artifact && node scripts-artifact.mjs",
-    "start": "npm run build && node server/index.js"
+    "start": "npm run build && node server/index.js",
+    "audio": "node scripts/generate-audio.mjs"
   },
   "dependencies": {
     "dotenv": "^18.0.5",

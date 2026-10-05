@@ -14,6 +14,8 @@ import type { PageCheck } from '../lib/verify';
 import { canSpeak, speak } from '../lib/voice';
 import { normalise } from '../lib/text';
 import MicCheck from '../components/MicCheck';
+import { loadManifest, playWord, type AudioManifest } from '../lib/pageAudio';
+import { useEffect } from 'react';
 
 interface Props { story: Story; base: string; reader: Reader; provider: SpeechProvider | null; go: (s: Screen) => void; onAward: (a: RecordResult) => void }
 
@@ -59,7 +61,7 @@ export default function Session({ story, base, reader, provider, go, onAward }: 
       <MicCheck provider={provider} onDone={() => setStep(plan.words.length ? 'warmup' : 'read')} />
     </div>
   );
-  if (step === 'warmup') return <WarmUp words={plan.words} provider={provider} reader={reader} stepper={stepper} onAward={take} onDone={() => setStep('read')} go={go} />;
+  if (step === 'warmup') return <WarmUp storyBase={base} words={plan.words} provider={provider} reader={reader} stepper={stepper} onAward={take} onDone={() => setStep('read')} go={go} />;
   if (step === 'read') return <ReadPages story={story} base={base} pages={plan.pages} reader={reader} provider={provider} stepper={stepper}
     onAward={take} onPage={p => earned.current.pages.push(p)} onDone={() => setStep('reread')} go={go} />;
   if (step === 'reread') return <ReRead story={story} base={base} page={earned.current.pages[0] ?? plan.pages[0]} reader={reader} provider={provider}
@@ -91,13 +93,16 @@ export default function Session({ story, base, reader, provider, go, onAward }: 
   );
 }
 
-function WarmUp({ words, provider, reader, stepper, onAward, onDone, go }: {
-  words: { word: string; why: string }[]; provider: SpeechProvider | null; reader: Reader; stepper: React.ReactNode;
+function WarmUp({ storyBase, words, provider, reader, stepper, onAward, onDone, go }: {
+  storyBase: string; words: { word: string; why: string }[]; provider: SpeechProvider | null; reader: Reader; stepper: React.ReactNode;
   onAward: (a: Award) => void; onDone: () => void; go: (s: Screen) => void;
 }) {
   const [i, setI] = useState(0);
   const [result, setResult] = useState<boolean | null>(null);
   const { word, why } = words[i];
+  const [audio, setAudio] = useState<AudioManifest | null>(null);
+  useEffect(() => { loadManifest(storyBase).then(setAudio); }, []);
+  const recorded = audio?.words[word.toLowerCase()];
   const next = () => { setResult(null); i + 1 < words.length ? setI(i + 1) : onDone(); };
   return (
     <div className="timed">
@@ -108,7 +113,7 @@ function WarmUp({ words, provider, reader, stepper, onAward, onDone, go }: {
         <p className="warm-word">{word}</p>
         {result !== null && <p className={'banner ' + (result ? 'ok' : 'retry')}>{result ? '✓ Got it!' : `Not quite. Press Hear it, then try again.`}</p>}
         <div className="row wrap centre-row">
-          {canSpeak() && <button className="btn btn-ghost" onClick={() => speak(normalise(word), { rate: 0.75 })}>Hear it</button>}
+          {(canSpeak() || recorded) && <button className="btn btn-ghost" onClick={() => recorded ? playWord(storyBase + recorded) : speak(normalise(word), { rate: 0.75 })}>Hear it</button>}
           <ReadAloud key={i + ':' + result} text={word} provider={provider} label="Say it" doneLabel="Done"
             onResult={(c) => { const ok = c.accuracy === 1 && c.coverage === 1; setResult(ok); onAward(reader.record({ type: 'warmup', word, correct: ok })); }} />
           <button className="btn btn-navy" onClick={next}>{i + 1 < words.length ? 'Next word →' : 'Start reading →'}</button>
