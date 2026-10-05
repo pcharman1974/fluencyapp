@@ -1,0 +1,26 @@
+/* Beyond the Code — brand tokens.
+   Taken from www.littlewandlecode.org.uk (computed styles, 5 Oct 2026).
+   Confirm against the official Little Wandle Code brand guidelines. */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* Core palette */
+  --lwc-navy:        #0C5076; /* headings, hero background, "CODE" wordmark */
+  --lwc-navy-deep:   #041D2B; /* footer */
+  --lwc-orange:      #EE7E32; /* buttons, "Little Wandle" wordmark, badges */
+  --lwc-orange-soft: #F1985B; /* large panels ("Who needs…" card) */
+  --lwc-gold:        #D09C00; /* testimonial panel, "Download" badge */
+  --lwc-gold-soft:   #D9A441; /* accent text */
+  --lwc-grey-panel:  #F2F2F2; /* neutral panels */
+  --lwc-white:       #FFFFFF;
+  --lwc-text:        #000000; /* body copy */
+
+  /* Typography */
+  --font-family: 'Montserrat', sans-serif;
+  --font-weight-body: 500;
+  --font-weight-heading: 700;
+
+  /* Shapes seen on the site */
+  --radius-pill: 999px;   /* buttons */
+  --radius-panel: 16px;   /* content cards, with a darker bottom edge */
+}
