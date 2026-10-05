@@ -30,7 +30,7 @@ export const azureProvider: SpeechProvider = {
     } catch { return false; }
   },
 
-  async start(referenceText, onWord) {
+  async start(referenceText, onWord, _opts) {
     // Loaded on demand: the SDK is large and most sessions won't use it.
     const sdk = await import('microsoft-cognitiveservices-speech-sdk');
     const { token, region } = await getToken();
@@ -49,6 +49,7 @@ export const azureProvider: SpeechProvider = {
     pa.applyTo(recogniser);
 
     const words: HeardWord[] = [];
+    const startedAt = Date.now();
     const segScores: { fluency?: number; prosody?: number; pronunciation?: number }[] = [];
 
     recogniser.recognized = (_s, e) => {
@@ -76,7 +77,7 @@ export const azureProvider: SpeechProvider = {
             const v = segScores.map(s => s[k]).filter((x): x is number => typeof x === 'number');
             return v.length ? Math.round(v.reduce((a, b) => a + b, 0) / v.length) : undefined;
           };
-          res({ words, provider: 'Azure AI Speech (en-GB)', scores: { fluency: avg('fluency'), prosody: avg('prosody'), pronunciation: avg('pronunciation') } });
+          res({ words, durationSec: (Date.now() - startedAt) / 1000 - 1.2, provider: 'Azure AI Speech (en-GB)', scores: { fluency: avg('fluency'), prosody: avg('prosody'), pronunciation: avg('pronunciation') } });
         }, () => res({ words, provider: 'Azure AI Speech (en-GB)' })), 1200);
       }),
     };

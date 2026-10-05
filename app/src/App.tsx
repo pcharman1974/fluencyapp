@@ -5,9 +5,14 @@ import Home from './screens/Home';
 import Practice from './screens/Practice';
 import TimedRead from './screens/TimedRead';
 import Progress from './screens/Progress';
+import Session from './screens/Session';
+import { RewardToast } from './components/Rewards';
+import { useReader } from './lib/useReader';
+import { pickProvider, type SpeechProvider } from './lib/speech';
+import type { Award } from './lib/rewards';
 import { holdingLogo, lwcLogo } from './brand';
 
-export type Screen = { name: 'home' } | { name: 'practice'; page?: number; focusWords?: string[] } | { name: 'timed' } | { name: 'progress' };
+export type Screen = { name: 'home' } | { name: 'practice'; page?: number; focusWords?: string[] } | { name: 'timed' } | { name: 'progress' } | { name: 'session' };
 
 const STORY_URL = 'secret-stones/story.json'; // relative, so it works on any host
 
@@ -16,6 +21,10 @@ export default function App() {
   const [error, setError] = useState('');
   const [screen, setScreen] = useState<Screen>({ name: 'home' });
   const [reader, setReader] = useState(getReaderCode());
+  const state = useReader(reader);
+  const [provider, setProvider] = useState<SpeechProvider | null>(null);
+  const [toast, setToast] = useState<Award | null>(null);
+  useEffect(() => { pickProvider().then(setProvider); }, []);
 
   useEffect(() => {
     fetch(STORY_URL).then(r => r.json()).then(setStory).catch(() => setError('Could not load the story.'));
@@ -31,7 +40,7 @@ export default function App() {
   return (
     <div className="app">
       {/* Reading screens drop the header so the story gets the whole screen. */}
-      {(screen.name === 'home' || screen.name === 'progress') && (
+      {(!reader || screen.name === 'home' || screen.name === 'progress') && (
         <header className="topbar">
           <button className="wordmark" onClick={() => go({ name: 'home' })} aria-label="Power Reader home">
             <img src={holdingLogo} alt="Beyond the Code Power Reader" />
@@ -42,12 +51,15 @@ export default function App() {
           </div>
         </header>
       )}
-      <main className={screen.name === 'practice' || screen.name === 'timed' ? 'full' : ''}>
-        {screen.name === 'home' && <Home story={story} base={base} reader={reader} setReader={updateReader} go={go} />}
-        {screen.name === 'practice' && <Practice story={story} base={base} startPage={screen.page} focusWords={screen.focusWords} go={go} />}
-        {screen.name === 'timed' && <TimedRead story={story} reader={reader} go={go} />}
-        {screen.name === 'progress' && <Progress story={story} reader={reader} go={go} />}
+      <main className={reader && ['practice', 'timed', 'session'].includes(screen.name) ? 'full' : ''}>
+        {(screen.name === 'home' || !reader) && <Home story={story} base={base} readerCode={reader} reader={state} setReader={updateReader} go={go} />}
+        {reader && screen.name === 'practice' && <Practice story={story} base={base} startPage={screen.page} focusWords={screen.focusWords}
+          reader={state} hasReader={!!reader} provider={provider} go={go} onAward={setToast} />}
+        {reader && screen.name === 'session' && <Session story={story} base={base} reader={state} provider={provider} go={go} onAward={setToast} />}
+        {reader && screen.name === 'timed' && <TimedRead story={story} reader={reader} state={state} go={go} onAward={setToast} />}
+        {reader && screen.name === 'progress' && <Progress story={story} base={base} readerCode={reader} reader={state} go={go} />}
       </main>
+      <RewardToast award={toast} onDone={() => setToast(null)} />
     </div>
   );
 }

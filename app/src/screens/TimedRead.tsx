@@ -4,16 +4,19 @@ import type { Screen } from '../App';
 import { tokenisePages, type Token } from '../lib/text';
 import { alignHeard, errorsFromAlignment, scoreReading } from '../lib/scoring';
 import { providers, type SpeechProvider, type SpeechResult } from '../lib/speech';
-import { saveAttempt } from '../lib/storage';
+import { saveAttempt, getAttempts } from '../lib/storage';
+import Gauge from '../components/Gauge';
+import type { Reader } from '../lib/useReader';
+import type { Award } from '../lib/rewards';
 
-interface Props { story: Story; reader: string; go: (s: Screen) => void }
+interface Props { story: Story; reader: string; state: Reader; go: (s: Screen) => void; onAward: (a: Award) => void }
 
 type Phase = 'setup' | 'countdown' | 'reading' | 'analysing' | 'mark' | 'results';
 type Method = 'adult' | 'speech' | 'demo';
 
 const DURATION = 60;
 
-export default function TimedRead({ story, reader, go }: Props) {
+export default function TimedRead({ story, reader, state, go, onAward }: Props) {
   const tokens = useMemo(() => tokenisePages(story.pages), [story]);
   const [phase, setPhase] = useState<Phase>('setup');
   const [method, setMethod] = useState<Method>('adult');
@@ -30,6 +33,7 @@ export default function TimedRead({ story, reader, go }: Props) {
   const startedAt = useRef(0);
   const session = useRef<{ stop(): Promise<SpeechResult> } | null>(null);
   const saved = useRef(false);
+  const [history] = useState(() => getAttempts(reader).filter(a => a.storyId === story.id));
 
   const azure = providers.find(p => p.id === 'azure')!;
   const demo = providers.find(p => p.id === 'demo')!;
@@ -107,6 +111,7 @@ export default function TimedRead({ story, reader, go }: Props) {
         accuracy: result.accuracy, errorWords, speechScores: speech?.scores,
       };
       saveAttempt(attempt);
+      onAward(state.record({ type: 'timed', storyId: story.id, wcpm: result.wcpm, errorWords }));
       saved.current = true;
     }
     setPhase('results');
@@ -143,8 +148,8 @@ export default function TimedRead({ story, reader, go }: Props) {
     return (
       <div className="timed">
         <section className="panel results">
-          <p className="result-label">Words correct per minute</p>
-          <p className="result-big">{result.wcpm}</p>
+          <Gauge value={result.wcpm} first={history[0]?.wcpm} best={Math.max(result.wcpm, ...history.map(h => h.wcpm))} />
+          {history.length > 0 && <p className="big-msg">{result.wcpm > Math.max(...history.map(h => h.wcpm)) ? 'New best timed read!' : result.wcpm > history[0].wcpm ? `${result.wcpm - history[0].wcpm} more than your first timed read` : 'Keep practising: your gauge will move up.'}</p>}
           <div className="stats">
             <Stat label="Accuracy" value={Math.round(result.accuracy * 100) + '%'} />
             <Stat label="Words read" value={String(result.wordsRead)} />

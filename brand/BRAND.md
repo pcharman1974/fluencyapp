@@ -24,7 +24,7 @@ White text on navy and black text on white are the main reading pairs. White on 
 ## Type
 
 - **Montserrat** (Google Fonts): brand font for headings, buttons and labels, as on the website.
-- **Atkinson Hyperlegible Next** (Google Fonts): story text in the app. Designed by the Braille Institute so that easily confused characters (b/d, I/l/1, O/0) are clearly different. Plain enough not to look babyish to secondary pupils. Set large (default 28px on iPad) with 1.8 line spacing.
+- **Nunito** (Google Fonts): story text and body copy in the app. Rounded, open letter shapes, close to the font in the current FFT Tutoring reader. Set large (default 28px on iPad), weight 500, with 1.8 line spacing.
 
 ## Look and feel
 
