@@ -8,13 +8,14 @@ import { saveAttempt, getAttempts } from '../lib/storage';
 import { sendRecording, startRecording, type QaRecorder } from '../lib/qa';
 import Gauge from '../components/Gauge';
 import type { Reader, RecordResult } from '../lib/useReader';
-import type { Award } from '../lib/rewards';
+import { POINTS, type Award } from '../lib/rewards';
 
 interface Props { story: Story; reader: string; state: Reader; go: (s: Screen) => void; onAward: (a: RecordResult) => void }
 
+const DURATION = 60; // one minute: the standard length, so scores compare over time
+
 type Phase = 'setup' | 'countdown' | 'reading' | 'analysing' | 'results';
 
-const DURATION = 60;
 
 export default function TimedRead({ story, reader, state, go, onAward }: Props) {
   const tokens = useMemo(() => tokenisePages(story.pages), [story]);
@@ -121,8 +122,9 @@ export default function TimedRead({ story, reader, state, go, onAward }: Props) 
     <div className="timed">
       <button className="btn btn-ghost" onClick={() => go({ name: 'home' })}>← Back</button>
       <section className="panel setup">
-        <h2>One-minute timed read</h2>
-        <p>Read <strong>{story.title}</strong> aloud from the start for one minute. Read carefully and at a steady pace. Don't rush. If you get stuck on a word, have a go and carry on.</p>
+        <h2>Bonus: one-minute timed read</h2>
+        <p>Read <strong>{story.title}</strong> aloud from the start until the time is up. Read carefully and at a steady pace. Don't rush. If you get stuck on a word, have a go and carry on.</p>
+        <p className="hint">One minute. Earns +{POINTS.timedRead} Power and counts towards today's bar.</p>
         <p className="hint">{speechReady
           ? 'The app listens and marks your reading automatically.'
           : 'The speech check isn\'t set up on this server yet, so this read is marked with made-up demo data.'}</p>

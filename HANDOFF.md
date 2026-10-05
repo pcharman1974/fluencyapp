@@ -72,6 +72,12 @@ The user has added ElevenLabs keys to this cloud environment: `ELEVENLABS_API_KE
   holiday weeks are skipped. Constants in `app/src/lib/rewards.ts`.
 - **Session order: read first, then beat your best, then word practice at the end** (decided
   5 Oct 2026). A practice word must be tried once before moving on.
+- **Mic check is a one-off per device** (decided 5 Oct 2026), not part of each session. It runs
+  before the first reading on a device and can be re-run from "Check microphone" on the home
+  screen. Later it should move to first login.
+- **The timed read is a bonus activity, always one minute** (decided 5 Oct 2026): +10 Power, counts
+  towards the daily bar, offered at the end of a session and from the home screen. One fixed length
+  keeps WCPM comparable over time.
 - **Model reading is pre-recorded once per story**, not generated live: fixed cost, quality
   reviewed before release, no pupil data sent to the voice supplier.
 - **Orange buttons use deep navy text,** because white on the brand orange fails contrast.

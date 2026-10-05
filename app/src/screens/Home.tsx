@@ -56,13 +56,13 @@ export default function Home({ story, base, readerCode, reader, setReader, go }:
             <p className="hint centre-text">Read 3 pages aloud, beat your best, then practise a few words. About 5 to 10 minutes.</p>
             <div className="row wrap even">
               <button className="btn btn-ghost" onClick={() => go({ name: 'practice' })}>Practise any page</button>
-              <button className="btn btn-navy" onClick={() => go({ name: 'timed' })}>Timed read</button>
+              <button className="btn btn-navy" onClick={() => go({ name: 'timed' })}>Bonus: timed read</button>
               <button className="btn btn-ghost" onClick={() => go({ name: 'progress' })}>My progress</button>
             </div>
           </div>
         </div>
       </section>
-      <p className="hint centre-text">Reader {readerCode} · <button className="link" onClick={() => setEditing(true)}>Change reader</button> · <button className="link" onClick={() => go({ name: 'teacher' })}>Teacher view</button></p>
+      <p className="hint centre-text">Reader {readerCode} · <button className="link" onClick={() => setEditing(true)}>Change reader</button> · <button className="link" onClick={() => go({ name: 'miccheck' })}>Check microphone</button> · <button className="link" onClick={() => go({ name: 'teacher' })}>Teacher view</button></p>
     </div>
   );
 }

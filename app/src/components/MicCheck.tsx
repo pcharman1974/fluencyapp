@@ -6,8 +6,9 @@ import { dayKey } from '../lib/rewards';
 const KEY = 'btc.miccheck.v1';
 const PHRASE = 'I am ready to read.';
 
-export function micCheckedToday(): boolean {
-  try { return localStorage.getItem(KEY) === dayKey(new Date().toISOString()); } catch { return false; }
+/** One-off check per device (later: at first login). Re-run any time from the home screen. */
+export function micChecked(): boolean {
+  try { return Boolean(localStorage.getItem(KEY)); } catch { return false; }
 }
 function markChecked() {
   try { localStorage.setItem(KEY, dayKey(new Date().toISOString())); } catch { /* ignore */ }

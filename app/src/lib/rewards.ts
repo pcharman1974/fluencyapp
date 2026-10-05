@@ -172,7 +172,7 @@ export function award(before: ReadingEvent[], e: ReadingEvent, ctx: { storyPages
     const prev = bestReread(before, e.storyId, e.page);
     if (prev !== undefined && e.wcpm > prev) pts.push({ amount: POINTS.personalBest, reason: 'New personal best' });
   }
-  if (e.type === 'timed') pts.push({ amount: POINTS.timedRead, reason: 'Timed read' });
+  if (e.type === 'timed') pts.push({ amount: POINTS.timedRead, reason: 'Bonus timed read' });
   if (e.type === 'warmup' && e.correct) pts.push({ amount: POINTS.warmupWord, reason: `Practice word: ${e.word}` });
 
   // Today's reading bar: a bonus when it fills, then Power for each extra full minute (up to a cap).

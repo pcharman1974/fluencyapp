@@ -13,13 +13,12 @@ import type { Reader, RecordResult } from '../lib/useReader';
 import { checkDetail, type PageCheck } from '../lib/verify';
 import { canSpeak, speak } from '../lib/voice';
 import { normalise } from '../lib/text';
-import MicCheck from '../components/MicCheck';
 import { loadManifest, playWord, type AudioManifest } from '../lib/pageAudio';
 import { useEffect } from 'react';
 
 interface Props { story: Story; base: string; reader: Reader; provider: SpeechProvider | null; go: (s: Screen) => void; onAward: (a: RecordResult) => void }
 
-type Step = 'mic' | 'warmup' | 'read' | 'reread' | 'done';
+type Step = 'warmup' | 'read' | 'reread' | 'done';
 const PAGES_PER_SESSION = 3;
 
 /** Today's session, about 10 minutes: warm-up words, read a section aloud, re-read one page to beat your best. */
@@ -34,7 +33,7 @@ export default function Session({ story, base, reader, provider, go, onAward }: 
     const words = [...chosen.map(w => ({ word: w, why: "From today's pages" })), ...tricky.map(w => ({ word: w, why: 'Tricky last time' }))];
     return { words, pages };
   }, []); // fixed for the session
-  const [step, setStep] = useState<Step>('mic');
+  const [step, setStep] = useState<Step>('read');
   const earned = useRef<{ points: number; badges: BadgeId[]; pages: number[] }>({ points: 0, badges: [], pages: [] });
   const startedWeek = useRef(sessionsInWeek(reader.events, new Date().toISOString()));
 
@@ -46,7 +45,6 @@ export default function Session({ story, base, reader, provider, go, onAward }: 
 
   // Start with reading; practise words at the end.
   const steps: { id: Step; name: string }[] = [
-    { id: 'mic', name: 'Mic check' },
     { id: 'read', name: 'Read' }, { id: 'reread', name: 'Beat your best' },
     ...(plan.words.length ? [{ id: 'warmup' as Step, name: 'Word practice' }] : []),
     { id: 'done', name: 'Done' },
@@ -58,12 +56,6 @@ export default function Session({ story, base, reader, provider, go, onAward }: 
     <TodayBar events={reader.events} compact />
   </>);
 
-  if (step === 'mic') return (
-    <div className="timed">
-      <div className="session-top"><button className="icon-btn" aria-label="Close" onClick={() => go({ name: 'home' })}>✕</button>{stepper}</div>
-      <MicCheck provider={provider} onDone={() => setStep('read')} />
-    </div>
-  );
   if (step === 'warmup') return <WarmUp storyBase={base} words={plan.words} provider={provider} reader={reader} stepper={stepper} onAward={take} onDone={() => setStep('done')} go={go} />;
   if (step === 'read') return <ReadPages story={story} base={base} pages={plan.pages} reader={reader} provider={provider} stepper={stepper}
     onAward={take} onPage={p => earned.current.pages.push(p)} onDone={() => setStep('reread')} go={go} />;
@@ -92,6 +84,7 @@ export default function Session({ story, base, reader, provider, go, onAward }: 
         </>}
         <div className="row wrap">
           <button className="btn btn-orange" onClick={() => go({ name: 'home' })}>Finish</button>
+          <button className="btn btn-navy" onClick={() => go({ name: 'timed' })}>Bonus: timed read (+10 Power)</button>
           <button className="btn btn-ghost" onClick={() => go({ name: 'progress' })}>My progress</button>
         </div>
       </section>

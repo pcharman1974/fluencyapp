@@ -7,7 +7,7 @@ import TimedRead from './screens/TimedRead';
 import Progress from './screens/Progress';
 import Session from './screens/Session';
 import Teacher from './screens/Teacher';
-import MicCheck, { micCheckedToday } from './components/MicCheck';
+import MicCheck, { micChecked } from './components/MicCheck';
 import { LevelUp } from './components/PowerCore';
 import type { Level } from './lib/rewards';
 import type { RecordResult } from './lib/useReader';
@@ -19,7 +19,7 @@ import { holdingLogo, lwcLogo } from './brand';
 import BuildInfo from './components/BuildInfo';
 import { TestNotice } from './components/ServerData';
 
-export type Screen = { name: 'home' } | { name: 'practice'; page?: number; focusWords?: string[] } | { name: 'timed' } | { name: 'progress' } | { name: 'session' } | { name: 'teacher' };
+export type Screen = { name: 'home' } | { name: 'miccheck' } | { name: 'practice'; page?: number; focusWords?: string[] } | { name: 'timed' } | { name: 'progress' } | { name: 'session' } | { name: 'teacher' };
 
 const STORY_URL = 'secret-stones/story.json'; // relative, so it works on any host
 
@@ -33,7 +33,7 @@ export default function App() {
   const [toast, setToast] = useState<Award | null>(null);
   const [levelUp, setLevelUp] = useState<Level | null>(null);
   const [micOkState, setMicOk] = useState(false);
-  const micOk = micOkState || micCheckedToday(); // also true after the mic check inside a session
+  const micOk = micOkState || micChecked(); // one-off per device; re-run from the home screen
   const onAward = (a: RecordResult) => { setToast(a); if (a.levelUp) setLevelUp(a.levelUp); };
   useEffect(() => { pickProvider().then(setProvider); }, []);
 
@@ -62,18 +62,21 @@ export default function App() {
           </div>
         </header>
       )}
-      <main className={reader && micOk && ['practice', 'timed'].includes(screen.name) || (reader && screen.name === 'session') ? 'full' : ''}>
+      <main className={reader && micOk && ['practice', 'timed', 'session'].includes(screen.name) ? 'full' : ''}>
         {(screen.name === 'home' || (!reader && screen.name !== 'teacher')) && <>
           <TestNotice />
           <Home story={story} base={base} readerCode={reader} reader={state} setReader={updateReader} go={go} />
           <BuildInfo base={base} />
         </>}
-        {reader && !micOk && (screen.name === 'practice' || screen.name === 'timed') && (
+        {reader && !micOk && ['practice', 'timed', 'session'].includes(screen.name) && (
           <div className="timed"><MicCheck provider={provider} onDone={() => setMicOk(true)} onCancel={() => go({ name: 'home' })} /></div>
+        )}
+        {screen.name === 'miccheck' && (
+          <div className="timed"><MicCheck provider={provider} onDone={() => { setMicOk(true); go({ name: 'home' }); }} onCancel={() => go({ name: 'home' })} /></div>
         )}
         {reader && micOk && screen.name === 'practice' && <Practice story={story} base={base} startPage={screen.page} focusWords={screen.focusWords}
           reader={state} hasReader={!!reader} provider={provider} go={go} onAward={onAward} />}
-        {reader && screen.name === 'session' && <Session story={story} base={base} reader={state} provider={provider} go={go} onAward={onAward} />}
+        {reader && micOk && screen.name === 'session' && <Session story={story} base={base} reader={state} provider={provider} go={go} onAward={onAward} />}
         {reader && micOk && screen.name === 'timed' && <TimedRead story={story} reader={reader} state={state} go={go} onAward={onAward} />}
         {screen.name === 'teacher' && <Teacher story={story} go={go} />}
         {reader && screen.name === 'progress' && <Progress story={story} base={base} readerCode={reader} reader={state} go={go} />}
