@@ -75,6 +75,11 @@ The user has added ElevenLabs keys to this cloud environment: `ELEVENLABS_API_KE
 - **Mic check is a one-off per device** (decided 5 Oct 2026), not part of each session. It runs
   before the first reading on a device and can be re-run from "Check microphone" on the home
   screen. Later it should move to first login.
+- **Model then do on every session page** (decided 5 Oct 2026): the pupil listens to the model reading
+  (word highlighting on) and Read aloud unlocks only when it has played to the end; then they read
+  the page alone, unaided. "Practise any page" keeps Listen optional with a gentle nudge. Grounded in
+  listening-passage-preview evidence for secondary struggling readers (Wexler et al. 2008) and the
+  EEF's guided oral reading. Echo reading (Rasinski: sentence by sentence) is the agreed next step.
 - **The timed read is a bonus activity, always one minute** (decided 5 Oct 2026): +10 Power, counts
   towards the daily bar, offered at the end of a session and from the home screen. One fixed length
   keeps WCPM comparable over time.

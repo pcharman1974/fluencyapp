@@ -131,22 +131,25 @@ function ReadPages({ story, base, pages, reader, provider, stepper, onAward, onP
   const [i, setI] = useState(0);
   const [check, setCheck] = useState<PageCheck | null>(null);
   const [recording, setRecording] = useState(false);
+  const [heard, setHeard] = useState<number | null>(null); // page whose model reading has been heard
   const pageNo = pages[i];
   const page = story.pages[pageNo - 1];
   const lastOne = i === pages.length - 1;
+  const listened = heard === pageNo;
   return (
     <PageView story={story} base={base} pageNo={pageNo} recording={recording} onClose={() => go({ name: 'home' })}
+      modelFirst onListened={() => setHeard(pageNo)}
       title={`${page.heading} · page ${i + 1} of ${pages.length} today`}
       banner={<>{stepper}<CheckBanner check={check} demo={provider?.demo} /></>}
       footer={<>
-        <span className="hint nav-hint">Read the page aloud, then tap "I've finished".</span>
-        <ReadAloud key={pageNo + ':' + (check ? 'r' : '')} text={page.text} provider={provider} onRecording={setRecording} qa={{ type: 'page', storyId: story.id, page: pageNo }}
+        <span className="hint nav-hint">{listened ? 'Read it out loud, then tap "I\'ve finished".' : 'Listen first, then it\'s your turn.'}</span>
+        {!listened ? <button className="btn btn-orange btn-mic" disabled title="Listen to the page first"><span className="mic-icon" aria-hidden="true" />Read aloud</button> : <ReadAloud key={pageNo + ':' + (check ? 'r' : '')} text={page.text} provider={provider} onRecording={setRecording} qa={{ type: 'page', storyId: story.id, page: pageNo }}
           label={check && !check.verified ? 'Try again' : 'Read aloud'}
           onResult={c => {
             setCheck(c);
             onAward(reader.record({ type: 'page', storyId: story.id, page: pageNo, verified: c.verified, ...checkDetail(c, provider?.id) }, { storyPages: story.pages.length }));
             if (c.verified) onPage(pageNo);
-          }} />
+          }} />}
         <button className="btn btn-navy" disabled={!check?.verified || recording}
           onClick={() => { setCheck(null); lastOne ? onDone() : setI(i + 1); }}>
           {lastOne ? 'Beat your best →' : 'Next page →'}

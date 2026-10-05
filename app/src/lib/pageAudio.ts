@@ -25,7 +25,8 @@ let raf = 0;
 
 export function stopAudio() {
   cancelAnimationFrame(raf);
-  if (current) { current.pause(); current.src = ''; current = null; }
+  // Detach handlers first, so a stop is never reported as the reading finishing.
+  if (current) { current.onended = null; current.onerror = null; current.pause(); current.src = ''; current = null; }
 }
 
 /** Index of the word being said at time t (seconds), or -1 before the first word. */

@@ -491,3 +491,16 @@ main.full { max-width: none; padding: 0; }
 .today.compact .today-track { flex: 1; height: 12px; }
 .today-label { font-size: .85rem; font-weight: 700; color: #33444F; white-space: nowrap; font-variant-numeric: tabular-nums; }
 @media (prefers-reduced-motion: reduce) { .today-fill { transition: none; } }
+.banner.nudge { color: #0C3D5C; background: #E4EEF5; font-weight: 700; }
+.icon-btn.attention { border-color: var(--lwc-orange); box-shadow: 0 0 0 3px rgba(238,126,50,.35); animation: 1.6s ease-in-out infinite attention; }
+@keyframes attention { 50% { box-shadow: 0 0 0 6px rgba(238,126,50,.15); } }
+@media (prefers-reduced-motion: reduce) { .icon-btn.attention { animation: none; } }
+/* Listen, then read: two steps for session pages */
+.two-steps { display: flex; gap: 8px; margin: 0; padding: 8px 12px; list-style: none; background: #fff; border-bottom: 2px solid #E1E8EC; }
+.two-steps li { flex: 1; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 12px; background: #F1F5F8; color: #4A5B66; font: 700 1rem var(--font-family); }
+.two-steps b { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #C9D6DE; color: #fff; flex-shrink: 0; }
+.two-steps li.on { background: #FFF1E6; color: var(--lwc-navy-deep); box-shadow: inset 0 0 0 2px var(--lwc-orange); }
+.two-steps li.on b { background: var(--lwc-orange); color: var(--lwc-navy-deep); }
+.two-steps li.done { background: #E3F4E8; color: #14532D; }
+.two-steps li.done b { background: #15803D; }
+@media (max-width: 600px) { .two-steps li { font-size: .9rem; padding: 6px 8px; } }
