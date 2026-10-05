@@ -7,7 +7,8 @@
 //
 // Options: --voice <id or name>  --only pages|words  --force (redo files that already exist)
 // Keys come from the environment (or app/.env):
-//   ElevenLabs: ELEVENLABS_API_KEY, optional ELEVENLABS_VOICE_ID, ELEVENLABS_MODEL
+//   ElevenLabs: ELEVENLABS_API_KEY, optional ELEVENLABS_VOICE_ID, ELEVENLABS_MODEL (default eleven_v4),
+//               ELEVENLABS_STABILITY (0.5), ELEVENLABS_SIMILARITY (0.75), ELEVENLABS_STYLE (0.15), ELEVENLABS_LANGUAGE (en)
 //   Azure:      AZURE_SPEECH_KEY, AZURE_SPEECH_REGION, optional AZURE_TTS_VOICE
 //
 // Writes content/<story>/audio/: page-01.mp3 ..., words/<word>.mp3, and manifest.json (timings).
@@ -48,6 +49,8 @@ const chars = todoPages.reduce((n, p) => n + spokenVersion(p.text, story.ttsRepl
 console.log(`${story.title}: ${todoPages.length} pages and ${todoWords.length} words to generate, ${chars.toLocaleString()} characters (${provider}).`);
 if (args['dry-run'] || chars === 0) process.exit(0);
 
+const num = (v, d) => (v !== undefined && v !== '' && !Number.isNaN(Number(v)) ? Number(v) : d);
+
 // ---------- providers ----------
 async function elevenlabs(text) {
   const key = process.env.ELEVENLABS_API_KEY;
@@ -60,7 +63,14 @@ async function elevenlabs(text) {
     body: JSON.stringify({
       text,
       model_id: process.env.ELEVENLABS_MODEL || 'eleven_v4',
-      voice_settings: { stability: 0.6, similarity_boost: 0.75, style: 0.15, use_speaker_boost: true },
+      language_code: process.env.ELEVENLABS_LANGUAGE || 'en',
+      // Match the ElevenLabs website's sliders: stability 0.5 = halfway, similarity 0.75 = 75%.
+      voice_settings: {
+        stability: num(process.env.ELEVENLABS_STABILITY, 0.5),
+        similarity_boost: num(process.env.ELEVENLABS_SIMILARITY, 0.75),
+        style: num(process.env.ELEVENLABS_STYLE, 0.15),
+        use_speaker_boost: true,
+      },
     }),
   });
   if (!r.ok) throw new Error(`ElevenLabs ${r.status}: ${(await r.text()).slice(0, 300)}`);
