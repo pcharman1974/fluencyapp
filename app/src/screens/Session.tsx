@@ -1,27 +1,25 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Story } from '../types';
 import type { Screen } from '../App';
 import PageView from '../components/PageView';
 import ReadAloud from '../components/ReadAloud';
-import Gauge from '../components/Gauge';
 import StoryCards, { cardsCollected } from '../components/StoryCards';
 import { CheckBanner } from './Practice';
 import { GoalRing, Badge, TodayBar } from '../components/Rewards';
-import { bestReread, dayKey, sessionDays, sessionsInWeek, trickyWords, WEEKLY_TARGET, type Award, type BadgeId } from '../lib/rewards';
+import { bestReread, dayKey, PB_ACCURACY, sessionDays, sessionsInWeek, trickyWords, WEEKLY_TARGET, type Award, type BadgeId, type SelfAnswer, type SpeechScores } from '../lib/rewards';
 import type { SpeechProvider } from '../lib/speech';
 import type { Reader, RecordResult } from '../lib/useReader';
 import { checkDetail, type PageCheck } from '../lib/verify';
 import { canSpeak, speak } from '../lib/voice';
 import { normalise } from '../lib/text';
 import { loadManifest, playWord, type AudioManifest } from '../lib/pageAudio';
-import { useEffect } from 'react';
 
 interface Props { story: Story; base: string; reader: Reader; provider: SpeechProvider | null; go: (s: Screen) => void; onAward: (a: RecordResult) => void }
 
 type Step = 'warmup' | 'read' | 'reread' | 'done';
 const PAGES_PER_SESSION = 3;
 
-/** Today's session, about 10 minutes: warm-up words, read a section aloud, re-read one page to beat your best. */
+/** Today's session: read pages aloud (listen first), your best reading of one page, then practise words. */
 export default function Session({ story, base, reader, provider, go, onAward }: Props) {
   const plan = useMemo(() => {
     const got = cardsCollected(reader.events, story.id);
@@ -45,7 +43,7 @@ export default function Session({ story, base, reader, provider, go, onAward }: 
 
   // Start with reading; practise words at the end.
   const steps: { id: Step; name: string }[] = [
-    { id: 'read', name: 'Read' }, { id: 'reread', name: 'Beat your best' },
+    { id: 'read', name: 'Read' }, { id: 'reread', name: 'Your best reading' },
     ...(plan.words.length ? [{ id: 'warmup' as Step, name: 'Word practice' }] : []),
     { id: 'done', name: 'Done' },
   ];
@@ -152,7 +150,7 @@ function ReadPages({ story, base, pages, reader, provider, stepper, onAward, onP
           }} />}
         <button className="btn btn-navy" disabled={!check?.verified || recording}
           onClick={() => { setCheck(null); lastOne ? onDone() : setI(i + 1); }}>
-          {lastOne ? 'Beat your best →' : 'Next page →'}
+          {lastOne ? 'Your best reading →' : 'Next page →'}
         </button>
       </>} />
   );
@@ -163,40 +161,100 @@ function ReRead({ story, base, page: pageNo, reader, provider, stepper, onAward,
   onAward: (a: Award) => void; onDone: () => void; go: (s: Screen) => void;
 }) {
   const [check, setCheck] = useState<PageCheck | null>(null);
+  const [scores, setScores] = useState<SpeechScores | undefined>();
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [recording, setRecording] = useState(false);
   const [prevBest] = useState(() => bestReread(reader.events, story.id, pageNo));
   const page = story.pages[pageNo - 1];
-  // Earlier re-reads of this page only (fixed at the start, before this attempt is recorded).
-  const [firstRead] = useState(() => reader.events.find(e => e.type === 'reread' && e.storyId === story.id && e.page === pageNo && e.verified) as { wcpm: number } | undefined);
+  useEffect(() => () => { if (audioUrl) URL.revokeObjectURL(audioUrl); }, [audioUrl]);
+  const again = () => { setCheck(null); setScores(undefined); setAudioUrl(null); };
 
   if (check?.verified) {
-    const pb = prevBest !== undefined && check.wcpm > prevBest;
+    const accurate = check.accuracy >= PB_ACCURACY;
+    const pb = prevBest !== undefined && check.wcpm > prevBest && accurate;
     return (
       <div className="timed">
         {stepper}
-        <section className="panel results">
-          <p className="result-label">{pb ? 'New personal best!' : prevBest === undefined ? 'Your first score for this page' : 'Re-read done'}</p>
-          <Gauge value={check.wcpm} first={firstRead?.wcpm} best={prevBest !== undefined ? Math.max(prevBest, check.wcpm) : undefined} />
-          <p className="big-msg">{pb ? `${check.wcpm - prevBest!} more than your best!` : prevBest !== undefined ? `Your best is ${prevBest}. Keep practising this page to beat it.` : 'Re-read this page next time to try to beat it.'}</p>
-          <div className="row wrap"><button className="btn btn-orange" onClick={onDone}>See my session →</button></div>
+        <section className="panel results best-reading">
+          <p className="result-label">{pb ? 'New personal best!' : prevBest === undefined ? 'Your first best reading of this page' : 'Best reading done'}</p>
+          <p className="big-msg">{!accurate
+            ? 'Some words were tricky this time. Go for every word right first, then make it smooth.'
+            : pb ? 'Smoother than ever, and just as accurate. Brilliant reading!'
+            : 'Well read! Listen back and think about how it sounded.'}</p>
+          {audioUrl && (
+            <div className="listen-back">
+              <h3>Listen to yourself</h3>
+              <audio controls src={audioUrl} />
+            </div>
+          )}
+          <SelfCheck key={check.wcpm + ':' + check.durationSec} onDone={a => onAward(reader.record({ type: 'selfcheck', storyId: story.id, page: pageNo, ...a }))} />
+          <div className="stats">
+            <div className="stat"><span className="stat-value">{Math.round(check.accuracy * 100)}%</span><span className="stat-label">Words right</span></div>
+            {scores?.prosody !== undefined && <div className="stat"><span className="stat-value">{scores.prosody}</span><span className="stat-label">Expression <span className="tag">{provider?.demo ? 'demo' : 'guide'}</span></span></div>}
+            <div className="stat small"><span className="stat-value">{check.wcpm}</span><span className="stat-label">Words a minute{prevBest !== undefined ? ` (best ${Math.max(prevBest, accurate ? check.wcpm : 0)})` : ''}</span></div>
+          </div>
+          <div className="row wrap centre-row">
+            <button className="btn btn-ghost" onClick={again}>Try it again</button>
+            <button className="btn btn-orange" onClick={onDone}>Next →</button>
+          </div>
         </section>
       </div>
     );
   }
   return (
     <PageView story={story} base={base} pageNo={pageNo} plain recording={recording} onClose={() => go({ name: 'home' })}
-      title={`Beat your best: ${page.heading}`}
+      title={`Your best reading: ${page.heading}`}
       banner={<>{stepper}
-        <div className="banner demo">{prevBest !== undefined ? `Your best on this page: ${prevBest} words correct per minute. ` : ''}Read this page again, smoothly and clearly. The clock starts when you tap Start.</div>
+        <div className="storyteller" aria-label="How to read it">
+          <strong>Read it like a storyteller:</strong>
+          <span>Smooth, like talking</span><span>Pause at full stops and commas</span><span>Make your voice match the meaning</span>
+        </div>
         {check && <CheckBanner check={check} />}</>}
       footer={<>
-        <span className="hint nav-hint">No help on a re-read: read it by yourself.</span>
-        <ReadAloud key={String(!!check)} text={page.text} provider={provider} onRecording={setRecording} label={check ? 'Try again' : 'Start'} qa={{ type: 'reread', storyId: story.id, page: pageNo }}
-          onResult={c => {
-            setCheck(c);
-            onAward(reader.record({ type: 'reread', storyId: story.id, page: pageNo, verified: c.verified, ...checkDetail(c, provider?.id) }));
+        <span className="hint nav-hint">Your best reading, all by yourself.</span>
+        <ReadAloud key={String(!!check)} text={page.text} provider={provider} onRecording={setRecording} label={check ? 'Try again' : 'Start'} keepAudio
+          qa={{ type: 'reread', storyId: story.id, page: pageNo }}
+          onResult={(c, result, audio) => {
+            setCheck(c); setScores(result.scores);
+            if (audio) setAudioUrl(URL.createObjectURL(audio));
+            onAward(reader.record({ type: 'reread', storyId: story.id, page: pageNo, verified: c.verified, ...checkDetail(c, provider?.id), scores: result.scores }));
           }} />
         <button className="btn btn-ghost" disabled={recording} onClick={onDone}>Skip</button>
       </>} />
+  );
+}
+
+/** The pupil's own quick check on how their best reading sounded (prosody), in child-friendly words. */
+function SelfCheck({ onDone }: { onDone: (a: { smooth: SelfAnswer; pauses: SelfAnswer; meaning: SelfAnswer }) => void }) {
+  const [a, setA] = useState<Partial<Record<'smooth' | 'pauses' | 'meaning', SelfAnswer>>>({});
+  const [saved, setSaved] = useState(false);
+  const qs = [
+    ['smooth', 'Did it sound smooth, like talking?'],
+    ['pauses', 'Did you pause at full stops?'],
+    ['meaning', 'Did your voice show the meaning?'],
+  ] as const;
+  const choose = (k: 'smooth' | 'pauses' | 'meaning', v: SelfAnswer) => {
+    if (saved) return;
+    const next = { ...a, [k]: v };
+    setA(next);
+    if (next.smooth && next.pauses && next.meaning) { setSaved(true); onDone(next as { smooth: SelfAnswer; pauses: SelfAnswer; meaning: SelfAnswer }); }
+  };
+  return (
+    <div className="selfcheck">
+      <h3>How did it sound?</h3>
+      {qs.map(([k, q]) => (
+        <div key={k} className="selfcheck-row">
+          <span>{q}</span>
+          <div className="seg" role="group" aria-label={q}>
+            {(['yes', 'nearly', 'not-yet'] as const).map(v => (
+              <button key={v} className={a[k] === v ? 'on' : ''} aria-pressed={a[k] === v} disabled={saved && a[k] !== v} onClick={() => choose(k, v)}>
+                {v === 'yes' ? 'Yes' : v === 'nearly' ? 'Nearly' : 'Not yet'}
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+      {saved && <p className="hint">Thanks! Thinking about how you read helps you read better.</p>}
+    </div>
   );
 }

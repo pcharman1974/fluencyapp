@@ -24,9 +24,10 @@ export function sendRecords(readerCode: string, records: { events?: unknown[]; a
 
 export interface QaRecorder { stop(): Promise<Blob | null>; cancel(): void }
 
-/** Records the microphone alongside the speech check, if test data is being saved. */
-export async function startRecording(): Promise<QaRecorder | null> {
-  if (!(await qaEnabled()) || typeof MediaRecorder === 'undefined' || !navigator.mediaDevices) return null;
+/** Records the microphone alongside the speech check: if test data is being saved, or always when `forPlayback` (listen back to yourself). */
+export async function startRecording(forPlayback = false): Promise<QaRecorder | null> {
+  if (typeof MediaRecorder === 'undefined' || !navigator.mediaDevices) return null;
+  if (!forPlayback && !(await qaEnabled())) return null;
   let stream: MediaStream;
   try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch { return null; }
   const mime = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm', 'audio/ogg'].find(t => MediaRecorder.isTypeSupported(t));

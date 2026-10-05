@@ -64,6 +64,17 @@ describe('points and goals', () => {
     ]);
     expect(ev.filter(e => e.type === 'points' && e.reason === 'New personal best')).toHaveLength(1);
   });
+  it('only counts a personal best if it is accurate too', () => {
+    const rr = (date: string, wcpm: number, accuracy: number): ReadingEvent => ({ type: 'reread', date, storyId: 's', page: 2, verified: true, wcpm, accuracy });
+    const ev = run([rr('2026-10-05T10:00:00', 70, 0.98), rr('2026-10-06T10:00:00', 90, 0.85), rr('2026-10-07T10:00:00', 80, 0.97)]);
+    const pbs = ev.filter(e => e.type === 'points' && e.reason === 'New personal best');
+    expect(pbs).toHaveLength(1);             // the rushed 90 (85% right) doesn't count; the accurate 80 does
+    expect(pbs[0].date).toBe('2026-10-07T10:00:00');
+  });
+  it('gives Power for a self-check on your best reading', () => {
+    const a = award([], { type: 'selfcheck', date: '2026-10-05T10:00:00', storyId: 's', page: 2, smooth: 'yes', pauses: 'nearly', meaning: 'not-yet' });
+    expect(a.points).toEqual([{ amount: 2, reason: 'Checked my best reading' }]);
+  });
   it('awards story finished when every page is checked', () => {
     const ev = run([1, 2, 3].map(p => page('2026-10-05T10:00:00', p)), 3);
     expect(ev.some(e => e.type === 'points' && e.reason === 'Finished the story')).toBe(true);

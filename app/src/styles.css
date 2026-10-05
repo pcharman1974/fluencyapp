@@ -504,3 +504,15 @@ main.full { max-width: none; padding: 0; }
 .two-steps li.done { background: #E3F4E8; color: #14532D; }
 .two-steps li.done b { background: #15803D; }
 @media (max-width: 600px) { .two-steps li { font-size: .9rem; padding: 6px 8px; } }
+
+/* Your best reading */
+.storyteller { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 16px; background: #FFF6EF; color: var(--lwc-navy-deep); }
+.storyteller span { background: #fff; border: 2px solid #F1B48A; border-radius: 99px; padding: 4px 12px; font-weight: 700; font-size: .95rem; }
+.best-reading .listen-back { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 6px 0 4px; }
+.best-reading .listen-back h3 { margin: 0; }
+.best-reading audio { width: min(420px, 100%); }
+.selfcheck { max-width: 640px; margin: 12px auto; text-align: left; display: flex; flex-direction: column; gap: 10px; }
+.selfcheck h3 { margin: 0; text-align: center; }
+.selfcheck-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; font-weight: 700; color: var(--lwc-navy-deep); }
+.selfcheck .seg button:disabled { opacity: .45; }
+.stat.small .stat-value { font-size: 1.3rem; }

@@ -93,7 +93,7 @@ export function FluencyChart({ events, storyId, audience }: { events: ReadingEve
   const pupil = audience === 'pupil';
   const names = {
     timed: 'Timed reads',
-    reread: pupil ? 'Beat-your-best re-reads' : 'Re-reads (beat your best)',
+    reread: pupil ? 'Your best readings' : 'Best readings (practised page)',
     page: pupil ? 'Page reads (average that day)' : 'Page reads (daily average)',
   };
 

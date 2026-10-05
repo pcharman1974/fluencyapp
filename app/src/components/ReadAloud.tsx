@@ -10,13 +10,15 @@ interface Props {
   label?: string;
   doneLabel?: string;
   onRecording?: (on: boolean) => void;
-  onResult: (check: PageCheck, result: SpeechResult) => void;
+  onResult: (check: PageCheck, result: SpeechResult, audio: Blob | null) => void;
   /** What is being read, for the testing data store (recording plus check result). */
   qa?: QaContext;
+  /** Keep a recording so the pupil can listen back to themselves (stays on the device unless test data is on). */
+  keepAudio?: boolean;
 }
 
 /** "Read aloud" button: listens while the pupil reads, then checks the reading against the text. */
-export default function ReadAloud({ text, provider, label = 'Read aloud', doneLabel = "I've finished", onRecording, onResult, qa }: Props) {
+export default function ReadAloud({ text, provider, label = 'Read aloud', doneLabel = "I've finished", onRecording, onResult, qa, keepAudio }: Props) {
   const [state, setState] = useState<'idle' | 'recording' | 'checking'>('idle');
   const [secs, setSecs] = useState(0);
   const [problem, setProblem] = useState('');
@@ -30,7 +32,7 @@ export default function ReadAloud({ text, provider, label = 'Read aloud', doneLa
   const start = async () => {
     if (!provider) return;
     setProblem('');
-    recorder.current = qa ? startRecording() : null;
+    recorder.current = qa || keepAudio ? startRecording(keepAudio) : null;
     try {
       session.current = await provider.start(text, undefined, { kind: 'page' });
     } catch {
@@ -52,7 +54,7 @@ export default function ReadAloud({ text, provider, label = 'Read aloud', doneLa
     onRecording?.(false);
     setState('idle');
     const check = checkPage(text, result, elapsed);
-    onResult(check, result);
+    onResult(check, result, audio);
     if (qa) sendRecording(getReaderCode(), qa, { check, heard: result.words.map(w => w.text).join(' '), provider: result.provider, text }, audio);
   };
 

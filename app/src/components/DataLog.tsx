@@ -4,9 +4,9 @@ import type { ReadingEvent } from '../lib/rewards';
 import { download, KIND_LABEL, logRows, toCsv, type LogKind } from '../lib/dataLog';
 
 const FILTERS: { label: string; kinds: LogKind[] }[] = [
-  { label: 'Everything', kinds: ['page', 'reread', 'warmup', 'timed', 'marking', 'points', 'badge'] },
+  { label: 'Everything', kinds: ['page', 'reread', 'selfcheck', 'warmup', 'timed', 'marking', 'points', 'badge'] },
   { label: 'Page reads', kinds: ['page'] },
-  { label: 'Re-reads', kinds: ['reread'] },
+  { label: 'Best readings', kinds: ['reread', 'selfcheck'] },
   { label: 'Warm-up words', kinds: ['warmup'] },
   { label: 'Timed reads', kinds: ['timed', 'marking'] },
   { label: 'Power and badges', kinds: ['points', 'badge'] },

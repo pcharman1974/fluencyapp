@@ -3,10 +3,10 @@
 import type { Attempt } from '../types';
 import { BADGES, type ReadingEvent } from './rewards';
 
-export type LogKind = 'page' | 'reread' | 'warmup' | 'timed' | 'marking' | 'points' | 'badge';
+export type LogKind = 'page' | 'reread' | 'selfcheck' | 'warmup' | 'timed' | 'marking' | 'points' | 'badge';
 
 export const KIND_LABEL: Record<LogKind, string> = {
-  page: 'Page read', reread: 'Re-read', warmup: 'Warm-up word', timed: 'Timed read',
+  page: 'Page read', reread: 'Best reading', selfcheck: 'Self-check', warmup: 'Warm-up word', timed: 'Timed read',
   marking: 'Timed read marking', points: 'Power', badge: 'Badge',
 };
 
@@ -35,10 +35,16 @@ function eventRow(e: ReadingEvent): LogRow {
         details: [
           ...facts([['Heard', pct(e.coverage)], ['Correct', pct(e.accuracy)], ['WCPM', e.wcpm], ['Pace', e.wpm !== undefined ? `${e.wpm} words/min` : undefined],
             ['Words on page', e.words], ['Time', e.durationSec !== undefined ? `${Math.round(e.durationSec)}s` : undefined],
-            ['Misread', e.misread?.length ? e.misread.join(', ') : undefined], ['Checked by', source(e.checkedBy)]]),
+            ['Misread', e.misread?.length ? e.misread.join(', ') : undefined], ['Checked by', source(e.checkedBy)],
+            ['Expression score', e.type === 'reread' ? e.scores?.prosody : undefined], ['Fluency score', e.type === 'reread' ? e.scores?.fluency : undefined]]),
           ...(e.message ? [`Pupil saw: "${e.message}"`] : []),
         ],
       };
+    case 'selfcheck': {
+      const say = { yes: 'yes', nearly: 'nearly', 'not-yet': 'not yet' } as const;
+      return { date: e.date, kind: 'selfcheck', what: `Page ${e.page}`, raw,
+        details: [`Smooth, like talking: ${say[e.smooth]}`, `Paused at full stops: ${say[e.pauses]}`, `Voice showed the meaning: ${say[e.meaning]}`] };
+    }
     case 'warmup':
       return {
         date: e.date, kind: 'warmup', what: e.word, raw,
@@ -76,7 +82,7 @@ export function logRows(events: ReadingEvent[], attempts: Attempt[]): LogRow[] {
     .sort((a, b) => b.date.localeCompare(a.date) || order(a.kind) - order(b.kind));
 }
 // Within the same moment: the reading first, then what it earned.
-const order = (k: LogKind) => ['page', 'reread', 'warmup', 'timed', 'marking', 'points', 'badge'].indexOf(k);
+const order = (k: LogKind) => ['page', 'reread', 'selfcheck', 'warmup', 'timed', 'marking', 'points', 'badge'].indexOf(k);
 
 const COLUMNS = ['readerCode', 'date', 'type', 'storyId', 'page', 'word', 'verified', 'correct', 'coverage', 'accuracy', 'words', 'durationSec',
   'wpm', 'wcpm', 'misread', 'message', 'checkedBy', 'errorWords', 'seconds', 'wordsRead', 'errors', 'method', 'speechScores', 'amount', 'reason', 'id'];

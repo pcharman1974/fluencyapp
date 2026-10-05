@@ -7,9 +7,15 @@ export interface CheckDetail {
   misread: string[]; message: string; checkedBy: string; // speech service id, e.g. 'azure' or 'demo'
 }
 
+/** Scores (0-100) a speech service may give for a reading: a guide for adults, not a mark. */
+export type SpeechScores = { fluency?: number; prosody?: number; pronunciation?: number };
+/** Pupil's own check on their best reading. */
+export type SelfAnswer = 'yes' | 'nearly' | 'not-yet';
+
 export type ReadingEvent =
   | ({ type: 'page'; date: string; storyId: string; page: number; verified: boolean; coverage: number; accuracy: number; words: number; durationSec: number; misread: string[] } & Partial<CheckDetail>)
-  | ({ type: 'reread'; date: string; storyId: string; page: number; verified: boolean; wcpm: number } & Partial<CheckDetail>)
+  | ({ type: 'reread'; date: string; storyId: string; page: number; verified: boolean; wcpm: number; scores?: SpeechScores } & Partial<CheckDetail>)
+  | { type: 'selfcheck'; date: string; storyId: string; page: number; smooth: SelfAnswer; pauses: SelfAnswer; meaning: SelfAnswer }
   | { type: 'timed'; date: string; storyId: string; wcpm: number; errorWords: string[]; seconds?: number }
   | ({ type: 'warmup'; date: string; word: string; correct: boolean } & Partial<CheckDetail>)
   | { type: 'points'; date: string; amount: number; reason: string }
@@ -20,7 +26,10 @@ export const POINTS = {
   weeklyGoal: 25, storyFinished: 20, warmupWord: 1,
   dailyGoal: 15,   // filling today's reading bar
   extraMinute: 2,  // each further full minute of reading that day
+  selfCheck: 2,    // thinking about how your best reading sounded
 };
+/** A re-read only counts as a new personal best if it is this accurate: accuracy first, never rushing. */
+export const PB_ACCURACY = 0.95;
 // Regular and often: a few minutes most days beats one long go a week.
 export const DAILY_TARGET_MIN = 5;   // minutes of checked reading aloud that fill the day's bar
 export const MAX_EXTRA_MINUTES = 15; // extra-minute Power stops after this many, so it can't be farmed
@@ -46,7 +55,7 @@ export const BADGES: { id: BadgeId; name: string; how: string }[] = [
   { id: 'first-page', name: 'First page', how: 'Read your first page aloud' },
   { id: 'perfect-page', name: 'Perfect page', how: 'Read every word on a page correctly' },
   { id: 'story-finished', name: 'Story finished', how: 'Read every page of a story aloud' },
-  { id: 'personal-best', name: 'Personal best', how: 'Beat your best on a re-read' },
+  { id: 'personal-best', name: 'Personal best', how: 'Read a page better than ever: smoother and just as accurate' },
   { id: 're-reader', name: 'Re-reader', how: 'Do 5 re-reads' },
   { id: 'goal-week', name: 'Goal week', how: 'Fill your reading bar on 3 days in one week' },
   { id: 'streak-3', name: '3-week streak', how: 'Hit your weekly goal 3 weeks running' },
@@ -126,7 +135,8 @@ export function weekStreak(ev: ReadingEvent[], nowIso: string, holidays: string[
 
 export function bestReread(ev: ReadingEvent[], storyId: string, page: number): number | undefined {
   let best: number | undefined;
-  for (const e of ev) if (e.type === 'reread' && e.verified && e.storyId === storyId && e.page === page) best = Math.max(best ?? 0, e.wcpm);
+  // Only accurate readings set the bar: a rushed reading with lots of errors isn't a best.
+  for (const e of ev) if (e.type === 'reread' && e.verified && e.storyId === storyId && e.page === page && (e.accuracy === undefined || e.accuracy >= PB_ACCURACY)) best = Math.max(best ?? 0, e.wcpm);
   return best;
 }
 
@@ -170,9 +180,11 @@ export function award(before: ReadingEvent[], e: ReadingEvent, ctx: { storyPages
   if (e.type === 'reread' && e.verified) {
     pts.push({ amount: POINTS.reread, reason: `Re-read page ${e.page}` });
     const prev = bestReread(before, e.storyId, e.page);
-    if (prev !== undefined && e.wcpm > prev) pts.push({ amount: POINTS.personalBest, reason: 'New personal best' });
+    const accurate = e.accuracy === undefined || e.accuracy >= PB_ACCURACY;
+    if (prev !== undefined && e.wcpm > prev && accurate) pts.push({ amount: POINTS.personalBest, reason: 'New personal best' });
   }
   if (e.type === 'timed') pts.push({ amount: POINTS.timedRead, reason: 'Bonus timed read' });
+  if (e.type === 'selfcheck') pts.push({ amount: POINTS.selfCheck, reason: 'Checked my best reading' });
   if (e.type === 'warmup' && e.correct) pts.push({ amount: POINTS.warmupWord, reason: `Practice word: ${e.word}` });
 
   // Today's reading bar: a bonus when it fills, then Power for each extra full minute (up to a cap).
