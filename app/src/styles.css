@@ -513,3 +513,11 @@ main.full { max-width: none; padding: 0; }
 .selfcheck-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; font-weight: 700; color: var(--lwc-navy-deep); }
 .selfcheck .seg button:disabled { opacity: .45; }
 .stat.small .stat-value { font-size: 1.3rem; }
+
+/* Who's reading? */
+.reader-choices { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 16px; margin: 8px 0 12px; }
+.reader-choice { background: #F5F8FA; border-radius: 14px; padding: 16px; }
+.reader-choice h3 { margin: 0 0 4px; }
+.reader-choice.new { background: #FFF6EF; }
+.reader-choice .reader-list { margin: 10px 0 0; }
+@media (max-width: 820px) { .reader-choices { grid-template-columns: 1fr; } }

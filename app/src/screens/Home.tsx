@@ -12,15 +12,14 @@ import type { ReadingEvent } from '../lib/rewards';
 import { cardsCollected } from '../components/StoryCards';
 import type { Reader } from '../lib/useReader';
 
-interface Props { story: Story; base: string; readerCode: string; reader: Reader; setReader: (c: string) => void; go: (s: Screen) => void }
+interface Props { story: Story; base: string; readerCode: string; reader: Reader; setReader: (c: string) => void; go: (s: Screen) => void; picking: boolean; setPicking: (on: boolean) => void }
 
-export default function Home({ story, base, readerCode, reader, setReader, go }: Props) {
-  const [editing, setEditing] = useState(!readerCode);
+export default function Home({ story, base, readerCode, reader, setReader, go, picking, setPicking }: Props) {
   const attempts = readerCode ? getAttempts(readerCode).filter(a => a.storyId === story.id) : [];
   const latest = attempts.at(-1), first = attempts[0], best = attempts.reduce((m, a) => Math.max(m, a.wcpm), 0);
   const cards = cardsCollected(reader.events, story.id).size;
 
-  if (editing) return (
+  if (picking || !readerCode) return (
     <div className="home">
       <section className="hero">
         <div>
@@ -29,7 +28,7 @@ export default function Home({ story, base, readerCode, reader, setReader, go }:
         </div>
         <img className="hero-mascot" src={gerbil} alt="" />
       </section>
-      <ReaderPicker current={readerCode} onPick={c => { setReader(c); setEditing(false); }} go={go} />
+      <ReaderPicker current={readerCode} onPick={setReader} go={go} />
     </div>
   );
 
@@ -62,7 +61,7 @@ export default function Home({ story, base, readerCode, reader, setReader, go }:
           </div>
         </div>
       </section>
-      <p className="hint centre-text">Reader {readerCode} · <button className="link" onClick={() => setEditing(true)}>Change reader</button> · <button className="link" onClick={() => go({ name: 'miccheck' })}>Check microphone</button> · <button className="link" onClick={() => go({ name: 'teacher' })}>Teacher view</button></p>
+      <p className="hint centre-text">Reader {readerCode} · <button className="link" onClick={() => setPicking(true)}>Change reader</button> · <button className="link" onClick={() => go({ name: 'miccheck' })}>Check microphone</button> · <button className="link" onClick={() => go({ name: 'teacher' })}>Teacher view</button></p>
     </div>
   );
 }
@@ -101,25 +100,34 @@ function ReaderPicker({ current, onPick, go }: { current: string; onPick: (code:
 
   return (
     <section className="panel reader-panel">
-      {all.length > 0 && <>
-        <h2>Who's reading?</h2>
-        <div className="reader-list">
-          {all.map(r => (
-            <button key={r.code} className={'reader-pick' + (r.code === current ? ' on' : '')} disabled={!!busy} onClick={() => pick(r.code)}>
-              <strong>{r.code}</strong><span>{busy === r.code ? 'Loading…' : ago(r.last) || 'no reading yet'}</span>
-            </button>
-          ))}
+      <h2>Who's reading?</h2>
+      <div className="reader-choices">
+        <div className="reader-choice">
+          <h3>I've read before</h3>
+          {all.length > 0 ? <>
+            <p className="hint">Tap your reader code.</p>
+            <div className="reader-list">
+              {all.map(r => (
+                <button key={r.code} className={'reader-pick' + (r.code === current ? ' on' : '')} disabled={!!busy} onClick={() => pick(r.code)}>
+                  <strong>{r.code}</strong><span>{busy === r.code ? 'Loading…' : r.code === current ? `last reader · ${ago(r.last) || 'no reading yet'}` : ago(r.last) || 'no reading yet'}</span>
+                </button>
+              ))}
+            </div>
+          </> : <p className="hint">No readers yet. Add yourself as a new reader.</p>}
         </div>
-      </>}
-      <label htmlFor="code">{all.length ? 'Or add a new pupil' : 'New pupil'}: reader code</label>
-      <div className="row">
-        <input id="code" value={code} maxLength={12} autoComplete="off" placeholder="e.g. 7B-14"
-          onChange={e => { setNote(''); setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, '')); }}
-          onKeyDown={e => e.key === 'Enter' && create()} />
-        <button className="btn btn-orange" disabled={!code || !!busy} onClick={create}>Add and start</button>
+        <div className="reader-choice new">
+          <h3>I'm new</h3>
+          <label htmlFor="code" className="hint">Type the reader code your teacher gave you.</label>
+          <div className="row">
+            <input id="code" value={code} maxLength={12} autoComplete="off" placeholder="e.g. 7B-14"
+              onChange={e => { setNote(''); setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, '')); }}
+              onKeyDown={e => e.key === 'Enter' && create()} />
+            <button className="btn btn-orange" disabled={!code || !!busy} onClick={create}>Start</button>
+          </div>
+          {note && <p className="hint">{note}</p>}
+          <p className="hint">Use a code, never your name.</p>
+        </div>
       </div>
-      {note && <p className="hint">{note}</p>}
-      <p className="hint">Use a code, never a pupil's name.</p>
       <p className="hint"><button className="link" onClick={() => go({ name: 'teacher' })}>Teacher view</button></p>
     </section>
   );

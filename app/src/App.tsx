@@ -27,6 +27,8 @@ export default function App() {
   const [story, setStory] = useState<Story | null>(null);
   const [error, setError] = useState('');
   const [screen, setScreen] = useState<Screen>({ name: 'home' });
+  // Shared school devices: always ask who's reading when the app opens (not when moving between screens).
+  const [picking, setPicking] = useState(true);
   const [reader, setReader] = useState(getReaderCode());
   const state = useReader(reader);
   const [provider, setProvider] = useState<SpeechProvider | null>(null);
@@ -45,7 +47,7 @@ export default function App() {
   if (error) return <div className="centre"><p>{error}</p></div>;
   if (!story) return <div className="centre"><p>Loading…</p></div>;
 
-  const updateReader = (c: string) => { setReader(c); setReaderCode(c); };
+  const updateReader = (c: string) => { setReader(c); setReaderCode(c); setPicking(false); };
   const go = (s: Screen) => { window.scrollTo(0, 0); setScreen(s); };
 
   return (
@@ -57,7 +59,7 @@ export default function App() {
             <img src={holdingLogo} alt="Beyond the Code Power Reader" />
           </button>
           <div className="topbar-right">
-            {reader && <span className="reader-chip">Reader {reader}</span>}
+            {reader && !picking && <span className="reader-chip">Reader {reader}</span>}
             <img className="partner-logo" src={lwcLogo} alt="Little Wandle Code" />
           </div>
         </header>
@@ -65,7 +67,7 @@ export default function App() {
       <main className={reader && micOk && ['practice', 'timed', 'session'].includes(screen.name) ? 'full' : ''}>
         {(screen.name === 'home' || (!reader && screen.name !== 'teacher')) && <>
           <TestNotice />
-          <Home story={story} base={base} readerCode={reader} reader={state} setReader={updateReader} go={go} />
+          <Home story={story} base={base} readerCode={reader} reader={state} setReader={updateReader} go={go} picking={picking} setPicking={setPicking} />
           <BuildInfo base={base} />
         </>}
         {reader && !micOk && ['practice', 'timed', 'session'].includes(screen.name) && (
