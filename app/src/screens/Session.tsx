@@ -111,12 +111,14 @@ function WarmUp({ storyBase, words, provider, reader, stepper, onAward, onDone, 
         <p className="hint">Warm-up word {i + 1} of {words.length}</p>
         <span className={'why ' + (why.startsWith('Tricky') ? 'tricky' : 'new')}>{why}</span>
         <p className="warm-word">{word}</p>
+        {result === null && <p className="hint">Press Say it and read the word aloud. Then you can move on.</p>}
         {result !== null && <p className={'banner ' + (result ? 'ok' : 'retry')}>{result ? '✓ Got it!' : `Not quite. Press Hear it, then try again.`}</p>}
         <div className="row wrap centre-row">
           {(canSpeak() || recorded) && <button className="btn btn-ghost" onClick={() => recorded ? playWord(storyBase + recorded) : speak(normalise(word), { rate: 0.75 })}>Hear it</button>}
-          <ReadAloud key={i + ':' + result} text={word} provider={provider} label="Say it" doneLabel="Done"
+          <ReadAloud key={i + ':' + result} text={word} provider={provider} label="Say it" doneLabel="Done" qa={{ type: 'warmup', word }}
             onResult={(c) => { const ok = c.accuracy === 1 && c.coverage === 1; setResult(ok); onAward(reader.record({ type: 'warmup', word, correct: ok, ...checkDetail(c, provider?.id), message: ok ? '✓ Got it!' : 'Not quite. Press Hear it, then try again.' })); }} />
-          <button className="btn btn-navy" onClick={next}>{i + 1 < words.length ? 'Next word →' : 'Start reading →'}</button>
+          {/* Say the word (and get it checked) before moving on. */}
+          <button className="btn btn-navy" disabled={result === null} title={result === null ? 'Say the word first' : undefined} onClick={next}>{i + 1 < words.length ? 'Next word →' : 'Start reading →'}</button>
         </div>
       </section>
     </div>
@@ -139,7 +141,7 @@ function ReadPages({ story, base, pages, reader, provider, stepper, onAward, onP
       banner={<>{stepper}<CheckBanner check={check} demo={provider?.demo} /></>}
       footer={<>
         <span className="hint nav-hint">Read the page aloud, then tap "I've finished".</span>
-        <ReadAloud key={pageNo + ':' + (check ? 'r' : '')} text={page.text} provider={provider} onRecording={setRecording}
+        <ReadAloud key={pageNo + ':' + (check ? 'r' : '')} text={page.text} provider={provider} onRecording={setRecording} qa={{ type: 'page', storyId: story.id, page: pageNo }}
           label={check && !check.verified ? 'Try again' : 'Read aloud'}
           onResult={c => {
             setCheck(c);
@@ -187,7 +189,7 @@ function ReRead({ story, base, page: pageNo, reader, provider, stepper, onAward,
         {check && <CheckBanner check={check} />}</>}
       footer={<>
         <span className="hint nav-hint">No help on a re-read: read it by yourself.</span>
-        <ReadAloud key={String(!!check)} text={page.text} provider={provider} onRecording={setRecording} label={check ? 'Try again' : 'Start'}
+        <ReadAloud key={String(!!check)} text={page.text} provider={provider} onRecording={setRecording} label={check ? 'Try again' : 'Start'} qa={{ type: 'reread', storyId: story.id, page: pageNo }}
           onResult={c => {
             setCheck(c);
             onAward(reader.record({ type: 'reread', storyId: story.id, page: pageNo, verified: c.verified, ...checkDetail(c, provider?.id) }));

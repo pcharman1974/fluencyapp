@@ -37,6 +37,7 @@ export default function Practice({ story, base, startPage = 1, focusWords, reade
         <button className="btn btn-ghost" disabled={pageNo === 1 || recording} onClick={() => turn(pageNo - 1)}>← Last</button>
         <div className="nav-mid">
           <ReadAloud key={pageNo + ':' + (check ? 'r' : '')} text={page.text} provider={provider} onRecording={setRecording} onResult={onResult}
+            qa={{ type: 'page', storyId: story.id, page: pageNo }}
             label={check && !check.verified ? 'Try again' : 'Read aloud'} />
           <span className="page-count">{pageNo}/{story.pages.length}</span>
         </div>

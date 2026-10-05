@@ -17,6 +17,7 @@ import { pickProvider, type SpeechProvider } from './lib/speech';
 import type { Award } from './lib/rewards';
 import { holdingLogo, lwcLogo } from './brand';
 import BuildInfo from './components/BuildInfo';
+import { TestNotice } from './components/ServerData';
 
 export type Screen = { name: 'home' } | { name: 'practice'; page?: number; focusWords?: string[] } | { name: 'timed' } | { name: 'progress' } | { name: 'session' } | { name: 'teacher' };
 
@@ -63,6 +64,7 @@ export default function App() {
       )}
       <main className={reader && micOk && ['practice', 'timed'].includes(screen.name) || (reader && screen.name === 'session') ? 'full' : ''}>
         {(screen.name === 'home' || (!reader && screen.name !== 'teacher')) && <>
+          <TestNotice />
           <Home story={story} base={base} readerCode={reader} reader={state} setReader={updateReader} go={go} />
           <BuildInfo base={base} />
         </>}

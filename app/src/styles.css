@@ -461,3 +461,18 @@ main.full { max-width: none; padding: 0; }
 .dl-raw { margin-top: 4px; }
 .dl-raw summary { cursor: pointer; color: var(--lwc-navy); font-size: .85rem; font-weight: 700; }
 .dl-raw pre { background: #F5F8FA; border-radius: 8px; padding: 10px; font-size: .8rem; overflow-x: auto; margin: 6px 0 0; }
+
+/* Testing data store */
+.test-notice { border-radius: 12px; margin: 0 0 16px; }
+.serverdata h2 { margin: 0; }
+.serverdata select { font: inherit; padding: 6px 8px; border: 2px solid var(--lwc-navy); border-radius: 10px; margin-left: 6px; }
+.dl-audio { display: block; width: 100%; max-width: 480px; margin-top: 6px; }
+.dl-del { margin-left: auto; font-size: .85rem; }
+
+/* Choose a pupil */
+.reader-panel h2 { margin-top: 0; }
+.reader-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin: 8px 0 20px; }
+.reader-pick { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 12px 14px; border: 2px solid #C9D6DE; border-radius: 14px; background: #fff; text-align: left; }
+.reader-pick strong { font: 800 1.15rem var(--font-family); color: var(--lwc-navy); }
+.reader-pick span { color: #4A5B66; font-size: .85rem; }
+.reader-pick:hover, .reader-pick.on { border-color: var(--lwc-orange); background: #FFF6EF; }

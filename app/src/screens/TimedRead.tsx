@@ -5,34 +5,35 @@ import { tokenisePages, type Token } from '../lib/text';
 import { alignHeard, errorsFromAlignment, scoreReading } from '../lib/scoring';
 import { providers, type SpeechProvider, type SpeechResult } from '../lib/speech';
 import { saveAttempt, getAttempts } from '../lib/storage';
+import { sendRecording, startRecording, type QaRecorder } from '../lib/qa';
 import Gauge from '../components/Gauge';
 import type { Reader, RecordResult } from '../lib/useReader';
 import type { Award } from '../lib/rewards';
 
 interface Props { story: Story; reader: string; state: Reader; go: (s: Screen) => void; onAward: (a: RecordResult) => void }
 
-type Phase = 'setup' | 'countdown' | 'reading' | 'analysing' | 'mark' | 'results';
-type Method = 'adult' | 'speech' | 'demo';
+type Phase = 'setup' | 'countdown' | 'reading' | 'analysing' | 'results';
 
 const DURATION = 60;
 
 export default function TimedRead({ story, reader, state, go, onAward }: Props) {
   const tokens = useMemo(() => tokenisePages(story.pages), [story]);
   const [phase, setPhase] = useState<Phase>('setup');
-  const [method, setMethod] = useState<Method>('adult');
   const [speechReady, setSpeechReady] = useState(false);
   const [count, setCount] = useState(3);
   const [elapsed, setElapsed] = useState(0);
   const [errors, setErrors] = useState<Set<number>>(new Set());
   const [checks, setChecks] = useState<Set<number>>(new Set());
   const [lastWord, setLastWord] = useState<number | null>(null);
-  const [markMode, setMarkMode] = useState<'errors' | 'last'>('last');
   const [heardCount, setHeardCount] = useState(0);
   const [speech, setSpeech] = useState<SpeechResult | null>(null);
   const [problem, setProblem] = useState('');
   const startedAt = useRef(0);
   const session = useRef<{ stop(): Promise<SpeechResult> } | null>(null);
   const saved = useRef(false);
+  const recorder = useRef<QaRecorder | null>(null);
+  const audio = useRef<Blob | null>(null);
+  useEffect(() => () => recorder.current?.cancel(), []);
   const [history] = useState(() => getAttempts(reader).filter(a => a.storyId === story.id));
 
   const azure = providers.find(p => p.id === 'azure')!;
@@ -59,15 +60,16 @@ export default function TimedRead({ story, reader, state, go, onAward }: Props) 
 
   async function begin() {
     setProblem('');
-    const provider: SpeechProvider | null = method === 'speech' ? azure : method === 'demo' ? demo : null;
-    if (provider) {
-      try {
-        session.current = await provider.start(tokens.map(t => t.display).join(' '), setHeardCount);
-      } catch (e) {
-        setProblem('The microphone or speech service could not start. Carry on and the adult can mark the reading instead.');
-        setMethod('adult');
-      }
+    // Marked automatically: the real speech check if the server has one, otherwise demo data.
+    const provider: SpeechProvider = speechReady ? azure : demo;
+    try {
+      session.current = await provider.start(tokens.map(t => t.display).join(' '), setHeardCount);
+    } catch {
+      setProblem('The microphone or speech service could not start. Check the microphone is allowed for this page, then try again.');
+      setPhase('setup');
+      return;
     }
+    recorder.current = await startRecording();
     startedAt.current = Date.now();
     setElapsed(0);
     setPhase('reading');
@@ -76,46 +78,42 @@ export default function TimedRead({ story, reader, state, go, onAward }: Props) 
   async function finish() {
     const secs = Math.min(DURATION, (Date.now() - startedAt.current) / 1000);
     setElapsed(secs);
-    if (session.current) {
-      setPhase('analysing');
-      const result = await session.current.stop();
-      session.current = null;
-      setSpeech(result);
-      const a = alignHeard(tokens, result.words.filter(w => w.startSec === undefined || w.startSec <= secs));
-      setErrors(new Set(errorsFromAlignment(a)));
-      setChecks(new Set(a.words.filter(w => w.check).map(w => w.refIndex)));
-      setLastWord(a.lastWordIndex >= 0 ? a.lastWordIndex : null);
-      setMarkMode('errors');
-    } else {
-      setMarkMode('last');
+    audio.current = (await recorder.current?.stop()) ?? null; recorder.current = null;
+    if (!session.current) return;
+    setPhase('analysing');
+    const heard = await session.current.stop();
+    session.current = null;
+    setSpeech(heard);
+    const a = alignHeard(tokens, heard.words.filter(w => w.startSec === undefined || w.startSec <= secs));
+    if (a.lastWordIndex < 0) {
+      setProblem("We didn't hear any reading. Check the microphone is on and allowed for this page, then try again.");
+      setPhase('setup');
+      return;
     }
-    setPhase('mark');
+    const errs = new Set(errorsFromAlignment(a));
+    setErrors(errs);
+    setChecks(new Set(a.words.filter(w => w.check).map(w => w.refIndex)));
+    setLastWord(a.lastWordIndex);
+    save(scoreReading(a.lastWordIndex, errs, Math.round(secs)), a.lastWordIndex, errs, heard);
+    setPhase('results');
   }
-
-  const toggleError = (i: number) => setErrors(e => { const n = new Set(e); n.has(i) ? n.delete(i) : n.add(i); return n; });
-
-  const tapWord = (t: Token) => {
-    if (phase === 'reading' && method === 'adult') toggleError(t.index);
-    if (phase === 'mark') markMode === 'last' ? setLastWord(t.index) : toggleError(t.index);
-  };
 
   const result = lastWord !== null ? scoreReading(lastWord, errors, Math.round(elapsed)) : null;
 
-  const showResults = () => {
-    if (!result) return;
-    if (!saved.current) {
-      const errorWords = [...errors].filter(i => i <= lastWord!).sort((a, b) => a - b).map(i => tokens[i].display);
-      const attempt: Attempt = {
-        readerCode: reader, storyId: story.id, date: new Date().toISOString(), method,
-        seconds: result.seconds, wordsRead: result.wordsRead, errors: result.errors, wcpm: result.wcpm,
-        accuracy: result.accuracy, errorWords, speechScores: speech?.scores,
-      };
-      saveAttempt(attempt);
-      onAward(state.record({ type: 'timed', storyId: story.id, wcpm: result.wcpm, errorWords }));
-      saved.current = true;
-    }
-    setPhase('results');
-  };
+  /** Saves the automatically marked result (no adult marking step). */
+  function save(r: NonNullable<typeof result>, last: number, errs: Set<number>, heard: SpeechResult) {
+    if (saved.current) return;
+    const errorWords = [...errs].filter(i => i <= last).sort((a, b) => a - b).map(i => tokens[i].display);
+    const attempt: Attempt = {
+      readerCode: reader, storyId: story.id, date: new Date().toISOString(), method: speechReady ? 'speech' : 'demo',
+      seconds: r.seconds, wordsRead: r.wordsRead, errors: r.errors, wcpm: r.wcpm,
+      accuracy: r.accuracy, errorWords, speechScores: heard.scores,
+    };
+    saveAttempt(attempt);
+    sendRecording(reader, { type: 'timed', storyId: story.id }, { attempt, heard: heard.words.map(w => w.text).join(' '), provider: heard.provider }, audio.current);
+    onAward(state.record({ type: 'timed', storyId: story.id, wcpm: r.wcpm, errorWords }));
+    saved.current = true;
+  }
 
   // ---------- Screens ----------
 
@@ -124,16 +122,11 @@ export default function TimedRead({ story, reader, state, go, onAward }: Props) 
       <button className="btn btn-ghost" onClick={() => go({ name: 'home' })}>← Back</button>
       <section className="panel setup">
         <h2>One-minute timed read</h2>
-        <p>Read <strong>{story.title}</strong> aloud from the start for one minute. Read carefully and at a steady pace. Don't rush. If you get stuck on a word for a few seconds, the adult will tell you it and you carry on.</p>
-        <h3>How will the reading be checked?</h3>
-        <div className="choices" role="radiogroup">
-          <Choice on={method === 'adult'} onClick={() => setMethod('adult')} title="Adult marks it"
-            text="The adult sits alongside and taps any word read wrongly, skipped, or told to the reader. Afterwards they tap the last word read." />
-          <Choice on={method === 'speech'} disabled={!speechReady} onClick={() => setMethod('speech')} title="Speech check"
-            text={speechReady ? 'The microphone listens and marks the reading. The adult checks and corrects the marking afterwards.' : 'Not set up on this server yet (needs an Azure Speech key).'} />
-          <Choice on={method === 'demo'} onClick={() => setMethod('demo')} title="Demo"
-            text="Try the speech check with made-up data. Nothing is recorded." />
-        </div>
+        <p>Read <strong>{story.title}</strong> aloud from the start for one minute. Read carefully and at a steady pace. Don't rush. If you get stuck on a word, have a go and carry on.</p>
+        <p className="hint">{speechReady
+          ? 'The app listens and marks your reading automatically.'
+          : 'The speech check isn\'t set up on this server yet, so this read is marked with made-up demo data.'}</p>
+        {problem && <p className="problem">{problem}</p>}
         <button className="btn btn-orange btn-big" onClick={() => { setCount(3); setPhase('countdown'); }}>Start</button>
       </section>
     </div>
@@ -191,29 +184,10 @@ export default function TimedRead({ story, reader, state, go, onAward }: Props) 
   return (
     <div className="timed">
       <div className="timer-bar">
-        {phase === 'reading' ? (
-          <>
-            <div className="clock" aria-live="off">{remaining}</div>
-            <div className="progress"><div style={{ width: (elapsed / DURATION) * 100 + '%' }} /></div>
-            {method !== 'adult' && <span className="mic"><span className="mic-dot" /> Listening{heardCount ? ` · ${heardCount} words` : ''}</span>}
-            {method === 'adult' && <span className="hint">Adult: tap any word read wrongly</span>}
-            <button className="btn btn-ghost" onClick={finish}>Finish early</button>
-          </>
-        ) : (
-          <>
-            <div className="mark-help">
-              <strong>{markMode === 'last' ? 'Tap the last word read' : 'Tap words to mark or unmark errors'}</strong>
-              {speech && <span className="hint"> · Marking from {speech.provider}. Check it matches what you heard. Words with a dotted line were unclear; they are not counted as errors.</span>}
-            </div>
-            <div className="seg" role="group">
-              <button className={markMode === 'last' ? 'on' : ''} onClick={() => setMarkMode('last')}>Last word</button>
-              <button className={markMode === 'errors' ? 'on' : ''} onClick={() => setMarkMode('errors')}>Errors</button>
-            </div>
-            <button className="btn btn-orange" disabled={lastWord === null} onClick={showResults}>
-              {result ? `See result: ${result.wcpm} WCPM` : 'See result'}
-            </button>
-          </>
-        )}
+        <div className="clock" aria-live="off">{remaining}</div>
+        <div className="progress"><div style={{ width: (elapsed / DURATION) * 100 + '%' }} /></div>
+        <span className="mic"><span className="mic-dot" /> Listening{heardCount ? ` · ${heardCount} words` : ''}</span>
+        <button className="btn btn-ghost" onClick={finish}>Finish early</button>
       </div>
       {problem && <p className="problem">{problem}</p>}
       <section className="panel passage" aria-label="Reading passage">
@@ -226,20 +200,12 @@ export default function TimedRead({ story, reader, state, go, onAward }: Props) 
                 lastWord !== null && t.index > lastWord ? 'unread' : '',
                 t.index === lastWord ? 'last' : '',
               ].filter(Boolean).join(' ');
-              return <span key={t.index}><span className={cls} onClick={() => tapWord(t)}>{t.display}</span>{' '}</span>;
+              return <span key={t.index}><span className={cls} >{t.display}</span>{' '}</span>;
             })}
           </p>
         ))}
       </section>
     </div>
-  );
-}
-
-function Choice({ on, disabled, onClick, title, text }: { on: boolean; disabled?: boolean; onClick: () => void; title: string; text: string }) {
-  return (
-    <button role="radio" aria-checked={on} disabled={disabled} className={'choice' + (on ? ' on' : '')} onClick={onClick}>
-      <strong>{title}</strong><span>{text}</span>
-    </button>
   );
 }
 

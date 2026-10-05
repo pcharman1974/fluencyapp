@@ -3,6 +3,7 @@ import type { Story } from '../types';
 import type { Screen } from '../App';
 import { getAllReaderCodes, getAttempts, getEvents, getHolidays, setHolidays } from '../lib/storage';
 import DataLog from '../components/DataLog';
+import ServerData from '../components/ServerData';
 import { download, logRows, toCsv } from '../lib/dataLog';
 import { summarise, sortForTeacher, type PupilSummary, type Status } from '../lib/teacher';
 import { exampleClass } from '../lib/exampleData';
@@ -95,6 +96,7 @@ export default function Teacher({ story, go }: Props) {
         </div>
         <p className="hint">Tap a pupil for detail. "Failed checks" are pages where the app didn't hear most of the page read aloud; lots of these can mean a microphone problem, rushing, or not reading.</p>
       </section>
+      <ServerData />
     </div>
   );
 }

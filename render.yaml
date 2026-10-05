@@ -3,13 +3,17 @@ services:
   - type: web
     name: power-reader
     runtime: node
-    plan: free            # sleeps after ~15 min idle; first visit then takes up to a minute
+    # plan: not set here, so Render keeps the paid plan chosen in the dashboard (a disk needs a paid plan).
     region: frankfurt     # nearest Render region to the UK
     rootDir: app
     buildCommand: npm ci && npm run build
     startCommand: node server/index.js
     healthCheckPath: /healthz
     autoDeploy: true
+    disk:                 # test data and recordings (see app/server/qa.js); matches the disk added in the dashboard
+      name: qa-data
+      mountPath: /var/data
+      sizeGB: 1
     envVars:
       - key: APP_PASSWORD
         sync: false       # Render asks for this when you create the service

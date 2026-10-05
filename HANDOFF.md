@@ -72,8 +72,19 @@ The user has added ElevenLabs keys to this cloud environment: `ELEVENLABS_API_KE
 - **Orange buttons use deep navy text,** because white on the brand orange fails contrast.
 - **Reading text is in Nunito,** at the user's request.
 - **Speech-check "mispronounced" flags are shown for adults to check, not counted as errors.**
-  Adults review timed-read marking before it's saved.
+- **Timed reads are marked automatically** by the speech check (demo data if no Azure key). No adult
+  marking step (changed 5 Oct 2026 at the user's request; previously adults reviewed the marking).
 - **Pupils are identified by a reader code, never a name.**
+
+## Testing data store (5 Oct 2026)
+
+The whole app is currently a test version. When the site has a password and the Render disk is
+mounted at `/var/data`, every record (page reads, re-reads, warm-ups, timed reads, Power, badges) is
+also sent to the server, with a recording of each read and the words the speech check heard. Nothing
+is deleted automatically. Code: `app/server/qa.js`, `app/src/lib/qa.ts`, teacher panel
+`app/src/components/ServerData.tsx`. The home screen shows a "Test version" notice while it's on.
+Pupils are chosen from a list (this device plus the server) or added by code; choosing one loads
+their history from the server. **Before real pupils use it: DPIA, consent, retention policy.**
 
 ## Known limits and open items
 

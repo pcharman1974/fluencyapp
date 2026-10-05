@@ -6,6 +6,7 @@
 //
 // Set in .env (see .env.example) or the host's environment settings:
 //   AZURE_SPEECH_KEY, AZURE_SPEECH_REGION, APP_PASSWORD
+//   QA_DATA_DIR (optional): where test data and recordings go. Defaults to /var/data (Render disk) if present.
 
 import 'dotenv/config';
 import express from 'express';
@@ -13,6 +14,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import os from 'node:os';
 import crypto from 'node:crypto';
+import fs from 'node:fs';
+import { qaRoutes } from './qa.js';
 
 const app = express();
 const dir = path.dirname(fileURLToPath(import.meta.url));
@@ -50,11 +53,16 @@ app.get('/api/speech-token', async (_req, res) => {
   }
 });
 
+// Testing data store: every record and recording. On a public host, only when the site has a password.
+const qaRoot = process.env.QA_DATA_DIR || (fs.existsSync('/var/data') ? '/var/data' : path.join(dir, '..', '.qa-data'));
+const qa = qaRoutes(app, { root: qaRoot, enabled: Boolean(APP_PASSWORD) || !process.env.RENDER });
+
 app.use(express.static(path.join(dir, '..', 'dist')));
 app.listen(PORT, () => {
   const lan = Object.values(os.networkInterfaces()).flat().filter(i => i && i.family === 'IPv4' && !i.internal).map(i => i.address);
   console.log(`\nPower Reader is running.\n  On this computer:  http://localhost:${PORT}`);
   for (const ip of lan) console.log(`  On an iPad (same Wi-Fi):  http://${ip}:${PORT}`);
   console.log(`  Speech check: ${AZURE_SPEECH_KEY ? 'on' : 'off (no Azure key in .env)'}`);
+  console.log(`  Saving test data: ${qa.enabled ? `on (${qa.dir})` : 'off'}`);
   console.log(`  Password: ${APP_PASSWORD ? 'on' : 'off'}\n  Press Ctrl+C to stop.\n`);
 });
