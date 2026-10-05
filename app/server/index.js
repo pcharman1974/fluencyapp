@@ -8,6 +8,7 @@ import 'dotenv/config';
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import os from 'node:os';
 
 const app = express();
 const dir = path.dirname(fileURLToPath(import.meta.url));
@@ -32,4 +33,9 @@ app.get('/api/speech-token', async (_req, res) => {
 });
 
 app.use(express.static(path.join(dir, '..', 'dist')));
-app.listen(PORT, () => console.log(`Beyond the Code server on http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  const lan = Object.values(os.networkInterfaces()).flat().filter(i => i && i.family === 'IPv4' && !i.internal).map(i => i.address);
+  console.log(`\nPower Reader is running.\n  On this computer:  http://localhost:${PORT}`);
+  for (const ip of lan) console.log(`  On an iPad (same Wi-Fi):  http://${ip}:${PORT}`);
+  console.log(`  Speech check: ${AZURE_SPEECH_KEY ? 'on' : 'off (no Azure key in .env)'}\n  Press Ctrl+C to stop.\n`);
+});
