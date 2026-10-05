@@ -2,6 +2,7 @@
 import { alignHeard, scoreReading } from './scoring';
 import { tokenise } from './text';
 import type { SpeechResult } from './speech';
+import type { CheckDetail } from './rewards';
 
 // Starting thresholds for the prototype. To be tuned against adult judgements in trials.
 export const MIN_COVERAGE = 0.8;  // share of the page's words heard, in order
@@ -45,4 +46,10 @@ export function checkPage(text: string, result: SpeechResult, elapsedSec: number
     verified = false; message = 'There were long gaps in the reading. Try the page again.';
   }
   return { verified, coverage, accuracy: attempted ? correct / attempted : 0, wpm, wcpm, words: ref.length, durationSec: duration, misread, message };
+}
+
+/** The fields of a page check that are saved with each read, for checking later. */
+export function checkDetail(c: PageCheck, checkedBy = 'unknown'): CheckDetail {
+  return { coverage: c.coverage, accuracy: c.accuracy, words: c.words, durationSec: c.durationSec, wpm: c.wpm, wcpm: c.wcpm,
+    misread: c.misread, message: c.message, checkedBy };
 }

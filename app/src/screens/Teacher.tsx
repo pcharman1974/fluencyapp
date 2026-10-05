@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import type { Story } from '../types';
 import type { Screen } from '../App';
-import { getAllReaderCodes, getEvents, getHolidays, setHolidays } from '../lib/storage';
+import { getAllReaderCodes, getAttempts, getEvents, getHolidays, setHolidays } from '../lib/storage';
+import DataLog from '../components/DataLog';
+import { download, logRows, toCsv } from '../lib/dataLog';
 import { summarise, sortForTeacher, type PupilSummary, type Status } from '../lib/teacher';
 import { exampleClass } from '../lib/exampleData';
 import { weekKey, WEEKLY_TARGET, LEVELS, type ReadingEvent } from '../lib/rewards';
@@ -55,6 +57,8 @@ export default function Teacher({ story, go }: Props) {
         <div className="row wrap">
           <label className="check"><input type="checkbox" checked={showExamples} onChange={e => setShowExamples(e.target.checked)} /> Show example pupils</label>
           <label className="check"><input type="checkbox" checked={isHoliday} onChange={toggleHoliday} /> This week is a school holiday</label>
+          {real.length > 0 && <button className="link" onClick={() => download(`power-reader-all-${now.slice(0, 10)}.csv`,
+            toCsv(real.flatMap(code => logRows(getEvents(code), getAttempts(code)).map(row => ({ readerCode: code, row })))), 'text/csv')}>Download all data (QA, CSV)</button>}
         </div>
       </div>
       <section className="panel">
@@ -105,10 +109,15 @@ function ago(iso: string) {
 }
 
 function PupilDetail({ p, events, story, onBack }: { p: PupilSummary; events: ReadingEvent[]; story: Story; onBack: () => void }) {
+  const [log, setLog] = useState(false);
   const recent = events.filter(e => e.type === 'page' || e.type === 'reread' || e.type === 'timed').slice(-12).reverse();
   return (
     <div className="teacher">
-      <button className="btn btn-ghost" onClick={onBack}>← Class</button>
+      <div className="row wrap between">
+        <button className="btn btn-ghost" onClick={onBack}>← Class</button>
+        <button className={'btn ' + (log ? 'btn-navy' : 'btn-ghost')} aria-pressed={log} onClick={() => setLog(!log)}>Data log (QA)</button>
+      </div>
+      {log && <DataLog code={p.code} events={events} attempts={p.example ? [] : getAttempts(p.code)} example={p.example} />}
       <section className="panel">
         <div className="row wrap between">
           <h2>{p.code} {p.example && <span className="tag ex">Example</span>}</h2>

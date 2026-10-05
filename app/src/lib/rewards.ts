@@ -1,11 +1,17 @@
 // Power points, levels, weekly goal, week streak and badges.
 // Principle: reward reading practice and personal improvement, never raw speed against others.
 
+/** Everything a speech check measured, saved with each read for checking (QA). Older records may lack some fields. */
+export interface CheckDetail {
+  coverage: number; accuracy: number; words: number; durationSec: number; wpm: number; wcpm: number;
+  misread: string[]; message: string; checkedBy: string; // speech service id, e.g. 'azure' or 'demo'
+}
+
 export type ReadingEvent =
-  | { type: 'page'; date: string; storyId: string; page: number; verified: boolean; coverage: number; accuracy: number; words: number; durationSec: number; misread: string[]; wcpm?: number }
-  | { type: 'reread'; date: string; storyId: string; page: number; verified: boolean; wcpm: number }
+  | ({ type: 'page'; date: string; storyId: string; page: number; verified: boolean; coverage: number; accuracy: number; words: number; durationSec: number; misread: string[] } & Partial<CheckDetail>)
+  | ({ type: 'reread'; date: string; storyId: string; page: number; verified: boolean; wcpm: number } & Partial<CheckDetail>)
   | { type: 'timed'; date: string; storyId: string; wcpm: number; errorWords: string[] }
-  | { type: 'warmup'; date: string; word: string; correct: boolean }
+  | ({ type: 'warmup'; date: string; word: string; correct: boolean } & Partial<CheckDetail>)
   | { type: 'points'; date: string; amount: number; reason: string }
   | { type: 'badge'; date: string; id: BadgeId };
 

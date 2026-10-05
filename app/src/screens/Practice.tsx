@@ -6,7 +6,7 @@ import ReadAloud from '../components/ReadAloud';
 import type { SpeechProvider } from '../lib/speech';
 import type { Reader, RecordResult } from '../lib/useReader';
 import type { Award } from '../lib/rewards';
-import type { PageCheck } from '../lib/verify';
+import { checkDetail, type PageCheck } from '../lib/verify';
 
 interface Props {
   story: Story; base: string; startPage?: number; focusWords?: string[];
@@ -26,8 +26,7 @@ export default function Practice({ story, base, startPage = 1, focusWords, reade
   const onResult = (c: PageCheck) => {
     setCheck(c);
     if (!hasReader) return;
-    onAward(reader.record({ type: 'page', storyId: story.id, page: pageNo, verified: c.verified, coverage: c.coverage,
-      accuracy: c.accuracy, words: c.words, durationSec: c.durationSec, misread: c.misread, wcpm: c.wcpm }, { storyPages: story.pages.length }));
+    onAward(reader.record({ type: 'page', storyId: story.id, page: pageNo, verified: c.verified, ...checkDetail(c, provider?.id) }, { storyPages: story.pages.length }));
   };
 
   return (

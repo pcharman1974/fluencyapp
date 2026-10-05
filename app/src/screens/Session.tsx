@@ -10,7 +10,7 @@ import { GoalRing, Badge } from '../components/Rewards';
 import { bestReread, sessionsInWeek, trickyWords, type Award, type BadgeId } from '../lib/rewards';
 import type { SpeechProvider } from '../lib/speech';
 import type { Reader, RecordResult } from '../lib/useReader';
-import type { PageCheck } from '../lib/verify';
+import { checkDetail, type PageCheck } from '../lib/verify';
 import { canSpeak, speak } from '../lib/voice';
 import { normalise } from '../lib/text';
 import MicCheck from '../components/MicCheck';
@@ -115,7 +115,7 @@ function WarmUp({ storyBase, words, provider, reader, stepper, onAward, onDone, 
         <div className="row wrap centre-row">
           {(canSpeak() || recorded) && <button className="btn btn-ghost" onClick={() => recorded ? playWord(storyBase + recorded) : speak(normalise(word), { rate: 0.75 })}>Hear it</button>}
           <ReadAloud key={i + ':' + result} text={word} provider={provider} label="Say it" doneLabel="Done"
-            onResult={(c) => { const ok = c.accuracy === 1 && c.coverage === 1; setResult(ok); onAward(reader.record({ type: 'warmup', word, correct: ok })); }} />
+            onResult={(c) => { const ok = c.accuracy === 1 && c.coverage === 1; setResult(ok); onAward(reader.record({ type: 'warmup', word, correct: ok, ...checkDetail(c, provider?.id), message: ok ? '✓ Got it!' : 'Not quite. Press Hear it, then try again.' })); }} />
           <button className="btn btn-navy" onClick={next}>{i + 1 < words.length ? 'Next word →' : 'Start reading →'}</button>
         </div>
       </section>
@@ -143,8 +143,7 @@ function ReadPages({ story, base, pages, reader, provider, stepper, onAward, onP
           label={check && !check.verified ? 'Try again' : 'Read aloud'}
           onResult={c => {
             setCheck(c);
-            onAward(reader.record({ type: 'page', storyId: story.id, page: pageNo, verified: c.verified, coverage: c.coverage,
-              accuracy: c.accuracy, words: c.words, durationSec: c.durationSec, misread: c.misread, wcpm: c.wcpm }, { storyPages: story.pages.length }));
+            onAward(reader.record({ type: 'page', storyId: story.id, page: pageNo, verified: c.verified, ...checkDetail(c, provider?.id) }, { storyPages: story.pages.length }));
             if (c.verified) onPage(pageNo);
           }} />
         <button className="btn btn-navy" disabled={!check?.verified || recording}
@@ -191,7 +190,7 @@ function ReRead({ story, base, page: pageNo, reader, provider, stepper, onAward,
         <ReadAloud key={String(!!check)} text={page.text} provider={provider} onRecording={setRecording} label={check ? 'Try again' : 'Start'}
           onResult={c => {
             setCheck(c);
-            onAward(reader.record({ type: 'reread', storyId: story.id, page: pageNo, verified: c.verified, wcpm: c.wcpm }));
+            onAward(reader.record({ type: 'reread', storyId: story.id, page: pageNo, verified: c.verified, ...checkDetail(c, provider?.id) }));
           }} />
         <button className="btn btn-ghost" disabled={recording} onClick={onDone}>Skip</button>
       </>} />
