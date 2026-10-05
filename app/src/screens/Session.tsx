@@ -139,16 +139,17 @@ function ReadPages({ story, base, pages, reader, provider, stepper, onAward, onP
       modelFirst onListened={() => setHeard(pageNo)}
       title={`${page.heading} · page ${i + 1} of ${pages.length} today`}
       banner={<>{stepper}<CheckBanner check={check} demo={provider?.demo} /></>}
+      turnDone={!!check?.verified}
+      turn={<ReadAloud key={pageNo + ':' + (check ? 'r' : '')} text={page.text} provider={provider} onRecording={setRecording} qa={{ type: 'page', storyId: story.id, page: pageNo }}
+        label={check && !check.verified ? 'Try again' : 'Read aloud'}
+        onResult={c => {
+          setCheck(c);
+          onAward(reader.record({ type: 'page', storyId: story.id, page: pageNo, verified: c.verified, ...checkDetail(c, provider?.id) }, { storyPages: story.pages.length }));
+          if (c.verified) onPage(pageNo);
+        }} />}
       footer={<>
-        <span className="hint nav-hint">{listened ? 'Read it out loud, then tap "I\'ve finished".' : 'Listen first, then it\'s your turn.'}</span>
-        {!listened ? <button className="btn btn-orange btn-mic" disabled title="Listen to the page first"><span className="mic-icon" aria-hidden="true" />Read aloud</button> : <ReadAloud key={pageNo + ':' + (check ? 'r' : '')} text={page.text} provider={provider} onRecording={setRecording} qa={{ type: 'page', storyId: story.id, page: pageNo }}
-          label={check && !check.verified ? 'Try again' : 'Read aloud'}
-          onResult={c => {
-            setCheck(c);
-            onAward(reader.record({ type: 'page', storyId: story.id, page: pageNo, verified: c.verified, ...checkDetail(c, provider?.id) }, { storyPages: story.pages.length }));
-            if (c.verified) onPage(pageNo);
-          }} />}
-        <button className="btn btn-navy" disabled={!check?.verified || recording}
+        <span className="hint nav-hint">{check?.verified ? 'Well read! On to the next one.' : listened ? 'Read it out loud, then tap "I\'ve finished".' : 'Press ▶ Listen first, then it\'s your turn.'}</span>
+        <button className={'btn ' + (check?.verified ? 'btn-orange btn-big' : 'btn-navy')} disabled={!check?.verified || recording}
           onClick={() => { setCheck(null); lastOne ? onDone() : setI(i + 1); }}>
           {lastOne ? 'Your best reading →' : 'Next page →'}
         </button>

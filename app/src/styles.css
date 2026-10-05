@@ -522,3 +522,8 @@ main.full { max-width: none; padding: 0; }
 .reader-choice .reader-list { margin: 10px 0 0; }
 @media (max-width: 820px) { .reader-choices { grid-template-columns: 1fr; } }
 .code-input { width: 7.5em !important; font-size: 1.5rem !important; letter-spacing: .25em; text-align: center; font-variant-numeric: tabular-nums; }
+.two-steps .step-btn { margin-left: auto; min-height: 44px; padding: 8px 20px; font-size: 1.05rem; }
+.two-steps .step-btn.btn-orange { box-shadow: 0 3px #C25F1D; }
+.two-steps .step-turn { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.two-steps .step-turn .btn { min-height: 44px; padding: 8px 18px; font-size: 1.05rem; }
+@media (max-width: 820px) { .two-steps { flex-direction: column; } }

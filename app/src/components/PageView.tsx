@@ -29,10 +29,13 @@ interface Props {
   /** Model then do: the pupil hears the page first (session reading). onListened fires when the model reading finishes. */
   modelFirst?: boolean;
   onListened?: () => void;
+  /** Step 2's control (the Read aloud button) and whether the pupil's own reading is done. */
+  turn?: React.ReactNode;
+  turnDone?: boolean;
 }
 
 /** Full-screen page: slim tool bar, the page, and a footer the screen supplies. */
-export default function PageView({ story, base, pageNo, focusWords, recording, plain, onClose, title, banner, footer, modelFirst, onListened }: Props) {
+export default function PageView({ story, base, pageNo, focusWords, recording, plain, onClose, title, banner, footer, modelFirst, onListened, turn, turnDone }: Props) {
   const [size, setSize] = useState(loadPrefs().size);
   const [picture, setPicture] = useState(loadPrefs().picture);
   const [ruler, setRuler] = useState(false);
@@ -55,10 +58,10 @@ export default function PageView({ story, base, pageNo, focusWords, recording, p
   useEffect(() => { try { localStorage.setItem(PREFS, JSON.stringify({ size, picture, steady })); } catch { /* ignore */ } }, [size, picture, steady]);
   useEffect(() => () => stopAll(), []);
   useEffect(() => { stopAll(); setSpeaking(undefined); setPopup(null); setListened(false); setNudge(null); document.querySelector('.reader-scroll')?.scrollTo(0, 0); }, [pageNo]);
-  useEffect(() => { if (recording) { stopAll(); setSpeaking(undefined); setPopup(null); setNudge(null); setListened(false); } }, [recording]);
+  useEffect(() => { if (recording) { stopAll(); setSpeaking(undefined); setPopup(null); setNudge(null); if (!modelFirst) setListened(false); } }, [recording]);
 
   // No model reading available (no recording and no device voice): don't hold the pupil up.
-  useEffect(() => { if (modelFirst && audioLoaded && !recorded && !canSpeak()) onListened?.(); }, [modelFirst, audioLoaded, recorded, pageNo]);
+  useEffect(() => { if (modelFirst && audioLoaded && !recorded && !canSpeak()) { setListened(true); onListened?.(); } }, [modelFirst, audioLoaded, recorded, pageNo]);
 
   const wordStarts = useMemo(() => {
     const starts: number[] = []; const re = /\S+/g; let m;
@@ -106,10 +109,17 @@ export default function PageView({ story, base, pageNo, focusWords, recording, p
         </>}
       </div>
       {banner}
-      {modelFirst && !recording && (
+      {modelFirst && (
         <ol className="two-steps" aria-label="Listen, then read">
-          <li className={listened ? 'done' : 'on'}><b>1</b> {listened ? 'Listened ✓' : speaking !== undefined ? 'Listening… follow the words' : 'Press Listen and follow the words'}</li>
-          <li className={listened ? 'on' : ''}><b>2</b> {listened ? 'Your turn! Read it out loud' : 'Your turn to read it'}</li>
+          <li className={listened ? 'done' : 'on'}><b>1</b>
+            {listened ? 'Listened ✓'
+              : speaking !== undefined ? <>Listening… follow the words <button className="btn btn-ghost step-btn" onClick={listen}>Stop</button></>
+              : <>Listen and follow the words <button className="btn btn-orange step-btn" onClick={listen}><span aria-hidden="true">▶</span> Listen</button></>}
+          </li>
+          <li className={turnDone ? 'done' : listened ? 'on' : ''}><b>2</b>
+            {turnDone ? 'Read it ✓' : recording ? 'Reading… tap when you finish' : listened ? 'Your turn! Read it out loud' : 'Your turn to read it'}
+            {listened && !turnDone && turn && <span className="step-turn">{turn}</span>}
+          </li>
         </ol>
       )}
       {!modelFirst && nudge && !plain && !recording && (
