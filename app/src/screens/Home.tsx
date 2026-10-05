@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Story } from '../types';
 import type { Screen } from '../App';
+import { gerbil } from '../brand';
 
 interface Props { story: Story; base: string; reader: string; setReader: (c: string) => void; go: (s: Screen) => void }
 
@@ -9,8 +10,11 @@ export default function Home({ story, base, reader, setReader, go }: Props) {
   return (
     <div className="home">
       <section className="hero">
-        <h1>Read it. Practise it. Beat your best.</h1>
-        <p>Read the story page by page first. When you feel ready, try a one-minute timed read to see how many words you can read correctly.</p>
+        <div>
+          <h1>Read it. Practise it. Beat your best.</h1>
+          <p>Read the story page by page first. When you feel ready, try a one-minute timed read to see how many words you can read correctly.</p>
+        </div>
+        <img className="hero-mascot" src={gerbil} alt="" />
       </section>
 
       <section className="panel reader-panel">

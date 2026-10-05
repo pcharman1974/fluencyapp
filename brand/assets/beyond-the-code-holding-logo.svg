@@ -1,0 +1,7 @@
+<!-- HOLDING LOGO for Beyond the Code Power Reader. Replace with the designed logo. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 270 64" role="img" aria-label="Beyond the Code Power Reader">
+  <text x="2" y="17" font-family="Montserrat, Arial, sans-serif" font-weight="700" font-size="15" fill="#EE7E32" letter-spacing="0.5">Beyond the</text>
+  <text x="0" y="52" font-family="Montserrat, Arial, sans-serif" font-weight="800" font-size="40" fill="#0C5076" letter-spacing="-1">CODE</text>
+  <rect x="120" y="23" width="148" height="32" rx="16" fill="#EE7E32"/>
+  <text x="194" y="45" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-weight="800" font-size="15" fill="#041D2B" letter-spacing="1">POWER READER</text>
+</svg>

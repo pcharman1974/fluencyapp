@@ -3,7 +3,9 @@
 **App name:** Beyond the Code
 **Brand family:** Little Wandle Code (www.littlewandlecode.org.uk), the Key Stage 3 phonics intervention and assessment programme from Wandle Learning Trust, FFT Education and Collins.
 
-These values come from the live website on 5 Oct 2026, not from an official brand guide. Check them with the brand owner before release. The site credits **Communitas** for its branding and design, so they or the Little Wandle team should hold the master files.
+The Little Wandle Code logo and the gerbil character in `assets/` come from the website; FFT is a joint partner in Little Wandle Code. `beyond-the-code-holding-logo.svg` is a placeholder.
+
+The colour values come from the live website on 5 Oct 2026, not from an official brand guide. Check them with the brand owner before release. The site credits **Communitas** for its branding and design, so they or the Little Wandle team should hold the master files.
 
 ## Colours
 
@@ -21,8 +23,8 @@ White text on navy and black text on white are the main reading pairs. White on 
 
 ## Type
 
-- **Montserrat** (Google Fonts) for everything on the site: bold headings, medium-weight body text.
-- For the reading pages, test Montserrat against the font the current FFT reader uses before deciding. Readers who struggle need clear letter shapes and generous line spacing (the current reader's spacing works well).
+- **Montserrat** (Google Fonts): brand font for headings, buttons and labels, as on the website.
+- **Atkinson Hyperlegible Next** (Google Fonts): story text in the app. Designed by the Braille Institute so that easily confused characters (b/d, I/l/1, O/0) are clearly different. Plain enough not to look babyish to secondary pupils. Set large (default 28px on iPad) with 1.8 line spacing.
 
 ## Look and feel
 

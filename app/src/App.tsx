@@ -5,10 +5,11 @@ import Home from './screens/Home';
 import Practice from './screens/Practice';
 import TimedRead from './screens/TimedRead';
 import Progress from './screens/Progress';
+import { holdingLogo, lwcLogo } from './brand';
 
 export type Screen = { name: 'home' } | { name: 'practice'; page?: number; focusWords?: string[] } | { name: 'timed' } | { name: 'progress' };
 
-const STORY_URL = '/secret-stones/story.json';
+const STORY_URL = 'secret-stones/story.json'; // relative, so it works on any host
 
 export default function App() {
   const [story, setStory] = useState<Story | null>(null);
@@ -29,14 +30,19 @@ export default function App() {
 
   return (
     <div className="app">
-      <header className="topbar">
-        <button className="wordmark" onClick={() => go({ name: 'home' })} aria-label="Beyond the Code home">
-          <span className="wm-small">Little Wandle</span>
-          <span className="wm-big">Beyond the Code</span>
-        </button>
-        {reader && <span className="reader-chip">Reader {reader}</span>}
-      </header>
-      <main>
+      {/* Reading screens drop the header so the story gets the whole screen. */}
+      {(screen.name === 'home' || screen.name === 'progress') && (
+        <header className="topbar">
+          <button className="wordmark" onClick={() => go({ name: 'home' })} aria-label="Power Reader home">
+            <img src={holdingLogo} alt="Beyond the Code Power Reader" />
+          </button>
+          <div className="topbar-right">
+            {reader && <span className="reader-chip">Reader {reader}</span>}
+            <img className="partner-logo" src={lwcLogo} alt="Little Wandle Code" />
+          </div>
+        </header>
+      )}
+      <main className={screen.name === 'practice' || screen.name === 'timed' ? 'full' : ''}>
         {screen.name === 'home' && <Home story={story} base={base} reader={reader} setReader={updateReader} go={go} />}
         {screen.name === 'practice' && <Practice story={story} base={base} startPage={screen.page} focusWords={screen.focusWords} go={go} />}
         {screen.name === 'timed' && <TimedRead story={story} reader={reader} go={go} />}

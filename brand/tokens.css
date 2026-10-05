@@ -1,7 +1,7 @@
 /* Beyond the Code — brand tokens.
    Taken from www.littlewandlecode.org.uk (computed styles, 5 Oct 2026).
    Confirm against the official Little Wandle Code brand guidelines. */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;500;700&family=Montserrat:wght@500;600;700;800&display=swap');
 
 :root {
   /* Core palette */
@@ -16,7 +16,8 @@
   --lwc-text:        #000000; /* body copy */
 
   /* Typography */
-  --font-family: 'Montserrat', sans-serif;
+  --font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;            /* brand: headings, buttons */
+  --font-reading: 'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', Verdana, sans-serif; /* story text */
   --font-weight-body: 500;
   --font-weight-heading: 700;
 

@@ -8,7 +8,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host",
     "test": "vitest run",
-    "server": "node server/index.js"
+    "server": "node server/index.js",
+    "build:artifact": "tsc --noEmit && vite build --mode artifact && node scripts-artifact.mjs"
   },
   "dependencies": {
     "dotenv": "^18.0.5",
