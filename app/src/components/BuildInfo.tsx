@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { loadManifest, type AudioManifest } from '../lib/pageAudio';
+import { loadManifest, manifestProblem, type AudioManifest } from '../lib/pageAudio';
 
 const REPO = 'https://github.com/pcharman1974/fluencyapp';
 
@@ -11,7 +11,7 @@ export default function BuildInfo({ base }: { base: string }) {
   const built = new Date(b.builtAt).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   const voice = audio === undefined ? 'checking…'
     : audio ? `recorded${audio.provider ? ` (${audio.provider === 'elevenlabs' ? 'ElevenLabs' : audio.provider})` : ''}, ${Object.keys(audio.pages).length} pages`
-    : 'device voice (no recordings found)';
+    : `device voice (no recordings: ${manifestProblem || 'not found'})`;
   return (
     <p className="build-info">
       Version {b.commit

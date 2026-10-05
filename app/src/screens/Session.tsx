@@ -13,11 +13,12 @@ import type { Reader, RecordResult } from '../lib/useReader';
 import { checkDetail, type PageCheck } from '../lib/verify';
 import { canSpeak, speak } from '../lib/voice';
 import { normalise } from '../lib/text';
-import { loadManifest, playWord, type AudioManifest } from '../lib/pageAudio';
+import { loadManifest, playWord, preloadAudio, type AudioManifest } from '../lib/pageAudio';
 
 interface Props { story: Story; base: string; reader: Reader; provider: SpeechProvider | null; go: (s: Screen) => void; onAward: (a: RecordResult) => void }
 
 type Step = 'warmup' | 'read' | 'reread' | 'done';
+const SHORT: Record<Step, string> = { read: 'Read', reread: 'Best', warmup: 'Words', done: 'Done' };
 const PAGES_PER_SESSION = 3;
 
 /** Today's session: read pages aloud (listen first), your best reading of one page, then practise words. */
@@ -50,7 +51,8 @@ export default function Session({ story, base, reader, provider, go, onAward }: 
   ];
   const stepper = (<>
     <ol className="stepper" aria-label="Session steps">
-      {steps.map(s => <li key={s.id} className={s.id === step ? 'on' : steps.findIndex(x => x.id === s.id) < steps.findIndex(x => x.id === step) ? 'past' : ''}>{s.name}</li>)}
+      {steps.map(s => <li key={s.id} className={s.id === step ? 'on' : steps.findIndex(x => x.id === s.id) < steps.findIndex(x => x.id === step) ? 'past' : ''}>
+        <span className="long">{s.name}</span><span className="short" aria-hidden="true">{SHORT[s.id]}</span></li>)}
     </ol>
     <TodayBar events={reader.events} compact />
   </>);
@@ -101,6 +103,7 @@ function WarmUp({ storyBase, words, provider, reader, stepper, onAward, onDone, 
   const [audio, setAudio] = useState<AudioManifest | null>(null);
   useEffect(() => { loadManifest(storyBase).then(setAudio); }, []);
   const recorded = audio?.words[word.toLowerCase()];
+  useEffect(() => { if (recorded) preloadAudio(storyBase + recorded); }, [recorded]);
   const next = () => { setResult(null); i + 1 < words.length ? setI(i + 1) : onDone(); };
   return (
     <div className="timed">

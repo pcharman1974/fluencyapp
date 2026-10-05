@@ -3,12 +3,16 @@ import type { Story } from '../types';
 import ReadingText, { Ruler } from './ReadingText';
 import { canSpeak, speak, stopSpeaking } from '../lib/voice';
 import { normalise } from '../lib/text';
-import { loadManifest, playPage, playWord, stopAudio, type AudioManifest } from '../lib/pageAudio';
+import { loadManifest, manifestProblem, playPage, playWord, preloadAudio, stopAudio, type AudioManifest } from '../lib/pageAudio';
+import { sendRecords } from '../lib/qa';
+import { getReaderCode } from '../lib/storage';
 
 const SIZES = [22, 25, 28, 32, 36, 42];
 const PREFS = 'btc.practice.prefs.v1';
 function loadPrefs(): { size: number; picture: boolean; steady: boolean } {
-  const d = { size: 2, picture: true, steady: false };
+  // Phones start a size smaller; a size the pupil has chosen is kept.
+  const phone = typeof window !== 'undefined' && window.matchMedia?.('(max-width: 600px)').matches;
+  const d = { size: phone ? 1 : 2, picture: true, steady: false };
   try { return { ...d, ...JSON.parse(localStorage.getItem(PREFS) || '{}') }; } catch { return d; }
 }
 const STEADY_RATE = 0.85; // slower model reading; pitch is kept
@@ -67,6 +71,18 @@ export default function PageView({ story, base, pageNo, focusWords, recording, p
   // aloud, so they read them unprompted; back again once the page is done.
   const showVocab = !plain && !recording && !(modelFirst && listened && !turnDone);
 
+  // Get this page's recording (and its word clips) ready before Listen is pressed.
+  useEffect(() => {
+    if (!recorded) return;
+    preloadAudio(storyBase + recorded.file);
+  }, [recorded?.file]);
+
+  /** Tells the test server when a device falls back to its own voice, and why. */
+  const reportFallback = (reason: string) => sendRecords(getReaderCode(), { events: [{
+    type: 'diag', what: 'model-reading-fallback', reason, page: pageNo, date: new Date().toISOString(),
+    userAgent: navigator.userAgent,
+  }] });
+
   const wordStarts = useMemo(() => {
     const starts: number[] = []; const re = /\S+/g; let m;
     while ((m = re.exec(page.text))) starts.push(m.index);
@@ -80,10 +96,17 @@ export default function PageView({ story, base, pageNo, focusWords, recording, p
     setSpeaking(0);
     const id = ++playId.current;
     const done = () => { if (id !== playId.current) return; setSpeaking(undefined); setListened(true); setNudge('your-turn'); onListened?.(); };
+    const deviceVoice = () => speak(page.text, {
+      rate: steady ? 0.75 : 0.9,
+      onWord: c => { let i = 0; while (i + 1 < wordStarts.length && wordStarts[i + 1] <= c) i++; setSpeaking(i); },
+      onEnd: done,
+    });
     if (recorded) {
-      playPage(storyBase + recorded.file, recorded.words, { rate: steady ? STEADY_RATE : 1, onWord: setSpeaking, onEnd: done });
+      playPage(storyBase + recorded.file, recorded.words, { rate: steady ? STEADY_RATE : 1, onWord: setSpeaking, onEnd: done,
+        onFail: why => { if (id !== playId.current) return; reportFallback(`recording would not play: ${why}`); deviceVoice(); } });
       return;
     }
+    reportFallback(audioLoaded ? `no recordings list: ${manifestProblem || 'not found'}` : 'recordings list still loading');
     speak(page.text, {
       rate: steady ? 0.75 : 0.9,
       onWord: c => { let i = 0; while (i + 1 < wordStarts.length && wordStarts[i + 1] <= c) i++; setSpeaking(i); },
@@ -104,7 +127,7 @@ export default function PageView({ story, base, pageNo, focusWords, recording, p
         {<button className={'icon-btn wide' + (picture ? ' on' : '')} aria-pressed={picture} onClick={() => setPicture(!picture)}>Picture</button>}
         <button className={'icon-btn wide' + (ruler ? ' on' : '')} aria-pressed={ruler} onClick={() => setRuler(!ruler)}>Ruler</button>
         {(canSpeak() || recorded) && !plain && <>
-          <button className={'icon-btn wide' + (speaking !== undefined ? ' on' : '') + (modelFirst && !listened && speaking === undefined ? ' attention' : '')} disabled={recording} onClick={listen}
+          <button className={'icon-btn wide' + (speaking !== undefined ? ' on' : '') + (modelFirst ? ' top-listen' : '') + (modelFirst && !listened && speaking === undefined ? ' attention' : '')} disabled={recording} onClick={listen}
             title={recording ? 'Listen is off while you read aloud' : undefined}>
             {speaking !== undefined ? 'Stop' : 'Listen'}
           </button>
