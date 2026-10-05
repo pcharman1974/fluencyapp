@@ -16,6 +16,7 @@ import { useReader } from './lib/useReader';
 import { pickProvider, type SpeechProvider } from './lib/speech';
 import type { Award } from './lib/rewards';
 import { holdingLogo, lwcLogo } from './brand';
+import BuildInfo from './components/BuildInfo';
 
 export type Screen = { name: 'home' } | { name: 'practice'; page?: number; focusWords?: string[] } | { name: 'timed' } | { name: 'progress' } | { name: 'session' } | { name: 'teacher' };
 
@@ -61,7 +62,10 @@ export default function App() {
         </header>
       )}
       <main className={reader && micOk && ['practice', 'timed'].includes(screen.name) || (reader && screen.name === 'session') ? 'full' : ''}>
-        {(screen.name === 'home' || (!reader && screen.name !== 'teacher')) && <Home story={story} base={base} readerCode={reader} reader={state} setReader={updateReader} go={go} />}
+        {(screen.name === 'home' || (!reader && screen.name !== 'teacher')) && <>
+          <Home story={story} base={base} readerCode={reader} reader={state} setReader={updateReader} go={go} />
+          <BuildInfo base={base} />
+        </>}
         {reader && !micOk && (screen.name === 'practice' || screen.name === 'timed') && (
           <div className="timed"><MicCheck provider={provider} onDone={() => setMicOk(true)} onCancel={() => go({ name: 'home' })} /></div>
         )}

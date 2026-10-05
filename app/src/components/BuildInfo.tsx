@@ -1,0 +1,23 @@
+import { useEffect, useState } from 'react';
+import { loadManifest, type AudioManifest } from '../lib/pageAudio';
+
+const REPO = 'https://github.com/pcharman1974/fluencyapp';
+
+/** Footnote: which build this is, and whether the recorded model reading loaded. */
+export default function BuildInfo({ base }: { base: string }) {
+  const [audio, setAudio] = useState<AudioManifest | null | undefined>(undefined);
+  useEffect(() => { loadManifest(base).then(setAudio); }, [base]);
+  const b = __BUILD_INFO__;
+  const built = new Date(b.builtAt).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const voice = audio === undefined ? 'checking…'
+    : audio ? `recorded${audio.provider ? ` (${audio.provider === 'elevenlabs' ? 'ElevenLabs' : audio.provider})` : ''}, ${Object.keys(audio.pages).length} pages`
+    : 'device voice (no recordings found)';
+  return (
+    <p className="build-info">
+      Version {b.commit
+        ? <a href={`${REPO}/commit/${b.commit}`} target="_blank" rel="noreferrer">{b.commit}</a>
+        : 'unknown'}
+      {b.message && <> · {b.message}</>} · built {built} ({b.target}) · Model reading: {voice}
+    </p>
+  );
+}

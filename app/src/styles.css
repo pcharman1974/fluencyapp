@@ -23,6 +23,8 @@ main.full { max-width: none; padding: 0; }
 .centre-text { text-align: center; }
 .big-msg { font-size: 1.6rem; color: var(--lwc-navy); font-weight: 700; }
 .hint { color: #4A5B66; font-size: .95rem; }
+.build-info { color: #6B7A84; font-size: .8rem; text-align: center; margin: 24px 0 0; overflow-wrap: anywhere; }
+.build-info a { color: inherit; }
 .row { display: flex; gap: 12px; align-items: center; }
 .wrap { flex-wrap: wrap; margin-top: 20px; }
 
