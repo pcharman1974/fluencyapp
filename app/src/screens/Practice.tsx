@@ -27,7 +27,7 @@ export default function Practice({ story, base, startPage = 1, focusWords, reade
     setCheck(c);
     if (!hasReader) return;
     onAward(reader.record({ type: 'page', storyId: story.id, page: pageNo, verified: c.verified, coverage: c.coverage,
-      accuracy: c.accuracy, words: c.words, durationSec: c.durationSec, misread: c.misread }, { storyPages: story.pages.length }));
+      accuracy: c.accuracy, words: c.words, durationSec: c.durationSec, misread: c.misread, wcpm: c.wcpm }, { storyPages: story.pages.length }));
   };
 
   return (

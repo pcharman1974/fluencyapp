@@ -2,7 +2,7 @@
 // Principle: reward reading practice and personal improvement, never raw speed against others.
 
 export type ReadingEvent =
-  | { type: 'page'; date: string; storyId: string; page: number; verified: boolean; coverage: number; accuracy: number; words: number; durationSec: number; misread: string[] }
+  | { type: 'page'; date: string; storyId: string; page: number; verified: boolean; coverage: number; accuracy: number; words: number; durationSec: number; misread: string[]; wcpm?: number }
   | { type: 'reread'; date: string; storyId: string; page: number; verified: boolean; wcpm: number }
   | { type: 'timed'; date: string; storyId: string; wcpm: number; errorWords: string[] }
   | { type: 'warmup'; date: string; word: string; correct: boolean }

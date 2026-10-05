@@ -144,7 +144,7 @@ function ReadPages({ story, base, pages, reader, provider, stepper, onAward, onP
           onResult={c => {
             setCheck(c);
             onAward(reader.record({ type: 'page', storyId: story.id, page: pageNo, verified: c.verified, coverage: c.coverage,
-              accuracy: c.accuracy, words: c.words, durationSec: c.durationSec, misread: c.misread }, { storyPages: story.pages.length }));
+              accuracy: c.accuracy, words: c.words, durationSec: c.durationSec, misread: c.misread, wcpm: c.wcpm }, { storyPages: story.pages.length }));
             if (c.verified) onPage(pageNo);
           }} />
         <button className="btn btn-navy" disabled={!check?.verified || recording}

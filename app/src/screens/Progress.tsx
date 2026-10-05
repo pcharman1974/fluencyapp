@@ -6,6 +6,7 @@ import { Badge, WeekSummary } from '../components/Rewards';
 import { PowerPanel } from '../components/PowerCore';
 import StoryCards from '../components/StoryCards';
 import Gauge from '../components/Gauge';
+import { FluencyChart, PowerChart } from '../components/ProgressCharts';
 import type { Reader } from '../lib/useReader';
 
 interface Props { story: Story; base: string; readerCode: string; reader: Reader; go: (s: Screen) => void }
@@ -25,6 +26,17 @@ export default function Progress({ story, base, readerCode, reader, go }: Props)
         <div className="panel dash-week"><WeekSummary events={reader.events} holidays={reader.holidays} /></div>
       </section>
 
+      <section className="progress-charts">
+        <div className="panel">
+          <h2>Your reading speed</h2>
+          <FluencyChart events={reader.events} storyId={story.id} audience="pupil" />
+        </div>
+        <div className="panel">
+          <h2>Your Power</h2>
+          <PowerChart events={reader.events} audience="pupil" />
+        </div>
+      </section>
+
       <section className="panel">
         <h2>Badges <span className="count">{have.size}/{BADGES.length}</span></h2>
         <div className="badges">{BADGES.map(b => <Badge key={b.id} id={b.id} earned={have.has(b.id)} />)}</div>
@@ -42,7 +54,6 @@ export default function Progress({ story, base, readerCode, reader, go }: Props)
           <div className="fluency">
             <Gauge value={attempts.at(-1)!.wcpm} first={attempts.length > 1 ? attempts[0].wcpm : undefined} best={best} />
             <div className="fluency-detail">
-              <Chart values={attempts.map(a => a.wcpm)} />
               <table className="table">
                 <thead><tr><th>Date</th><th>WCPM</th><th>Accuracy</th><th>Checked by</th></tr></thead>
                 <tbody>
@@ -69,27 +80,5 @@ export default function Progress({ story, base, readerCode, reader, go }: Props)
         </section>
       )}
     </div>
-  );
-}
-
-function Chart({ values }: { values: number[] }) {
-  if (values.length < 2) return null;
-  const W = 600, H = 180, P = 28;
-  const max = Math.max(...values) * 1.15;
-  const x = (i: number) => P + (i * (W - 2 * P)) / (values.length - 1);
-  const y = (v: number) => H - P - (v / max) * (H - 2 * P);
-  const d = values.map((v, i) => `${i ? 'L' : 'M'}${x(i)},${y(v)}`).join(' ');
-  return (
-    <svg className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Words correct per minute over ${values.length} reads: ${values.join(', ')}`}>
-      <line x1={P} y1={H - P} x2={W - P} y2={H - P} className="axis" />
-      <path d={`${d} L${x(values.length - 1)},${H - P} L${x(0)},${H - P} Z`} className="area" />
-      <path d={d} className="line" />
-      {values.map((v, i) => (
-        <g key={i}>
-          <circle cx={x(i)} cy={y(v)} r={i === values.length - 1 ? 7 : 5} className="pt" />
-          <text x={x(i)} y={y(v) - 12} textAnchor="middle" className="pt-label">{v}</text>
-        </g>
-      ))}
-    </svg>
   );
 }

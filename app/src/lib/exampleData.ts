@@ -28,12 +28,20 @@ export function exampleClass(now = new Date()): { code: string; events: ReadingE
       for (let s = 0; s < n; s++) {
         const day = new Date(weekStart.getTime() + [0, 2, 4][s] * 864e5 + 3600e3 * (1 + s));
         if (day > now) continue;
+        // Fluency drifts up with practice: about `gain` WCPM per timed read so far.
+        const level = p.startWcpm + p.gain * timedCount;
         for (let k = 0; k < 3; k++) {
           const fail = rand() < p.failRate;
           raw.push({ type: 'page', date: new Date(day.getTime() + k * 120e3).toISOString(), storyId: 'secret-stones', page,
             verified: !fail, coverage: fail ? 0.3 + rand() * 0.4 : 0.9 + rand() * 0.1, accuracy: 0.85 + rand() * 0.15,
-            words: 75 + Math.round(rand() * 25), durationSec: 50 + rand() * 30, misread: rand() < 0.4 ? [WORDS[Math.floor(rand() * WORDS.length)]] : [] });
+            words: 75 + Math.round(rand() * 25), durationSec: 50 + rand() * 30, misread: rand() < 0.4 ? [WORDS[Math.floor(rand() * WORDS.length)]] : [],
+            wcpm: Math.round(level - 6 + rand() * 10) });
           if (!fail) page = page % 10 + 1;
+        }
+        // A "beat your best" re-read on the second session of the week: practised pages go faster.
+        if (s === 1) {
+          raw.push({ type: 'reread', date: new Date(day.getTime() + 420e3).toISOString(), storyId: 'secret-stones',
+            page: (page + 8) % 10 + 1, verified: rand() > p.failRate, wcpm: Math.round(level + 6 + rand() * 10) });
         }
         if (s === 0) {
           raw.push({ type: 'timed', date: new Date(day.getTime() + 600e3).toISOString(), storyId: 'secret-stones',

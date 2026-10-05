@@ -376,6 +376,46 @@ main.full { max-width: none; padding: 0; }
 .fluency-detail { min-width: 0; overflow-x: auto; }
 .chart .area { fill: rgba(238,126,50,.12); }
 
+/* Progress charts: reading speed (WCPM) and Power over time */
+.pc { display: flex; flex-direction: column; gap: 12px; }
+.pc-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.pc-stat { background: #F1F5F8; border-radius: 12px; padding: 12px 16px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pc-stat-label { color: #4A5B66; font-weight: 600; font-size: .9rem; }
+.pc-stat-value { font: 800 1.9rem var(--font-family); color: var(--lwc-navy-deep); line-height: 1.15; }
+.pc-stat-note { color: #4A5B66; font-size: .85rem; }
+.pc-stat-note.up { color: #15803D; font-weight: 700; }
+.pc-stat-note.down { color: #B91C1C; font-weight: 700; }
+.pc-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; list-style: none; margin: 4px 0 0; padding: 0; color: #33444F; font-size: .9rem; font-weight: 600; }
+.pc-legend li { display: inline-flex; align-items: center; gap: 6px; }
+.pc-plot { position: relative; width: 100%; min-width: 0; overflow: hidden; }
+.pc-plot svg { display: block; touch-action: pan-y; }
+.pc-plot svg:focus-visible { outline: 3px solid var(--lwc-orange); outline-offset: 2px; border-radius: 8px; }
+.pc-grid { stroke: #EEF2F5; stroke-width: 1; }
+.pc-base { stroke: #9AA8B1; stroke-width: 1; }
+.pc-axis { font: 600 12px var(--font-reading); fill: #4A5B66; font-variant-numeric: tabular-nums; }
+.pc-label { font: 800 13px var(--font-family); fill: var(--lwc-navy-deep); }
+.pc-cross { stroke: #9AA8B1; stroke-width: 1; }
+.pc-dot { stroke: #fff; stroke-width: 2; }
+.pc-level { stroke-width: 1.5; stroke-dasharray: 2 4; stroke-linecap: round; opacity: .9; }
+.pc-level.next { opacity: .55; }
+.pc-level-label { font: 700 11px var(--font-family); fill: #4A5B66; }
+.pc-tip { position: absolute; top: 8px; background: #fff; color: #33444F; border: 1px solid #C9D6DE; border-radius: 10px; padding: 8px 12px; font-size: .85rem; box-shadow: 0 6px 18px rgba(4,29,43,.15); pointer-events: none; white-space: nowrap; z-index: 2; }
+.pc-tip div { display: flex; align-items: center; gap: 6px; }
+.pc-tip b { color: var(--lwc-navy-deep); font-size: 1rem; }
+.pc-tip-date { font-weight: 700; color: var(--lwc-navy); margin-bottom: 2px; }
+.pc-key { flex-shrink: 0; }
+.pc-foot { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.pc-foot .hint { margin: 0; max-width: 60ch; }
+.pc-foot .link { white-space: nowrap; }
+.progress-charts { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin-bottom: 20px; }
+.progress-charts .panel { margin: 0; }
+@media (max-width: 1100px) { .progress-charts { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 600px) {
+  .pc-stats { grid-template-columns: 1fr 1fr; }
+  .pc-stat:first-child { grid-column: 1 / -1; }
+  .pc-foot { flex-direction: column; gap: 6px; }
+}
+
 /* Phones and portrait tablets */
 @media (max-width: 980px) {
   .dash { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
@@ -404,3 +444,4 @@ main.full { max-width: none; padding: 0; }
   .choices { grid-template-columns: 1fr; }
   .result-big { font-size: 4.5rem; }
 }
+.progress-charts h2, .progress-charts h3 { margin-top: 0; }

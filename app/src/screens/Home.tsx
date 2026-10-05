@@ -64,7 +64,7 @@ export default function Home({ story, base, readerCode, reader, setReader, go }:
             <div className="row wrap even">
               <button className="btn btn-ghost" onClick={() => go({ name: 'practice' })}>Practise any page</button>
               <button className="btn btn-navy" onClick={() => go({ name: 'timed' })}>Timed read</button>
-              <button className="btn btn-ghost" onClick={() => go({ name: 'progress' })}>Badges and cards</button>
+              <button className="btn btn-ghost" onClick={() => go({ name: 'progress' })}>My progress</button>
             </div>
           </div>
         </div>

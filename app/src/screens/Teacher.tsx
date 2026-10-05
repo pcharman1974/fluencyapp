@@ -6,6 +6,7 @@ import { summarise, sortForTeacher, type PupilSummary, type Status } from '../li
 import { exampleClass } from '../lib/exampleData';
 import { weekKey, WEEKLY_TARGET, LEVELS, type ReadingEvent } from '../lib/rewards';
 import { GoalRing } from '../components/Rewards';
+import { FluencyChart, PowerChart } from '../components/ProgressCharts';
 
 interface Props { story: Story; go: (s: Screen) => void }
 
@@ -104,7 +105,6 @@ function ago(iso: string) {
 }
 
 function PupilDetail({ p, events, story, onBack }: { p: PupilSummary; events: ReadingEvent[]; story: Story; onBack: () => void }) {
-  const timed = events.filter(e => e.type === 'timed') as Extract<ReadingEvent, { type: 'timed' }>[];
   const recent = events.filter(e => e.type === 'page' || e.type === 'reread' || e.type === 'timed').slice(-12).reverse();
   return (
     <div className="teacher">
@@ -122,10 +122,18 @@ function PupilDetail({ p, events, story, onBack }: { p: PupilSummary; events: Re
           </div>
         </div>
       </section>
+      <section className="progress-charts">
+        <div className="panel">
+          <h3>Reading speed (words correct per minute)</h3>
+          <FluencyChart events={events} storyId={story.id} audience="teacher" />
+        </div>
+        <div className="panel">
+          <h3>Power over time</h3>
+          <PowerChart events={events} audience="teacher" />
+        </div>
+      </section>
       <div className="t-cols">
         <section className="panel">
-          <h3>Timed reads (words correct per minute)</h3>
-          {timed.length ? <ul className="ledger">{[...timed].reverse().slice(0, 6).map(t => <li key={t.date}><span>{new Date(t.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span><b>{t.wcpm}</b></li>)}</ul> : <p className="hint">No timed reads yet.</p>}
           <h3>Words to work on</h3>
           {p.tricky.length ? <p className="word-list left">{p.tricky.map(w => <span key={w} className="chip">{w}</span>)}</p> : <p className="hint">None at the moment.</p>}
         </section>

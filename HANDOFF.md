@@ -24,6 +24,7 @@ correct per minute (WCPM). They earn Power points, levels, badges and story card
 | "Did they read it?" page check (thresholds) | `app/src/lib/verify.ts` |
 | Points, levels, weekly goal, streak, badges | `app/src/lib/rewards.ts` |
 | Teacher summary, example class | `app/src/lib/teacher.ts`, `app/src/lib/exampleData.ts` |
+| Progress charts (reading speed in WCPM, Power over time), pupil + teacher | `app/src/components/ProgressCharts.tsx`, `app/src/lib/progress.ts` |
 | Speech providers (Azure + demo) | `app/src/lib/speech/` |
 | Recorded model reading: playback | `app/src/lib/pageAudio.ts` |
 | Recorded model reading: generation | `app/scripts/generate-audio.mjs`, `app/scripts/audio-align.mjs` |
