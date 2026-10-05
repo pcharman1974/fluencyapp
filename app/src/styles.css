@@ -563,6 +563,10 @@ main.full { max-width: none; padding: 0; }
   .two-steps .step-btn, .two-steps .step-turn .btn { min-height: 38px; padding: 6px 14px; font-size: .95rem; }
   .reader-page { padding: 10px 14px; gap: 10px; }
   .reader-page .page-img { max-height: 20vh; }
+  /* Passage text about a third smaller on phones (6-7 words a line), at every A-/A+ size; the ruler matches. */
+  .reader-page .reading-text { font-size: calc(var(--reading-size, 28px) * .68); line-height: 1.7; word-spacing: .02em; }
+  .reader-page .ruler { height: calc(var(--reading-size, 28px) * .68 * 1.7); }
+  .reader-page { padding: 10px 12px; }
   .banner { padding: 6px 12px; font-size: .9rem; }
   .reader-nav { padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px)); }
 }

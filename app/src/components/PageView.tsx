@@ -10,9 +10,7 @@ import { getReaderCode } from '../lib/storage';
 const SIZES = [22, 25, 28, 32, 36, 42];
 const PREFS = 'btc.practice.prefs.v1';
 function loadPrefs(): { size: number; picture: boolean; steady: boolean } {
-  // Phones start a size smaller; a size the pupil has chosen is kept.
-  const phone = typeof window !== 'undefined' && window.matchMedia?.('(max-width: 600px)').matches;
-  const d = { size: phone ? 1 : 2, picture: true, steady: false };
+  const d = { size: 2, picture: true, steady: false }; // phones scale every size down in CSS
   try { return { ...d, ...JSON.parse(localStorage.getItem(PREFS) || '{}') }; } catch { return d; }
 }
 const STEADY_RATE = 0.85; // slower model reading; pitch is kept
