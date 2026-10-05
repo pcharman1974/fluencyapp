@@ -82,13 +82,28 @@ export function qaRoutes(app, { root, enabled }) {
     res.json({ ok: true });
   });
 
+  /** Claims a new reader number. Creating the file with 'wx' fails if it exists, so two devices can never both get it. */
+  app.post('/api/qa/readers', guard, express.json({ limit: '2kb' }), async (req, res) => {
+    const code = req.body?.code;
+    if (!READER.test(code || '')) return res.status(400).json({ error: 'Bad reader code' });
+    try {
+      await fsp.writeFile(path.join(evDir, `${code}.jsonl`), JSON.stringify({ kind: 'created', readerCode: code, date: new Date().toISOString() }) + '\n', { flag: 'wx' });
+      res.status(201).json({ ok: true });
+    } catch (e) {
+      if (e.code === 'EEXIST') return res.status(409).json({ error: 'taken' });
+      throw e;
+    }
+  });
+
   /** Every reader the server has records for, most recently active first. */
   app.get('/api/qa/readers', guard, async (_req, res) => {
     const out = [];
     for (const n of (await fsp.readdir(evDir)).filter(n => n.endsWith('.jsonl'))) {
       const lines = (await fsp.readFile(path.join(evDir, n), 'utf8')).split('\n').filter(Boolean);
-      let last; try { last = JSON.parse(lines.at(-1)).date; } catch { /* ignore */ }
-      out.push({ code: n.replace(/\.jsonl$/, ''), records: lines.length, lastActive: last });
+      // Last reading, not when the number was created.
+      let last;
+      for (let i = lines.length - 1; i >= 0 && !last; i--) { try { const r = JSON.parse(lines[i]); if (r.kind !== 'created') last = r.date; } catch { /* ignore */ } }
+      out.push({ code: n.replace(/\.jsonl$/, ''), records: lines.filter(l => !l.includes('"kind":"created"')).length, lastActive: last });
     }
     res.json(out.sort((a, b) => String(b.lastActive ?? '').localeCompare(String(a.lastActive ?? ''))));
   });

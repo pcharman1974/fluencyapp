@@ -88,8 +88,10 @@ The user has added ElevenLabs keys to this cloud environment: `ELEVENLABS_API_KE
   right first, an Expression score (Azure prosody, a guide) and words a minute last. A new personal
   best needs at least 95% of words right, and only accurate readings set the best.
 - **The app opens on "Who's reading?" every time** (decided 5 Oct 2026), for shared school devices:
-  "I've read before" (tap your code; the last reader is highlighted) or "I'm new" (type the code
-  from your teacher). Moving between screens doesn't ask again; "Change reader" does.
+  "I've read before" (tap your number; the last reader is highlighted) or "I'm new" (make up a
+  4-digit number). Numbers are unique: the server claims a new number atomically
+  (POST /api/qa/readers, 409 if taken), and a taken number is never opened from "I'm new".
+  Moving between screens doesn't ask again; "Change reader" does.
 - **The timed read is a bonus activity, always one minute** (decided 5 Oct 2026): +10 Power, counts
   towards the daily bar, offered at the end of a session and from the home screen. One fixed length
   keeps WCPM comparable over time.

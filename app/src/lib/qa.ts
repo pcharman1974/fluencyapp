@@ -72,3 +72,12 @@ export const listReaders = (): Promise<ServerReader[]> =>
   qaEnabled().then(on => (on ? fetch('api/qa/readers').then(r => (r.ok ? r.json() : [])) : [])).catch(() => []);
 export const fetchReader = (code: string): Promise<{ events: unknown[]; attempts: unknown[] }> =>
   fetch(`api/qa/records/${encodeURIComponent(code)}`).then(r => (r.ok ? r.json() : { events: [], attempts: [] }));
+
+/** Claims a new reader number on the server. 'taken' if someone already has it; 'offline' when there is no server to ask. */
+export async function claimReader(code: string): Promise<'ok' | 'taken' | 'offline'> {
+  if (!(await qaEnabled())) return 'offline';
+  try {
+    const r = await fetch('api/qa/readers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code }) });
+    return r.status === 409 ? 'taken' : r.ok ? 'ok' : 'offline';
+  } catch { return 'offline'; }
+}

@@ -6,7 +6,7 @@ import { WeekSummary } from '../components/Rewards';
 import { PowerPanel } from '../components/PowerCore';
 import Gauge from '../components/Gauge';
 import { getAllReaderCodes, getAttempts, getEvents, importRecords } from '../lib/storage';
-import { fetchReader, listReaders, type ServerReader } from '../lib/qa';
+import { claimReader, fetchReader, listReaders, type ServerReader } from '../lib/qa';
 import type { Attempt } from '../types';
 import type { ReadingEvent } from '../lib/rewards';
 import { cardsCollected } from '../components/StoryCards';
@@ -92,9 +92,15 @@ function ReaderPicker({ current, onPick, go }: { current: string; onPick: (code:
     }
     setBusy(''); onPick(c);
   };
-  const create = () => {
-    if (!code) return;
-    if (all.some(r => r.code === code)) { setNote(`${code} already exists, so we opened it.`); pick(code); return; }
+  // New readers make up a 4-digit number. A number already in use is never opened from here,
+  // so nobody lands in someone else's reading by accident.
+  const create = async () => {
+    if (!/^\d{4}$/.test(code) || busy) return;
+    if (all.some(r => r.code === code)) { setNote('That number is taken. Pick a different one.'); return; }
+    setBusy(code);
+    const claim = await claimReader(code); // the server makes it unique across every device
+    setBusy('');
+    if (claim === 'taken') { setNote('That number is taken. Pick a different one.'); return; }
     onPick(code);
   };
 
@@ -105,7 +111,7 @@ function ReaderPicker({ current, onPick, go }: { current: string; onPick: (code:
         <div className="reader-choice">
           <h3>I've read before</h3>
           {all.length > 0 ? <>
-            <p className="hint">Tap your reader code.</p>
+            <p className="hint">Tap your reader number.</p>
             <div className="reader-list">
               {all.map(r => (
                 <button key={r.code} className={'reader-pick' + (r.code === current ? ' on' : '')} disabled={!!busy} onClick={() => pick(r.code)}>
@@ -117,15 +123,15 @@ function ReaderPicker({ current, onPick, go }: { current: string; onPick: (code:
         </div>
         <div className="reader-choice new">
           <h3>I'm new</h3>
-          <label htmlFor="code" className="hint">Type the reader code your teacher gave you.</label>
+          <label htmlFor="code" className="hint">Make up a 4-digit number and remember it. It's your reader number.</label>
           <div className="row">
-            <input id="code" value={code} maxLength={12} autoComplete="off" placeholder="e.g. 7B-14"
-              onChange={e => { setNote(''); setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, '')); }}
+            <input id="code" value={code} maxLength={4} inputMode="numeric" pattern="[0-9]*" autoComplete="off" placeholder="1234"
+              className="code-input" aria-describedby="code-note"
+              onChange={e => { setNote(''); setCode(e.target.value.replace(/\D/g, '').slice(0, 4)); }}
               onKeyDown={e => e.key === 'Enter' && create()} />
-            <button className="btn btn-orange" disabled={!code || !!busy} onClick={create}>Start</button>
+            <button className="btn btn-orange" disabled={code.length !== 4 || !!busy} onClick={create}>Start</button>
           </div>
-          {note && <p className="hint">{note}</p>}
-          <p className="hint">Use a code, never your name.</p>
+          <p className="hint" id="code-note" role="status">{note || 'Only numbers. Don\'t use your birthday.'}</p>
         </div>
       </div>
       <p className="hint"><button className="link" onClick={() => go({ name: 'teacher' })}>Teacher view</button></p>
