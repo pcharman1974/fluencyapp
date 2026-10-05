@@ -4,14 +4,14 @@ import type { Screen } from '../App';
 import PageView from '../components/PageView';
 import ReadAloud from '../components/ReadAloud';
 import type { SpeechProvider } from '../lib/speech';
-import type { Reader } from '../lib/useReader';
+import type { Reader, RecordResult } from '../lib/useReader';
 import type { Award } from '../lib/rewards';
 import type { PageCheck } from '../lib/verify';
 
 interface Props {
   story: Story; base: string; startPage?: number; focusWords?: string[];
   reader: Reader; hasReader: boolean; provider: SpeechProvider | null;
-  go: (s: Screen) => void; onAward: (a: Award) => void;
+  go: (s: Screen) => void; onAward: (a: RecordResult) => void;
 }
 
 /** Free practice: any page, any order. Reading a page aloud earns points once it is checked. */

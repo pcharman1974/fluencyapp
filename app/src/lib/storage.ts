@@ -26,3 +26,9 @@ export const getEvents = (readerCode: string): ReadingEvent[] =>
 export const addEvents = (readerCode: string, events: ReadingEvent[]) =>
   write(KEY_EVENTS, [...read<Stored[]>(KEY_EVENTS, []), ...events.map(e => ({ ...e, readerCode }))]);
 export const getHolidays = () => read<string[]>(KEY_HOLIDAYS, []);
+export const setHolidays = (weeks: string[]) => write(KEY_HOLIDAYS, weeks);
+/** Every reader code that has used this device. */
+export const getAllReaderCodes = (): string[] => [...new Set([
+  ...read<Stored[]>(KEY_EVENTS, []).map(e => e.readerCode),
+  ...read<Attempt[]>(KEY_ATTEMPTS, []).map(a => a.readerCode),
+])].filter(Boolean).sort();

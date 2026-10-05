@@ -5,6 +5,8 @@ export interface StoryPage {
   imageAlt: string;
   text: string;
   highlightedWords: string[];
+  /** Harder words from this page, chosen by the content team, practised before reading it. */
+  warmupWords?: string[];
 }
 
 export interface Story {

@@ -9,14 +9,15 @@ import { CheckBanner } from './Practice';
 import { GoalRing, Badge } from '../components/Rewards';
 import { bestReread, sessionsInWeek, trickyWords, type Award, type BadgeId } from '../lib/rewards';
 import type { SpeechProvider } from '../lib/speech';
-import type { Reader } from '../lib/useReader';
+import type { Reader, RecordResult } from '../lib/useReader';
 import type { PageCheck } from '../lib/verify';
 import { canSpeak, speak } from '../lib/voice';
 import { normalise } from '../lib/text';
+import MicCheck from '../components/MicCheck';
 
-interface Props { story: Story; base: string; reader: Reader; provider: SpeechProvider | null; go: (s: Screen) => void; onAward: (a: Award) => void }
+interface Props { story: Story; base: string; reader: Reader; provider: SpeechProvider | null; go: (s: Screen) => void; onAward: (a: RecordResult) => void }
 
-type Step = 'warmup' | 'read' | 'reread' | 'done';
+type Step = 'mic' | 'warmup' | 'read' | 'reread' | 'done';
 const PAGES_PER_SESSION = 3;
 
 /** Today's session, about 10 minutes: warm-up words, read a section aloud, re-read one page to beat your best. */
@@ -25,19 +26,24 @@ export default function Session({ story, base, reader, provider, go, onAward }: 
     const got = cardsCollected(reader.events, story.id);
     const unread = story.pages.map(p => p.page).filter(p => !got.has(p));
     const pages = (unread.length ? unread : story.pages.map(p => p.page)).slice(0, PAGES_PER_SESSION);
-    return { words: trickyWords(reader.events), pages };
+    // Warm-up: 2 chosen words from today's pages, then 2 the pupil got wrong before.
+    const chosen = pages.flatMap(p => story.pages[p - 1].warmupWords ?? []).slice(0, 2);
+    const tricky = trickyWords(reader.events, 6).filter(w => !chosen.some(c => c.toLowerCase() === w.toLowerCase())).slice(0, 2);
+    const words = [...chosen.map(w => ({ word: w, why: "From today's pages" })), ...tricky.map(w => ({ word: w, why: 'Tricky last time' }))];
+    return { words, pages };
   }, []); // fixed for the session
-  const [step, setStep] = useState<Step>(plan.words.length ? 'warmup' : 'read');
+  const [step, setStep] = useState<Step>('mic');
   const earned = useRef<{ points: number; badges: BadgeId[]; pages: number[] }>({ points: 0, badges: [], pages: [] });
   const startedWeek = useRef(sessionsInWeek(reader.events, new Date().toISOString()));
 
-  const take = (a: Award) => {
+  const take = (a: RecordResult) => {
     earned.current.points += a.points.reduce((s, p) => s + p.amount, 0);
     earned.current.badges.push(...a.badges);
     onAward(a);
   };
 
   const steps: { id: Step; name: string }[] = [
+    { id: 'mic', name: 'Mic check' },
     ...(plan.words.length ? [{ id: 'warmup' as Step, name: 'Warm up' }] : []),
     { id: 'read', name: 'Read' }, { id: 'reread', name: 'Beat your best' }, { id: 'done', name: 'Done' },
   ];
@@ -47,6 +53,12 @@ export default function Session({ story, base, reader, provider, go, onAward }: 
     </ol>
   );
 
+  if (step === 'mic') return (
+    <div className="timed">
+      <div className="session-top"><button className="icon-btn" aria-label="Close" onClick={() => go({ name: 'home' })}>✕</button>{stepper}</div>
+      <MicCheck provider={provider} onDone={() => setStep(plan.words.length ? 'warmup' : 'read')} />
+    </div>
+  );
   if (step === 'warmup') return <WarmUp words={plan.words} provider={provider} reader={reader} stepper={stepper} onAward={take} onDone={() => setStep('read')} go={go} />;
   if (step === 'read') return <ReadPages story={story} base={base} pages={plan.pages} reader={reader} provider={provider} stepper={stepper}
     onAward={take} onPage={p => earned.current.pages.push(p)} onDone={() => setStep('reread')} go={go} />;
@@ -80,18 +92,19 @@ export default function Session({ story, base, reader, provider, go, onAward }: 
 }
 
 function WarmUp({ words, provider, reader, stepper, onAward, onDone, go }: {
-  words: string[]; provider: SpeechProvider | null; reader: Reader; stepper: React.ReactNode;
+  words: { word: string; why: string }[]; provider: SpeechProvider | null; reader: Reader; stepper: React.ReactNode;
   onAward: (a: Award) => void; onDone: () => void; go: (s: Screen) => void;
 }) {
   const [i, setI] = useState(0);
   const [result, setResult] = useState<boolean | null>(null);
-  const word = words[i];
+  const { word, why } = words[i];
   const next = () => { setResult(null); i + 1 < words.length ? setI(i + 1) : onDone(); };
   return (
     <div className="timed">
       <div className="session-top"><button className="icon-btn" aria-label="Close" onClick={() => go({ name: 'home' })}>✕</button>{stepper}</div>
       <section className="panel warmup">
-        <p className="hint">Warm-up word {i + 1} of {words.length}. These are words that were tricky last time.</p>
+        <p className="hint">Warm-up word {i + 1} of {words.length}</p>
+        <span className={'why ' + (why.startsWith('Tricky') ? 'tricky' : 'new')}>{why}</span>
         <p className="warm-word">{word}</p>
         {result !== null && <p className={'banner ' + (result ? 'ok' : 'retry')}>{result ? '✓ Got it!' : `Not quite. Press Hear it, then try again.`}</p>}
         <div className="row wrap centre-row">

@@ -2,7 +2,8 @@ import { useState } from 'react';
 import type { Story } from '../types';
 import type { Screen } from '../App';
 import { gerbil } from '../brand';
-import { LevelBar, WeekSummary } from '../components/Rewards';
+import { WeekSummary } from '../components/Rewards';
+import { PowerPanel } from '../components/PowerCore';
 import Gauge from '../components/Gauge';
 import { getAttempts } from '../lib/storage';
 import { cardsCollected } from '../components/StoryCards';
@@ -34,6 +35,7 @@ export default function Home({ story, base, readerCode, reader, setReader, go }:
           <button className="btn btn-orange" disabled={!code} onClick={() => { setReader(code); setEditing(false); }}>Start</button>
         </div>
         <p className="hint">Use the code your teacher gives you, not your name. Your progress is saved on this device only.</p>
+        <p className="hint"><button className="link" onClick={() => go({ name: 'teacher' })}>Teacher view</button></p>
       </section>
     </div>
   );
@@ -41,7 +43,7 @@ export default function Home({ story, base, readerCode, reader, setReader, go }:
   return (
     <div className="home">
       <section className="dash">
-        <div className="panel dash-level"><LevelBar events={reader.events} /></div>
+        <div className="panel dash-level power-card"><PowerPanel events={reader.events} /></div>
         <div className="panel dash-week"><WeekSummary events={reader.events} holidays={reader.holidays} /></div>
         <div className="panel dash-gauge">
           <h3>Fluency gauge</h3>
@@ -67,7 +69,7 @@ export default function Home({ story, base, readerCode, reader, setReader, go }:
           </div>
         </div>
       </section>
-      <p className="hint centre-text">Reader {readerCode} · <button className="link" onClick={() => setEditing(true)}>Change reader</button></p>
+      <p className="hint centre-text">Reader {readerCode} · <button className="link" onClick={() => setEditing(true)}>Change reader</button> · <button className="link" onClick={() => go({ name: 'teacher' })}>Teacher view</button></p>
     </div>
   );
 }

@@ -6,10 +6,10 @@ import { alignHeard, errorsFromAlignment, scoreReading } from '../lib/scoring';
 import { providers, type SpeechProvider, type SpeechResult } from '../lib/speech';
 import { saveAttempt, getAttempts } from '../lib/storage';
 import Gauge from '../components/Gauge';
-import type { Reader } from '../lib/useReader';
+import type { Reader, RecordResult } from '../lib/useReader';
 import type { Award } from '../lib/rewards';
 
-interface Props { story: Story; reader: string; state: Reader; go: (s: Screen) => void; onAward: (a: Award) => void }
+interface Props { story: Story; reader: string; state: Reader; go: (s: Screen) => void; onAward: (a: RecordResult) => void }
 
 type Phase = 'setup' | 'countdown' | 'reading' | 'analysing' | 'mark' | 'results';
 type Method = 'adult' | 'speech' | 'demo';

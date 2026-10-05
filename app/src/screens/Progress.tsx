@@ -2,7 +2,8 @@ import type { Story } from '../types';
 import type { Screen } from '../App';
 import { getAttempts } from '../lib/storage';
 import { BADGES, earnedBadges } from '../lib/rewards';
-import { Badge, LevelBar, WeekSummary } from '../components/Rewards';
+import { Badge, WeekSummary } from '../components/Rewards';
+import { PowerPanel } from '../components/PowerCore';
 import StoryCards from '../components/StoryCards';
 import Gauge from '../components/Gauge';
 import type { Reader } from '../lib/useReader';
@@ -20,7 +21,7 @@ export default function Progress({ story, base, readerCode, reader, go }: Props)
     <div className="progress-page">
       <button className="btn btn-ghost" onClick={() => go({ name: 'home' })}>← Home</button>
       <section className="dash">
-        <div className="panel dash-level"><LevelBar events={reader.events} /></div>
+        <div className="panel dash-level power-card"><PowerPanel events={reader.events} /></div>
         <div className="panel dash-week"><WeekSummary events={reader.events} holidays={reader.holidays} /></div>
       </section>
 

@@ -15,16 +15,18 @@ export const POINTS = {
 };
 export const WEEKLY_TARGET = 3; // sessions a week
 
+// Each level has its own colour: warm gold at the start, through orange, to deep navy at the top.
 export const LEVELS = [
-  { level: 1, name: 'Spark', min: 0 },
-  { level: 2, name: 'Charge', min: 100 },
-  { level: 3, name: 'Boost', min: 250 },
-  { level: 4, name: 'Surge', min: 500 },
-  { level: 5, name: 'Power', min: 800 },
-  { level: 6, name: 'Turbo', min: 1200 },
-  { level: 7, name: 'Lightning', min: 1700 },
-  { level: 8, name: 'Power Reader', min: 2300 },
+  { level: 1, name: 'Spark', min: 0, color: '#E8B33A' },
+  { level: 2, name: 'Charge', min: 100, color: '#E09A2E' },
+  { level: 3, name: 'Boost', min: 250, color: '#EE7E32' },
+  { level: 4, name: 'Surge', min: 500, color: '#E0612B' },
+  { level: 5, name: 'Power', min: 800, color: '#C2463A' },
+  { level: 6, name: 'Turbo', min: 1200, color: '#8E3A6E' },
+  { level: 7, name: 'Lightning', min: 1700, color: '#3D4F9A' },
+  { level: 8, name: 'Power Reader', min: 2300, color: '#0C5076' },
 ];
+export type Level = (typeof LEVELS)[number];
 
 export type BadgeId = 'first-page' | 'perfect-page' | 'story-finished' | 'personal-best' | 're-reader'
   | 'goal-week' | 'streak-3' | 'sessions-10' | 'word-fixer';

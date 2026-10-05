@@ -108,3 +108,37 @@ describe('checkPage', () => {
     expect(checkPage(text, { words: w, provider: 't' }, 15).misread).toEqual(['west']);
   });
 });
+
+import { summarise, sortForTeacher } from './teacher';
+import { exampleClass } from './exampleData';
+
+describe('teacher summary', () => {
+  const now = '2026-10-09T15:00:00'; // Friday
+  it('summarises a week of use', () => {
+    const ev = run([
+      page('2026-10-05T10:00:00', 1), page('2026-10-05T10:05:00', 2),
+      page('2026-10-07T10:00:00', 3, { verified: false }), page('2026-10-07T10:03:00', 3), page('2026-10-07T10:06:00', 4),
+    ]);
+    const s = summarise('7B-14', ev, now, []);
+    expect(s).toMatchObject({ sessionsThisWeek: 2, status: 'behind', pagesThisWeek: 4, checksThisWeek: 5, failedThisWeek: 1 });
+    expect(s.minutesThisWeek).toBe(3); // 4 pages x 50s
+    expect(s.weeks.at(-1)).toMatchObject({ week: '2026-10-05', sessions: 2 });
+  });
+  it('flags pupils who have not started or keep failing checks, and marks holiday weeks', () => {
+    expect(summarise('A', [], now, []).needsAttention).toBe(true);
+    expect(summarise('A', [], now, ['2026-10-05'])).toMatchObject({ status: 'holiday', needsAttention: false });
+    const fails = run([1, 2, 3, 4].map(p => page('2026-10-06T10:00:00', p, { verified: p > 2 })));
+    expect(summarise('B', fails, now, []).needsAttention).toBe(true);
+  });
+  it('sorts pupils needing attention first', () => {
+    const list = sortForTeacher([summarise('ON', run([1, 2, 3, 4, 5, 6].map(p => page(`2026-10-0${5 + (p % 3) * 2}T10:0${p}:00`, p))), now, []), summarise('NONE', [], now, [])]);
+    expect(list.map(s => s.code)).toEqual(['NONE', 'ON']);
+  });
+  it('builds a consistent example class', () => {
+    const c = exampleClass(new Date('2026-10-09T15:00:00'));
+    expect(c).toHaveLength(6);
+    const ex1 = summarise('EX-01', c[0].events, now, []);
+    expect(ex1.weeks.slice(0, 7).every(w => w.sessions === 3)).toBe(true);
+    expect(ex1.power).toBeGreaterThan(0);
+  });
+});
