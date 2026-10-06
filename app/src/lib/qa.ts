@@ -1,3 +1,4 @@
+import type { Profile } from './profile';
 // Testing data store (client side). While the app is a test version, every record saved on the
 // device is also sent to the server, with a recording of each read and what the speech check heard.
 // Switched on only when the server says so (it needs the site password and a disk); otherwise the
@@ -86,7 +87,7 @@ export const listRecordings = (): Promise<QaRecording[]> => fetch('api/qa/record
 export const listRecords = (): Promise<Record<string, Record<string, unknown>[]>> => fetch('api/qa/records').then(r => (r.ok ? r.json() : {}));
 export const deleteRecording = (id: string) => fetch(`api/qa/recordings/${id}`, { method: 'DELETE' });
 
-export interface ServerReader { code: string; records: number; lastActive?: string }
+export interface ServerReader { code: string; records: number; lastActive?: string; profile?: Profile }
 export const listReaders = (): Promise<ServerReader[]> =>
   qaEnabled().then(on => (on ? fetch('api/qa/readers').then(r => (r.ok ? r.json() : [])) : [])).catch(() => []);
 export const fetchReader = (code: string): Promise<{ events: unknown[]; attempts: unknown[] }> =>

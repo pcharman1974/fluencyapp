@@ -20,7 +20,8 @@ export type ReadingEvent =
   | { type: 'timed'; date: string; storyId: string; passageId?: string; wcpm: number; errorWords: string[]; seconds?: number }
   | ({ type: 'warmup'; date: string; word: string; correct: boolean } & Partial<CheckDetail>)
   | { type: 'points'; date: string; amount: number; reason: string }
-  | { type: 'badge'; date: string; id: BadgeId };
+  | { type: 'badge'; date: string; id: BadgeId }
+  | { type: 'profile'; date: string; avatar: string; colour: string; theme: string };
 
 export const POINTS = {
   perTenWords: 1, minPerPage: 2, reread: 5, personalBest: 10, timedRead: 10,

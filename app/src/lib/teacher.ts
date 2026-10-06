@@ -39,7 +39,7 @@ export function summarise(code: string, ev: ReadingEvent[], nowIso: string, holi
   const holiday = holidays.includes(wk);
   const status: Status = holiday ? 'holiday' : sessions >= WEEKLY_TARGET ? 'on-track' : sessions === 0 ? 'not-started' : 'behind';
   const pts = totalPoints(ev), lv = levelFor(pts);
-  const reading = ev.filter(e => e.type !== 'points' && e.type !== 'badge');
+  const reading = ev.filter(e => e.type !== 'points' && e.type !== 'badge' && e.type !== 'profile');
   const days = sessionDays(ev);
   const weeks: PupilSummary['weeks'] = [];
   let w = wk;

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { unlocksAt } from '../lib/profile';
 import { LEVELS, levelFor, totalPoints, type Level, type ReadingEvent } from '../lib/rewards';
 
 /** Lightning-bolt emblem used inside the core. Original shape. */
@@ -86,9 +87,24 @@ export function LevelUp({ level, onClose }: { level: Level | null; onClose: () =
         <p className="levelup-kicker">Level up!</p>
         <Core level={level} progress={0} size={240} />
         <p className="levelup-name">Level {level.level}: {level.name}</p>
+        <Unlocked level={level.level} />
         <p className="levelup-sub">{level.level < LEVELS.length ? `Next: ${LEVELS[level.level].name} at ${LEVELS[level.level].min} Power` : 'You have reached the top level.'}</p>
         <button className="btn btn-orange btn-big" onClick={onClose}>Keep reading</button>
       </div>
+    </div>
+  );
+}
+
+/** The avatars and background a level unlocks, so the pupil sees what their Power has bought. */
+function Unlocked({ level }: { level: number }) {
+  const u = unlocksAt(level);
+  if (!u.avatars.length && !u.themes.length) return null;
+  return (
+    <div className="levelup-unlocks">
+      <span>Unlocked:</span>
+      {u.avatars.map(a => <span key={a.id} className="unlock-item" title={a.label}><span aria-hidden="true">{a.emoji}</span> {a.label}</span>)}
+      {u.themes.map(t => <span key={t.id} className="unlock-item"><span className="look-swatch small" style={{ background: t.bg, borderColor: t.accent }} aria-hidden="true" /> {t.name} background</span>)}
+      <span className="hint-light">Tap your picture at the top to use them.</span>
     </div>
   );
 }

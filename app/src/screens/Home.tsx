@@ -13,6 +13,8 @@ import type { Attempt } from '../types';
 import type { ReadingEvent } from '../lib/rewards';
 import { cardsCollected } from '../components/StoryCards';
 import type { Reader } from '../lib/useReader';
+import { Avatar } from '../components/Avatar';
+import { profileOf } from '../lib/profile';
 
 interface Props { story: Story | null; base: string; readerCode: string; reader: Reader; setReader: (c: string) => void; go: (s: Screen) => void; picking: boolean; setPicking: (on: boolean) => void }
 
@@ -104,6 +106,7 @@ function MoreMenu({ readerCode, go, setPicking }: { readerCode: string; go: (s: 
       <p className="hint centre-text">Reader {readerCode} · <button className="link" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? 'Less' : 'More'}</button></p>
       {open && (
         <div className="row wrap centre-row more-items">
+          <button className="btn btn-ghost btn-small" onClick={() => go({ name: 'me' })}>My look and sounds</button>
           <button className="btn btn-ghost btn-small" onClick={() => setPicking(true)}>Change reader</button>
           <button className="btn btn-ghost btn-small" onClick={() => go({ name: 'practice' })}>Practise any page</button>
           <button className="btn btn-ghost btn-small" onClick={() => go({ name: 'miccheck' })}>Check microphone</button>
@@ -129,7 +132,10 @@ function ReaderPicker({ current, onPick, go }: { current: string; onPick: (code:
   useEffect(() => { listReaders().then(setServer); }, []);
   const local = getAllReaderCodes();
   const lastLocal = (c: string) => getEvents(c).at(-1)?.date;
-  const all = [...new Set([...server.map(r => r.code), ...local])].map(c => ({ code: c, last: server.find(r => r.code === c)?.lastActive ?? lastLocal(c) }))
+  const all = [...new Set([...server.map(r => r.code), ...local])].map(c => {
+    const sv = server.find(r => r.code === c);
+    return { code: c, last: sv?.lastActive ?? lastLocal(c), profile: sv?.profile ?? profileOf(getEvents(c)) };
+  })
     .sort((a, b) => String(b.last ?? '').localeCompare(String(a.last ?? '')) || a.code.localeCompare(b.code));
 
   const pick = async (c: string) => {
@@ -159,11 +165,11 @@ function ReaderPicker({ current, onPick, go }: { current: string; onPick: (code:
         <div className="reader-choice">
           <h3>I've read before</h3>
           {all.length > 0 ? <>
-            <p className="hint">Tap your reader number.</p>
+            <p className="hint">Find your picture and number.</p>
             <div className="reader-list">
               {all.map(r => (
                 <button key={r.code} className={'reader-pick' + (r.code === current ? ' on' : '')} disabled={!!busy} onClick={() => pick(r.code)}>
-                  <strong>{r.code}</strong><span>{busy === r.code ? 'Loading…' : r.code === current ? `last reader · ${ago(r.last) || 'no reading yet'}` : ago(r.last) || 'no reading yet'}</span>
+                  <Avatar profile={r.profile} size={44} /><span className="reader-pick-text"><strong>{r.code}</strong><span>{busy === r.code ? 'Loading…' : r.code === current ? `last reader · ${ago(r.last) || 'no reading yet'}` : ago(r.last) || 'no reading yet'}</span></span>
                 </button>
               ))}
             </div>

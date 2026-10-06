@@ -75,9 +75,9 @@ The user has added ElevenLabs keys to this cloud environment: `ELEVENLABS_API_KE
   holiday weeks are skipped. Constants in `app/src/lib/rewards.ts`.
 - **Session order: read first, then beat your best, then word practice at the end** (decided
   5 Oct 2026). A practice word must be tried once before moving on.
-- **Mic check is a one-off per device** (decided 5 Oct 2026), not part of each session. It runs
-  before the first reading on a device and can be re-run from "Check microphone" on the home
-  screen. Later it should move to first login.
+- **Mic check every time the app is opened** (changed 6 Oct 2026, replacing the one-off per device). It is
+  its own screen, straight after the pupil picks who's reading (and chooses a look, if new), before
+  the library or home. It isn't repeated for each story or session. "Check microphone" on home re-runs it.
 - **Model then do on every session page** (decided 5 Oct 2026): the pupil listens to the model reading
   (word highlighting on) and Read aloud unlocks only when it has played to the end; then they read
   the page alone, unaided. "Practise any page" keeps Listen optional with a gentle nudge. Grounded in
@@ -126,6 +126,9 @@ The user has added ElevenLabs keys to this cloud environment: `ELEVENLABS_API_KE
 - **Sessions are measured in words, not pages (decided 6 Oct 2026):** pages are kept exactly as supplied (about 50 to 170 words each). Each session takes the next unread pages up to about 240 words, never more than 20% over, with 1 to 5 pages (`lib/sessionPlan.ts`).
 - **Words and minutes counters (decided 6 Oct 2026):** total words read aloud and total minutes reading aloud, each with a ring gauge towards the next milestone. They appear on Home, on Progress (with a bar chart by week or month, words or minutes) and in the teacher's pupil detail; the teacher class table has total-words and total-time columns. Only accepted reading counts: page reads (words × share heard), best readings, timed reads (WCPM × time + errors) and correct practice words (1 each). Milestone badges (`lib/milestones.ts`): totals of 250 to 100,000 words and 30 minutes to 20 hours; a 1,000-word and a 20-minute week, and a 5,000-word and a 60-minute month, which can be earned again each week or month (shown as ×n). Thresholds are pitched at about 100 words a minute and 15 minutes a week. Pupils with earlier reading get any milestones they've already passed on their next accepted read.
 - **Remove pupil (decided 6 Oct 2026):** in Teacher view → a pupil → "Remove pupil". After a confirmation, this deletes all of that pupil's data: their server records file, every recording and its audio, their records on this device, and any of their uploads still waiting on this device. Nothing is kept, and the number becomes free to reuse (DELETE `/api/qa/readers/:code`). Copies on *other* devices that haven't been opened since aren't touched.
+- **Avatars and looks (decided 6 Oct 2026):** a new reader chooses a picture and colour before anything else; readers without one are asked on their next visit. The avatar shows on the "Who's reading?" list (also on other devices: the server's readers list returns each reader's latest look) and in the header, where tapping it opens the **Me** screen. Looks are `profile` events (`lib/profile.ts`, `components/Avatar.tsx`, `screens/Me.tsx`), so they travel with the pupil's records and don't count as reading.
+- **Power unlocks (decided 6 Oct 2026):** 8 pictures are free; about 2 more unlock at each level up to 8, plus a page background per level (Ocean at 2 … Lightning at 8). Locked items show "Level N". The level-up screen lists what was just unlocked; Me says what the next level brings.
+- **Celebrations (decided 6 Oct 2026):** confetti when today's bar fills, a badge is earned or the pupil levels up; a green tick for other Power. Sound is off by default; pupils can turn on a short chime on the Me screen (kept per device). Reduced-motion settings get a glow, no confetti (`components/Celebrate.tsx`).
 - **Audio replacements:** in `ttsReplacements`, a key starting with `=` replaces only that whole word (e.g. `"=east": "east."`).
 - **Azure:** errors that stop the speech service are saved with the recording (`speechProblem`). See `AZURE-CALIBRATION.md`.
 

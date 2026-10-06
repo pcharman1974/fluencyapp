@@ -5,7 +5,7 @@ import type { ReadingEvent } from './rewards';
 
 export interface PupilData { events: ReadingEvent[]; attempts: Attempt[] }
 
-const EVENT_TYPES = new Set(['page', 'reread', 'timed', 'warmup', 'points', 'badge', 'selfcheck']);
+const EVENT_TYPES = new Set(['page', 'reread', 'timed', 'warmup', 'points', 'badge', 'selfcheck', 'profile']);
 const SERVER_ONLY = new Set(['kind', 'receivedAt', 'batchId', 'readerCode']);
 
 /** Same record whichever copy it came from (server rows carry extra bookkeeping fields). */

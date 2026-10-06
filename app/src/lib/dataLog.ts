@@ -62,6 +62,8 @@ function eventRow(e: ReadingEvent): LogRow {
       return { date: e.date, kind: 'points', what: `+${e.amount}`, details: [e.reason], raw };
     case 'badge':
       return { date: e.date, kind: 'badge', what: badgeInfo(e.id, BADGES).name, details: [], raw };
+    case 'profile':
+      return { date: e.date, kind: 'points', what: 'Look changed', details: [`avatar ${e.avatar}`, `theme ${e.theme}`], raw };
   }
 }
 

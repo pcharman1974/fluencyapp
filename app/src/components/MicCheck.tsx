@@ -1,24 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import ReadAloud from './ReadAloud';
 import type { SpeechProvider } from '../lib/speech';
-import { dayKey } from '../lib/rewards';
 
-const KEY = 'btc.miccheck.v1';
 const PHRASE = 'I am ready to read.';
 
-/** One-off check per device (later: at first login). Re-run any time from the home screen. */
-export function micChecked(): boolean {
-  try { return Boolean(localStorage.getItem(KEY)); } catch { return false; }
-}
-function markChecked() {
-  try { localStorage.setItem(KEY, dayKey(new Date().toISOString())); } catch { /* ignore */ }
-}
-
 /**
- * Mic check before reading: 1) the microphone can be opened, 2) the level meter moves when the
+ * Mic check, every time the app is opened (its own screen, after choosing the reader). Rooms, devices and
+ * headsets change between lessons, so a check from last time proves little. Steps: 1) the microphone can be opened, 2) the level meter moves when the
  * pupil speaks, 3) the speech check hears a short sentence. Audio for the meter stays on the device.
  */
-export default function MicCheck({ provider, onDone, onCancel }: { provider: SpeechProvider | null; onDone: () => void; onCancel?: () => void }) {
+export default function MicCheck({ provider, onDone, onCancel, cancelLabel = 'Back' }: { provider: SpeechProvider | null; onDone: () => void; onCancel?: () => void; cancelLabel?: string }) {
   const [mic, setMic] = useState<'asking' | 'on' | 'blocked'>('asking');
   const [level, setLevel] = useState(0);
   const [heardVoice, setHeardVoice] = useState(false);
@@ -56,7 +47,7 @@ export default function MicCheck({ provider, onDone, onCancel }: { provider: Spe
   const demo = provider?.demo;
   const meterOk = mic === 'on' ? heardVoice : demo; // in demo with no microphone, skip the meter
   const ready = phrase === 'ok' && (meterOk || demo);
-  const finish = () => { markChecked(); onDone(); };
+  const finish = onDone;
 
   return (
     <section className="panel miccheck">
@@ -102,7 +93,7 @@ export default function MicCheck({ provider, onDone, onCancel }: { provider: Spe
 
       <div className="row wrap">
         <button className="btn btn-orange btn-big" disabled={!ready} onClick={finish}>{ready ? "Ready! Let's read →" : 'Finish the mic check to start'}</button>
-        {onCancel && <button className="btn btn-ghost" onClick={onCancel}>Back</button>}
+        {onCancel && <button className="btn btn-ghost" onClick={onCancel}>{cancelLabel}</button>}
       </div>
     </section>
   );

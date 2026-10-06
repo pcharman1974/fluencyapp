@@ -149,9 +149,16 @@ export function qaRoutes(app, { root, enabled }) {
     for (const n of (await fsp.readdir(evDir)).filter(n => n.endsWith('.jsonl'))) {
       const lines = (await fsp.readFile(path.join(evDir, n), 'utf8')).split('\n').filter(Boolean);
       // Last reading, not when the number was created.
-      let last;
-      for (let i = lines.length - 1; i >= 0 && !last; i--) { try { const r = JSON.parse(lines[i]); if (r.kind !== 'created') last = r.date; } catch { /* ignore */ } }
-      out.push({ code: n.replace(/\.jsonl$/, ''), records: lines.filter(l => !l.includes('"kind":"created"')).length, lastActive: last });
+      // and their latest avatar, so they can find themselves on any device.
+      let last, profile;
+      for (let i = lines.length - 1; i >= 0 && !(last && profile); i--) {
+        try {
+          const r = JSON.parse(lines[i]);
+          if (r.type === 'profile') profile ??= { avatar: r.avatar, colour: r.colour, theme: r.theme };
+          else if (r.kind !== 'created') last ??= r.date;
+        } catch { /* ignore */ }
+      }
+      out.push({ code: n.replace(/\.jsonl$/, ''), records: lines.filter(l => !l.includes('"kind":"created"')).length, lastActive: last, profile });
     }
     res.json(out.sort((a, b) => String(b.lastActive ?? '').localeCompare(String(a.lastActive ?? ''))));
   });
