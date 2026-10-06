@@ -101,7 +101,7 @@ export function TodayBar({ events, compact }: { events: ReadingEvent[]; compact?
         {Array.from({ length: DAILY_TARGET_MIN - 1 }, (_, i) => <span key={i} className="today-tick" style={{ left: ((i + 1) / DAILY_TARGET_MIN) * 100 + '%' }} />)}
       </div>
       {compact && <span className="today-label">{label}</span>}
-      {!compact && <span className="hint">{full ? `Keep going: +${POINTS.extraMinute} Power for every extra minute.` : `Only reading that passes the check counts. Filling the bar earns +${POINTS.dailyGoal} Power.`}</span>}
+      {!compact && <span className="hint">{full ? `Keep going: +${POINTS.extraMinute} Power for every extra minute.` : `Reading the app hears counts. A full bar earns +${POINTS.dailyGoal} Power.`}</span>}
     </div>
   );
 }

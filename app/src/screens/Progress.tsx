@@ -68,13 +68,13 @@ export default function Progress({ story, base, readerCode, reader, go }: Props)
       </section>
 
       <section className="panel">
-        <h2>Timed reads</h2>
+        <h2>1-minute reads</h2>
         {attempts.length === 0 ? <p>No timed reads yet.</p> : (
           <div className="fluency">
             <Gauge value={attempts.at(-1)!.wcpm} first={attempts.length > 1 ? attempts[0].wcpm : undefined} best={best} />
             <div className="fluency-detail">
               <table className="table">
-                <thead><tr><th>Date</th><th>WCPM</th><th>Accuracy</th><th>Checked by</th></tr></thead>
+                <thead><tr><th>Date</th><th>Words a minute</th><th>Words right</th><th>Checked by</th></tr></thead>
                 <tbody>
                   {[...attempts].reverse().slice(0, 6).map(a => (
                     <tr key={a.date}>
@@ -89,7 +89,7 @@ export default function Progress({ story, base, readerCode, reader, go }: Props)
             </div>
           </div>
         )}
-        <button className="btn btn-orange" onClick={() => go({ name: 'timed' })}>Do a timed read</button>
+        <button className="btn btn-orange" onClick={() => go({ name: 'timed' })}>Do a 1-minute read</button>
       </section>
 
       {recent.length > 0 && (

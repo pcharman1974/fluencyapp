@@ -121,7 +121,7 @@ describe('checkPage', () => {
   it('rejects half a page', () => {
     const c = checkPage(text, { words: all.slice(0, 10), provider: 't' }, 8);
     expect(c.verified).toBe(false);
-    expect(c.message).toMatch(/about 45%/);
+    expect(c.reason).toBe('part'); expect(c.message).toMatch(/only heard part/);
   });
   it('rejects silence and impossibly fast reading', () => {
     expect(checkPage(text, { words: [], provider: 't' }, 10).verified).toBe(false);

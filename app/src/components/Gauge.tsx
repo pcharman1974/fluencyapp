@@ -21,7 +21,7 @@ function arc(from: number, to: number, r: number) {
   return `M${x1} ${y1} A${r} ${r} 0 ${to - from > 180 ? 1 : 0} 1 ${x2} ${y2}`;
 }
 
-export default function Gauge({ value, first, best, max, label = 'words correct per minute', size = 'big' }: Props) {
+export default function Gauge({ value, first, best, max, label = 'words a minute', size = 'big' }: Props) {
   const top = max ?? Math.max(120, Math.ceil(Math.max(value, best ?? 0, first ?? 0) * 1.25 / 20) * 20);
   const ang = (v: number) => START + (Math.min(Math.max(v, 0), top) / top) * SWEEP;
   const ticks = Array.from({ length: 7 }, (_, i) => Math.round((top / 6) * i));

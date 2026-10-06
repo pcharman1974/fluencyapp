@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Story } from '../types';
 import ReadingText, { Ruler } from './ReadingText';
+import { SayIt } from './SayIt';
 import { canSpeak, speak, stopSpeaking } from '../lib/voice';
 import { normalise } from '../lib/text';
 import { loadManifest, manifestProblem, playPage, playWord, preloadAudio, stopAudio, type AudioManifest } from '../lib/pageAudio';
@@ -41,6 +42,7 @@ export default function PageView({ story, base, pageNo, focusWords, recording, p
   const [size, setSize] = useState(loadPrefs().size);
   const [picture, setPicture] = useState(loadPrefs().picture);
   const [ruler, setRuler] = useState(false);
+  const [tools, setTools] = useState(false);
   const [speaking, setSpeaking] = useState<number | undefined>();
   const [popup, setPopup] = useState<{ word: string; def?: string } | null>(null);
   const [steady, setSteady] = useState(loadPrefs().steady);
@@ -113,25 +115,30 @@ export default function PageView({ story, base, pageNo, focusWords, recording, p
   };
 
   const showPicture = picture && !!page.image;
+  const canListen = (canSpeak() || !!recorded) && !plain;
   return (
-    <div className="reader" style={{ ['--reading-size' as string]: SIZES[size] + 'px' }}>
+    <div className={'reader' + (recording ? ' is-recording' : '')} style={{ ['--reading-size' as string]: SIZES[size] + 'px' }}>
       <div className="reader-bar">
         <button className="icon-btn" aria-label="Close" onClick={onClose}>✕</button>
         <span className="reader-title">{title ?? page.heading}</span>
-        <div className="tool-group" role="group" aria-label="Text size">
-          <button className="icon-btn" aria-label="Smaller text" disabled={size === 0} onClick={() => setSize(size - 1)}>A−</button>
-          <button className="icon-btn" aria-label="Bigger text" disabled={size === SIZES.length - 1} onClick={() => setSize(size + 1)}>A+</button>
+        {/* On phones the reading tools fold away behind one button, so the page gets the screen. */}
+        <button className={'icon-btn wide tools-toggle' + (tools ? ' on' : '')} aria-expanded={tools} onClick={() => setTools(!tools)}>Aa Tools</button>
+        <div className={'tools' + (tools ? ' open' : '')}>
+          <div className="tool-group" role="group" aria-label="Text size">
+            <button className="icon-btn" aria-label="Smaller text" disabled={size === 0} onClick={() => setSize(size - 1)}>A−</button>
+            <button className="icon-btn" aria-label="Bigger text" disabled={size === SIZES.length - 1} onClick={() => setSize(size + 1)}>A+</button>
+          </div>
+          {page.image && <button className={'icon-btn wide' + (picture ? ' on' : '')} aria-pressed={picture} onClick={() => setPicture(!picture)}>Picture</button>}
+          <button className={'icon-btn wide' + (ruler ? ' on' : '')} aria-pressed={ruler} onClick={() => setRuler(!ruler)} title="A strip that keeps your place on the line">Line guide</button>
+          {canListen && <button className={'icon-btn wide speed' + (steady ? ' on' : '')} aria-pressed={steady} disabled={speaking !== undefined || recording}
+            onClick={() => setSteady(!steady)} title="How fast the reading you listen to goes">{steady ? 'Listen: slower' : 'Listen: normal'}</button>}
         </div>
-        {page.image && <button className={'icon-btn wide' + (picture ? ' on' : '')} aria-pressed={picture} onClick={() => setPicture(!picture)}>Picture</button>}
-        <button className={'icon-btn wide' + (ruler ? ' on' : '')} aria-pressed={ruler} onClick={() => setRuler(!ruler)}>Ruler</button>
-        {(canSpeak() || recorded) && !plain && <>
+        {canListen && (
           <button className={'icon-btn wide' + (speaking !== undefined ? ' on' : '') + (modelFirst ? ' top-listen' : '') + (modelFirst && !listened && speaking === undefined ? ' attention' : '')} disabled={recording} onClick={listen}
             title={recording ? 'Listen is off while you read aloud' : undefined}>
             {speaking !== undefined ? 'Stop' : 'Listen'}
           </button>
-          <button className={'icon-btn wide speed' + (steady ? ' on' : '')} aria-pressed={steady} disabled={speaking !== undefined || recording}
-            onClick={() => setSteady(!steady)} title="Listen speed">{steady ? 'Steady' : 'Normal'}</button>
-        </>}
+        )}
       </div>
       {banner}
       {modelFirst && (
@@ -139,10 +146,10 @@ export default function PageView({ story, base, pageNo, focusWords, recording, p
           <li className={listened ? 'done' : 'on'}><b>1</b>
             {listened ? 'Listened ✓'
               : speaking !== undefined ? <>Listening… follow the words <button className="btn btn-ghost step-btn" onClick={listen}>Stop</button></>
-              : <>Listen and follow the words <button className="btn btn-orange step-btn" onClick={listen}><span aria-hidden="true">▶</span> Listen</button></>}
+              : <>Listen and follow the words <SayIt id="step-listen" /> <button className="btn btn-orange step-btn" onClick={listen}><span aria-hidden="true">▶</span> Listen</button></>}
           </li>
           <li className={turnDone ? 'done' : listened ? 'on' : ''}><b>2</b>
-            {turnDone ? 'Read it ✓' : recording ? 'Reading… tap when you finish' : listened ? 'Your turn! Read it out loud' : 'Your turn to read it'}
+            {turnDone ? 'Read it ✓' : recording ? 'Reading… tap when you finish' : listened ? <>Your turn! Read it out loud <SayIt id="step-turn" /></> : 'Your turn to read it'}
             {listened && !turnDone && turn && <span className="step-turn">{turn}</span>}
           </li>
         </ol>

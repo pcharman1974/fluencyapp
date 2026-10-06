@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import type { Story } from '../types';
 import type { Screen } from '../App';
 import { gerbil } from '../brand';
-import { WeekSummary } from '../components/Rewards';
-import { PowerPanel } from '../components/PowerCore';
-import Gauge from '../components/Gauge';
-import { ReadingCounters } from '../components/ReadingCounters';
-import { getAllReaderCodes, getAttempts, getEvents, importRecords } from '../lib/storage';
+import { GoalRing, TodayBar } from '../components/Rewards';
+import { SayIt } from '../components/SayIt';
+import { formatMinutes, formatWords, totals } from '../lib/milestones';
+import { DAILY_TARGET_MIN, dayKey, levelFor, readingByDay, sessionsInWeek, totalPoints, WEEKLY_TARGET } from '../lib/rewards';
+import { Core } from '../components/PowerCore';
+import { getAllReaderCodes, getEvents, importRecords } from '../lib/storage';
 import { claimReader, fetchReader, listReaders, type ServerReader } from '../lib/qa';
 import type { Attempt } from '../types';
 import type { ReadingEvent } from '../lib/rewards';
@@ -16,9 +17,6 @@ import type { Reader } from '../lib/useReader';
 interface Props { story: Story | null; base: string; readerCode: string; reader: Reader; setReader: (c: string) => void; go: (s: Screen) => void; picking: boolean; setPicking: (on: boolean) => void }
 
 export default function Home({ story, base, readerCode, reader, setReader, go, picking, setPicking }: Props) {
-  // Timed reads use unseen passages, so the gauge follows every timed read, whichever story is on.
-  const attempts = readerCode ? getAttempts(readerCode) : [];
-  const latest = attempts.at(-1), first = attempts[0], best = attempts.reduce((m, a) => Math.max(m, a.wcpm), 0);
   const cards = story ? cardsCollected(reader.events, story.id).size : 0;
 
   if (picking || !readerCode || !story) return (
@@ -34,38 +32,84 @@ export default function Home({ story, base, readerCode, reader, setReader, go, p
     </div>
   );
 
-  return (
-    <div className="home">
-      <section className="dash">
-        <div className="panel dash-level power-card"><PowerPanel events={reader.events} /></div>
-        <div className="panel dash-week"><WeekSummary events={reader.events} holidays={reader.holidays} /></div>
-        <div className="panel dash-gauge">
-          <h3>Fluency gauge</h3>
-          {latest
-            ? <Gauge size="small" value={latest.wcpm} first={attempts.length > 1 ? first.wcpm : undefined} best={best} />
-            : <p className="hint">Do a timed read to see your fluency gauge.</p>}
-        </div>
-      </section>
-      <section className="panel dash-counters"><ReadingCounters events={reader.events} /></section>
+  // Today's bar decides the main button: carry on until it's full, then "read more" is optional.
+  const secs = readingByDay(reader.events).get(dayKey(new Date().toISOString())) ?? 0;
+  const full = secs >= DAILY_TARGET_MIN * 60;
+  const minsToGo = Math.max(1, Math.ceil((DAILY_TARGET_MIN * 60 - secs) / 60));
+  const t = totals(reader.events), lv = levelFor(totalPoints(reader.events));
+  const week = sessionsInWeek(reader.events, new Date().toISOString());
 
-      <section className="story-card panel">
-        {story.coverImage ? <img src={base + story.coverImage} alt="" /> : <div className="cover-placeholder" aria-hidden="true">{story.title}</div>}
-        <div className="story-card-body">
+  return (
+    <div className="home home2">
+      <section className="panel book-hero">
+        <button className="book-hero-cover" onClick={() => go({ name: 'session' })} aria-label={`Read ${story.title}`}>
+          {story.coverImage ? <img src={base + story.coverImage} alt="" /> : <div className="cover-placeholder" aria-hidden="true">{story.title}</div>}
+        </button>
+        <div className="book-hero-body">
+          <span className="book-hero-kicker">Your book</span>
           <h2>{story.title}</h2>
-          <p className="byline">Written by {story.author} · {cards}/{story.pages.length} story cards collected</p>
-          <div className="steps">
-            <button className="btn btn-orange btn-big" onClick={() => go({ name: 'session' })}>Start today's session</button>
-            <p className="hint centre-text">Listen and read today's pages (about 240 words), give your best reading, then practise a few words. About 5 to 10 minutes.</p>
-            <div className="row wrap even">
-              <button className="btn btn-ghost" onClick={() => go({ name: 'practice' })}>Practise any page</button>
-              <button className="btn btn-navy" onClick={() => go({ name: 'timed' })}>Bonus: timed read</button>
-              <button className="btn btn-ghost" onClick={() => go({ name: 'progress' })}>My progress</button>
-              <button className="btn btn-ghost" onClick={() => go({ name: 'library' })}>Change book</button>
-            </div>
+          <div className="book-progress-row">
+            <span className="book-progress" aria-hidden="true"><span style={{ width: `${(cards / story.pages.length) * 100}%` }} /></span>
+            <span className="hint">{cards} of {story.pages.length} pages read</span>
+          </div>
+          <TodayBar events={reader.events} compact />
+          <button className="btn btn-orange btn-huge" onClick={() => go({ name: 'session' })}>
+            {full ? 'Read some more' : cards === 0 ? 'Start reading' : 'Carry on reading'}
+          </button>
+          <p className="hint centre-text main-hint">
+            {full ? "Today's bar is full. Great reading!" : `About ${minsToGo} ${minsToGo === 1 ? 'minute' : 'minutes'} to fill today's bar.`}
+            <SayIt id={full ? 'home-full' : 'home-start'} />
+          </p>
+          <div className="row wrap centre-row small-actions">
+            <button className="btn btn-ghost btn-small" onClick={() => go({ name: 'timed' })}>Bonus: 1-minute read</button>
+            <button className="btn btn-ghost btn-small" onClick={() => go({ name: 'library' })}>Change book</button>
           </div>
         </div>
       </section>
-      <p className="hint centre-text">Reader {readerCode} · <button className="link" onClick={() => setPicking(true)}>Change reader</button> · <button className="link" onClick={() => go({ name: 'miccheck' })}>Check microphone</button> · <button className="link" onClick={() => go({ name: 'teacher' })}>Teacher view</button></p>
+
+      <section className="stat-tiles" aria-label="Your reading">
+        <button className="tile" onClick={() => go({ name: 'progress' })}>
+          <Core level={lv} progress={lv.progress} size={64} />
+          <span className="tile-main">Level {lv.level}</span>
+          <span className="tile-sub">{lv.name} · {totalPoints(reader.events)} Power</span>
+        </button>
+        <button className="tile" onClick={() => go({ name: 'progress' })}>
+          <GoalRing done={week} size={64} />
+          <span className="tile-main">{Math.min(week, WEEKLY_TARGET)} of {WEEKLY_TARGET} days</span>
+          <span className="tile-sub">this week</span>
+        </button>
+        <button className="tile" onClick={() => go({ name: 'progress' })}>
+          <span className="tile-icon words" aria-hidden="true">Aa</span>
+          <span className="tile-main">{formatWords(t.words)}</span>
+          <span className="tile-sub">words read</span>
+        </button>
+        <button className="tile" onClick={() => go({ name: 'progress' })}>
+          <span className="tile-icon minutes" aria-hidden="true">⏱</span>
+          <span className="tile-main">{formatMinutes(t.seconds)}</span>
+          <span className="tile-sub">reading aloud</span>
+        </button>
+      </section>
+      <div className="centre-row"><button className="btn btn-navy" onClick={() => go({ name: 'progress' })}>My progress and badges</button></div>
+
+      <MoreMenu readerCode={readerCode} go={go} setPicking={setPicking} />
+    </div>
+  );
+}
+
+/** Things a pupil rarely needs, kept out of the way. */
+function MoreMenu({ readerCode, go, setPicking }: { readerCode: string; go: (s: Screen) => void; setPicking: (on: boolean) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="more">
+      <p className="hint centre-text">Reader {readerCode} · <button className="link" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? 'Less' : 'More'}</button></p>
+      {open && (
+        <div className="row wrap centre-row more-items">
+          <button className="btn btn-ghost btn-small" onClick={() => setPicking(true)}>Change reader</button>
+          <button className="btn btn-ghost btn-small" onClick={() => go({ name: 'practice' })}>Practise any page</button>
+          <button className="btn btn-ghost btn-small" onClick={() => go({ name: 'miccheck' })}>Check microphone</button>
+          <button className="btn btn-ghost btn-small" onClick={() => go({ name: 'teacher' })}>Teacher view</button>
+        </div>
+      )}
     </div>
   );
 }

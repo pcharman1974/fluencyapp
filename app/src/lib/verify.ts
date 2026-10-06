@@ -19,6 +19,8 @@ export interface PageCheck {
   durationSec: number;
   misread: string[];  // words read wrongly or skipped, for warm-ups
   message: string;
+  /** Why a page wasn't accepted, for the spoken message: none heard, part heard, too fast, long gaps. */
+  reason?: 'none' | 'part' | 'fast' | 'gaps';
   /** Running record: every word of the text, marked as read, plus where extra words came. */
   record: RecordMark[];
 }
@@ -56,19 +58,22 @@ export function checkPage(text: string, result: SpeechResult, elapsedSec: number
   const wcpm = scoreReading(a.lastWordIndex, errors, duration).wcpm;
   const misread = [...new Set(a.words.filter(w => w.status !== 'correct').map(w => ref[w.refIndex].display.replace(/[^\p{L}\p{N}'’-]/gu, '')))].filter(Boolean);
 
-  let message = 'Page checked. Well read!';
+  // Short, friendly, and the same words as the recorded instructions (content/instructions/phrases.json).
+  let message = 'Well read!';
   let verified = true;
+  let reason: PageCheck['reason'];
   if (coverage < MIN_COVERAGE) {
     verified = false;
+    reason = attempted === 0 ? 'none' : 'part';
     message = attempted === 0
-      ? "We didn't hear any reading. Check the microphone and read the page aloud."
-      : `We heard about ${Math.round(coverage * 100)}% of the page. Read the whole page aloud to earn your points.`;
+      ? "I couldn't hear any reading. Check the microphone, then try again."
+      : 'I only heard part of the page. Read all of it out loud, a little louder, then try again.';
   } else if (wpm > MAX_WPM) {
-    verified = false; message = 'That was too fast to be reading aloud. Read it at your normal pace.';
+    verified = false; reason = 'fast'; message = 'That was too quick to be reading aloud. Read it at your normal speed.';
   } else if (wpm < MIN_WPM) {
-    verified = false; message = 'There were long gaps in the reading. Try the page again.';
+    verified = false; reason = 'gaps'; message = 'There were long gaps in the reading. Try the page again, nice and steady.';
   }
-  return { verified, coverage, accuracy: attempted ? correct / attempted : 0, wpm, wcpm, words: ref.length, durationSec: duration, misread, message, record: runningRecord(ref, a) };
+  return { verified, reason, coverage, accuracy: attempted ? correct / attempted : 0, wpm, wcpm, words: ref.length, durationSec: duration, misread, message, record: runningRecord(ref, a) };
 }
 
 /** The fields of a page check that are saved with each read, for checking later. */

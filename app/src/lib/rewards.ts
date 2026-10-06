@@ -32,7 +32,12 @@ export const POINTS = {
 /** A re-read only counts as a new personal best if it is this accurate: accuracy first, never rushing. */
 export const PB_ACCURACY = 0.95;
 // Regular and often: a few minutes most days beats one long go a week.
-export const DAILY_TARGET_MIN = 5;   // minutes of checked reading aloud that fill the day's bar
+/** Testers can shorten the daily target on one device (Teacher view → testing switch); pupils never see it. */
+export const TEST_TARGET_KEY = 'btc.test.dailyMinutes';
+function testTarget(): number | undefined {
+  try { const v = Number(globalThis.localStorage?.getItem(TEST_TARGET_KEY)); return v > 0 && v < 5 ? v : undefined; } catch { return undefined; }
+}
+export const DAILY_TARGET_MIN = testTarget() ?? 5;   // minutes of checked reading aloud that fill the day's bar
 export const MAX_EXTRA_MINUTES = 15; // extra-minute Power stops after this many, so it can't be farmed
 export const WEEKLY_TARGET = 3;      // days a week with the bar filled ("sessions")
 

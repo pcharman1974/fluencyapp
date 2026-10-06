@@ -19,6 +19,7 @@ interface Props {
 export default function ReadAloud({ text, provider, label = 'Read aloud', doneLabel = "I've finished", onRecording, onResult, qa }: Props) {
   const [state, setState] = useState<'idle' | 'recording' | 'checking'>('idle');
   const [secs, setSecs] = useState(0);
+  const [heardWords, setHeardWords] = useState(0);
   const [problem, setProblem] = useState('');
   const session = useRef<{ stop(): Promise<SpeechResult> } | null>(null);
   const started = useRef(0);
@@ -32,7 +33,8 @@ export default function ReadAloud({ text, provider, label = 'Read aloud', doneLa
     setProblem('');
     recorder.current = qa ? startRecording() : null;
     try {
-      session.current = await provider.start(text, undefined, { kind: 'page' });
+      setHeardWords(0);
+      session.current = await provider.start(text, setHeardWords, { kind: 'page' });
     } catch {
       recorder.current?.then(r => r?.cancel()); recorder.current = null;
       setProblem('The microphone could not start. Check it is allowed for this page.');
@@ -56,12 +58,17 @@ export default function ReadAloud({ text, provider, label = 'Read aloud', doneLa
     if (qa) sendRecording(getReaderCode(), qa, { check, heard: result.words.map(w => w.text).join(' '), provider: result.provider, speechProblem: result.problem, text }, audio);
   };
 
+  // Make it obvious the microphone is on: a pulsing mic, "I'm listening", and words heard so far.
   if (state === 'recording') return (
-    <button className="btn btn-rec" onClick={stop}>
-      <span className="mic-dot" aria-hidden="true" /> {doneLabel} <span className="rec-time">{secs}s</span>
-    </button>
+    <span className="rec-wrap">
+      <span className="listening" role="status">
+        <span className="mic-pulse" aria-hidden="true"><span className="mic-icon" /></span>
+        <span><span className="listening-title">I'm listening</span><span className="rec-sub">{heardWords > 0 ? `${heardWords} words heard` : 'Start reading out loud'} · {secs}s</span></span>
+      </span>
+      <button className="btn btn-rec btn-finish" onClick={stop}>{doneLabel}</button>
+    </span>
   );
-  if (state === 'checking') return <button className="btn btn-navy" disabled>Checking…</button>;
+  if (state === 'checking') return <button className="btn btn-navy" disabled>Checking your reading…</button>;
   return (
     <>
       <button className="btn btn-orange btn-mic" disabled={!provider} onClick={start}><span className="mic-icon" aria-hidden="true" />{label}</button>

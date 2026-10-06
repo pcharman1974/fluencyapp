@@ -647,3 +647,81 @@ main.full { max-width: none; padding: 0; }
 .badge.earned.milestone.minutes .badge-shield { fill: #7A5BC0; }
 .sub { display: block; color: #4A5B66; font-size: .78rem; font-weight: 600; }
 @media (max-width: 600px) { .rc-big { font-size: 1.4rem; } .rv-val { font-size: .62rem; } .rv-key { font-size: .6rem; } }
+
+/* ---------- Pupil usability pass (6 Oct 2026) ---------- */
+/* Speaker button that reads an instruction aloud */
+.say-it { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--lwc-navy); background: #fff; color: var(--lwc-navy); vertical-align: middle; flex-shrink: 0; padding: 0; margin-left: 4px; cursor: pointer; }
+.say-it svg { width: 18px; height: 18px; fill: currentColor; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+.say-it svg path:first-child { stroke: none; }
+.say-it.on { background: var(--lwc-navy); color: #fff; }
+
+/* Home: the book first, one big button */
+.home2 { display: flex; flex-direction: column; gap: 16px; }
+.book-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 24px; align-items: center; margin: 0; }
+.book-hero-cover { padding: 0; border: 0; background: none; border-radius: 14px; overflow: hidden; cursor: pointer; }
+.book-hero-cover img { width: 100%; display: block; aspect-ratio: 4 / 3; object-fit: cover; }
+.book-hero-cover .cover-placeholder { aspect-ratio: 4 / 3; min-height: 0; }
+.book-hero-body { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.book-hero-kicker { font-weight: 800; text-transform: uppercase; letter-spacing: .08em; font-size: .8rem; color: var(--lwc-orange); }
+.book-hero h2 { margin: 0; font-size: 1.7rem; line-height: 1.15; }
+.book-progress-row { display: flex; align-items: center; gap: 10px; }
+.book-progress-row .book-progress { flex: 1; height: 10px; background: #EAF1F5; border-radius: 99px; overflow: hidden; }
+.book-progress-row .book-progress span { display: block; height: 100%; background: var(--lwc-orange); }
+.book-progress-row .hint { white-space: nowrap; margin: 0; }
+.book-hero .today.compact { padding: 0; }
+.btn-huge { font-size: 1.45rem; min-height: 72px; padding: 16px 28px; width: 100%; box-shadow: 0 5px 0 #C25F1D; }
+.main-hint { margin: 0; display: flex; align-items: center; justify-content: center; gap: 4px; flex-wrap: wrap; }
+.btn-small { min-height: 40px; padding: 8px 16px; font-size: .95rem; }
+.small-actions { gap: 8px; }
+.stat-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.tile { background: #fff; border: 0; border-radius: 16px; padding: 14px 10px; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; box-shadow: 0 2px 0 rgba(12,80,118,.08); font: inherit; color: inherit; min-width: 0; }
+.tile:hover { box-shadow: 0 0 0 2px var(--lwc-navy); }
+.tile .goal-ring { width: 64px; height: 64px; }
+.tile-icon { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font: 800 1.4rem var(--font-family); color: #fff; }
+.tile-icon.words { background: #1D6FB0; }
+.tile-icon.minutes { background: #7A5BC0; font-size: 1.6rem; }
+.tile-main { font: 800 1.25rem var(--font-family); color: var(--lwc-navy-deep); margin-top: 4px; }
+.tile-sub { color: #4A5B66; font-size: .85rem; text-align: center; }
+.more-items { gap: 8px; margin-top: 4px; }
+.done-actions { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 8px; }
+.done-actions > .btn-big { min-width: min(100%, 360px); }
+
+/* Reading screen: tools fold away on phones */
+.tools { display: flex; align-items: center; gap: 8px; }
+.tools-toggle { display: none; }
+
+/* "I'm listening" while the microphone is on */
+.rec-wrap { display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.listening { display: inline-flex; align-items: center; gap: 10px; color: #7F1D1D; }
+.listening b { display: block; font-size: 1.05rem; }
+.rec-sub { display: block; font-size: .85rem; color: #4A5B66; font-weight: 600; }
+.mic-pulse { position: relative; width: 44px; height: 44px; border-radius: 50%; background: #B91C1C; display: inline-flex; align-items: center; justify-content: center; }
+.mic-pulse::before, .mic-pulse::after { content: ''; position: absolute; inset: 0; border-radius: 50%; border: 3px solid #B91C1C; animation: micpulse 1.6s ease-out infinite; }
+.mic-pulse::after { animation-delay: .8s; }
+.mic-pulse .mic-icon { filter: brightness(0) invert(1); }
+@keyframes micpulse { from { transform: scale(1); opacity: .7; } to { transform: scale(1.9); opacity: 0; } }
+.btn-finish { min-height: 56px; font-size: 1.15rem; padding: 12px 26px; }
+.reader.is-recording .reader-scroll { box-shadow: inset 0 0 0 4px rgba(185,28,28,.55); }
+@media (prefers-reduced-motion: reduce) { .mic-pulse::before, .mic-pulse::after { animation: none; } }
+
+@media (max-width: 760px) {
+  .book-hero { grid-template-columns: 1fr; gap: 14px; }
+  .book-hero-cover img, .book-hero-cover .cover-placeholder { aspect-ratio: 16 / 9; }
+  .stat-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .book-hero h2 { font-size: 1.35rem; }
+  .btn-huge { font-size: 1.25rem; min-height: 64px; }
+  .tools-toggle { display: inline-flex; }
+  .tools { display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 20; background: #fff; padding: 8px; gap: 6px; flex-wrap: wrap; border-bottom: 2px solid #E1E8EC; box-shadow: 0 6px 12px rgba(0,0,0,.08); }
+  .tools.open { display: flex; }
+  .reader-bar { position: relative; overflow: visible; }
+  .listening b { font-size: .95rem; }
+  .mic-pulse { width: 36px; height: 36px; }
+  .btn-finish { min-height: 48px; font-size: 1rem; }
+}
+.listening-title { display: block; font-weight: 800; font-size: 1.05rem; }
+.two-steps li { flex-wrap: wrap; }
+.two-steps .step-turn { margin-left: auto; }
+.two-steps .step-turn .rec-wrap { justify-content: flex-end; }
+@media (max-width: 600px) { .listening-title { font-size: .95rem; } .two-steps .step-turn { margin-left: 0; width: 100%; } .two-steps .step-turn .rec-wrap { justify-content: space-between; width: 100%; } }

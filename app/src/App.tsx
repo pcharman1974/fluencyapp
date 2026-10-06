@@ -22,7 +22,7 @@ import { TestNotice } from './components/ServerData';
 import Library from './screens/Library';
 import { STORIES, shelfStatus } from './lib/library';
 
-export type Screen = { name: 'home' } | { name: 'miccheck' } | { name: 'practice'; page?: number; focusWords?: string[] } | { name: 'timed' } | { name: 'progress' } | { name: 'session' } | { name: 'teacher' } | { name: 'library' };
+export type Screen = { name: 'home' } | { name: 'miccheck' } | { name: 'practice'; page?: number; focusWords?: string[] } | { name: 'timed' } | { name: 'progress' } | { name: 'session'; again?: number } | { name: 'teacher' } | { name: 'library' };
 
 export type { StoryInfo } from './lib/library';
 const storyKey = (reader: string) => `btc.story.${reader || 'none'}`;
@@ -61,7 +61,8 @@ export default function App() {
   // A reader with no book, or who has finished theirs, chooses one from the library before anything else.
   const info = STORIES.find(s => s.id === storyId);
   const needsBook = !!reader && !picking && (!info || shelfStatus(state.events, info).finished);
-  const choosing = needsBook && !['teacher', 'miccheck'].includes(screen.name);
+  // Not mid-session: a pupil who reads the last page still finishes the session first.
+  const choosing = needsBook && !['teacher', 'miccheck', 'session'].includes(screen.name);
   if (storyId && !story && !choosing && reader && !picking && screen.name !== 'teacher') return <div className="centre"><p>Loading…</p></div>;
 
   const updateReader = (c: string) => { setReader(c); setReaderCode(c); setPicking(false); setStoryId(savedStory(c)); };
@@ -102,7 +103,7 @@ export default function App() {
         )}
         {!choosing && story && reader && micOk && screen.name === 'practice' && <Practice story={story} base={base} startPage={screen.page} focusWords={screen.focusWords}
           reader={state} hasReader={!!reader} provider={provider} go={go} onAward={onAward} />}
-        {!choosing && story && reader && micOk && screen.name === 'session' && <Session story={story} base={base} reader={state} provider={provider} go={go} onAward={onAward} />}
+        {!choosing && story && reader && micOk && screen.name === 'session' && <Session key={screen.again ?? 0} story={story} base={base} reader={state} provider={provider} go={go} onAward={onAward} />}
         {!choosing && story && reader && micOk && screen.name === 'timed' && <TimedRead story={story} reader={reader} state={state} go={go} onAward={onAward} />}
         {screen.name === 'teacher' && <Teacher go={go} />}
         {!choosing && reader && screen.name === 'library' && <Library current={storyId} reader={state} choose={chooseStory} go={go} />}

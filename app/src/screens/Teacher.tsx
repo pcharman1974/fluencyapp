@@ -10,7 +10,7 @@ import ServerData from '../components/ServerData';
 import { download, logRows, toCsv } from '../lib/dataLog';
 import { summarise, sortForTeacher, type PupilSummary, type Status } from '../lib/teacher';
 import { exampleClass } from '../lib/exampleData';
-import { weekKey, WEEKLY_TARGET, LEVELS, type ReadingEvent } from '../lib/rewards';
+import { DAILY_TARGET_MIN, TEST_TARGET_KEY, weekKey, WEEKLY_TARGET, LEVELS, type ReadingEvent } from '../lib/rewards';
 import { GoalRing } from '../components/Rewards';
 import { FluencyChart, PowerChart } from '../components/ProgressCharts';
 import { ReadingCounters, ReadingVolumeChart } from '../components/ReadingCounters';
@@ -79,6 +79,11 @@ export default function Teacher({ go }: Props) {
         <div className="row wrap">
           <label className="check"><input type="checkbox" checked={showExamples} onChange={e => setShowExamples(e.target.checked)} /> Show example pupils</label>
           <label className="check"><input type="checkbox" checked={isHoliday} onChange={toggleHoliday} /> This week is a school holiday</label>
+          <label className="check" title="For testing only. Changes this device until switched off.">
+            <input type="checkbox" checked={DAILY_TARGET_MIN < 5} onChange={e => {
+              try { e.target.checked ? localStorage.setItem(TEST_TARGET_KEY, '1') : localStorage.removeItem(TEST_TARGET_KEY); } catch { /* ignore */ }
+              location.reload();
+            }} /> Testing: 1-minute daily bar on this device</label>
           {real.length > 0 && <button className="link" onClick={() => download(`power-reader-all-${now.slice(0, 10)}.csv`,
             toCsv(real.flatMap(code => logRows(classData[code].events, classData[code].attempts).map(row => ({ readerCode: code, row })))), 'text/csv')}>Download all data (QA, CSV)</button>}
         </div>

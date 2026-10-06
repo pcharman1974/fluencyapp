@@ -8,6 +8,7 @@ import { saveAttempt, getAttempts } from '../lib/storage';
 import { sendRecording, startRecording, type QaRecorder } from '../lib/qa';
 import { runningRecord, type RecordMark } from '../lib/verify';
 import { asStory, nextPassage } from '../lib/passages';
+import { SayIt } from '../components/SayIt';
 import Gauge from '../components/Gauge';
 import type { Reader, RecordResult } from '../lib/useReader';
 import { POINTS, type Award } from '../lib/rewards';
@@ -128,7 +129,7 @@ export default function TimedRead({ story, reader, state, go, onAward }: Props) 
     <div className="timed">
       <button className="btn btn-ghost" onClick={() => go({ name: 'home' })}>← Back</button>
       <section className="panel setup">
-        <h2>Bonus: one-minute timed read</h2>
+        <h2>Bonus: 1-minute read <SayIt id="timed" /></h2>
         <p>Read <strong>{passage.title}</strong> aloud from the start until the time is up. It's a new piece you haven't seen before. Read carefully and at a steady pace. Don't rush. If you get stuck on a word, have a go and carry on.</p>
         {passage.status === 'draft' && <p className="hint"><span className="tag">draft passage</span> Test text, still to be checked by the content team.</p>}
         <p className="hint">One minute. Earns +{POINTS.timedRead} Power and counts towards today's bar.</p>
@@ -151,7 +152,7 @@ export default function TimedRead({ story, reader, state, go, onAward }: Props) 
       <div className="timed">
         <section className="panel results">
           <Gauge value={result.wcpm} first={history[0]?.wcpm} best={Math.max(result.wcpm, ...history.map(h => h.wcpm))} />
-          {history.length > 0 && <p className="big-msg">{result.wcpm > Math.max(...history.map(h => h.wcpm)) ? 'New best timed read!' : result.wcpm > history[0].wcpm ? `${result.wcpm - history[0].wcpm} more than your first timed read` : 'Keep practising: your gauge will move up.'}</p>}
+          {history.length > 0 && <p className="big-msg">{result.wcpm > Math.max(...history.map(h => h.wcpm)) ? 'New best 1-minute read!' : result.wcpm > history[0].wcpm ? `${result.wcpm - history[0].wcpm} more than your first 1-minute read` : 'Keep practising: your gauge will move up.'}</p>}
           <div className="stats">
             <Stat label="Accuracy" value={Math.round(result.accuracy * 100) + '%'} />
             <Stat label="Words read" value={String(result.wordsRead)} />

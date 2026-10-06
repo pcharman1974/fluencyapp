@@ -1,0 +1,15 @@
+{
+  "home-start": "Tap the big orange button. Listen to each page first, then read it out loud yourself.",
+  "home-full": "Your reading bar is full for today. Brilliant! You can read some more, or come back tomorrow.",
+  "step-listen": "First, press Listen, and follow the words as you hear them.",
+  "step-turn": "Now it's your turn. Press Read aloud, read the page out loud, then press I've finished.",
+  "best": "Read this page all by yourself, like a storyteller. Smooth, like talking. Pause at full stops and commas. Make your voice match the meaning.",
+  "words": "Press Say it, then read the word out loud. Press Hear it if you want to hear it first.",
+  "retry-none": "I couldn't hear any reading. Check the microphone, then try again.",
+  "retry-part": "I only heard part of the page. Read all of it out loud, a little louder, then try again.",
+  "retry-fast": "That was too quick to be reading aloud. Read it at your normal speed.",
+  "retry-gaps": "There were long gaps in the reading. Try the page again, nice and steady.",
+  "library": "Choose a book to read. Tap a cover to start.",
+  "done-keep": "Well done! Keep reading to fill today's bar.",
+  "timed": "Read the passage out loud for one minute. Read carefully and steadily. If you get stuck on a word, have a go and carry on."
+}

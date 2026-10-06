@@ -92,7 +92,7 @@ export function FluencyChart({ events, storyId, audience }: { events: ReadingEve
   const [table, setTable] = useState(false);
   const pupil = audience === 'pupil';
   const names = {
-    timed: 'Timed reads',
+    timed: pupil ? '1-minute reads' : 'Timed reads',
     reread: pupil ? 'Your best readings' : 'Best readings (practised page)',
     page: pupil ? 'Page reads (average that day)' : 'Page reads (daily average)',
   };
@@ -100,7 +100,7 @@ export function FluencyChart({ events, storyId, audience }: { events: ReadingEve
   return (
     <div className="pc">
       <div className="pc-stats">
-        <Stat label={pupil ? 'Latest timed read' : 'Latest timed read (WCPM)'} value={s.latestTimed ?? '–'}
+        <Stat label={pupil ? 'Latest 1-minute read' : 'Latest timed read (WCPM)'} value={s.latestTimed ?? '–'}
           note={s.firstTimed !== undefined && s.latestTimed !== undefined && s.bestTimed !== undefined && days.filter(d => d.timed !== undefined).length > 1
             ? `${signed(s.latestTimed - s.firstTimed)} since ${pupil ? 'your' : 'the'} first` : pupil ? 'Do a timed read to start' : 'No timed reads yet'}
           up={s.firstTimed !== undefined && s.latestTimed !== undefined && days.filter(d => d.timed !== undefined).length > 1 ? s.latestTimed > s.firstTimed : undefined} />
@@ -120,7 +120,7 @@ export function FluencyChart({ events, storyId, audience }: { events: ReadingEve
         {table ? <FluencyTable days={days} names={names} /> : <FluencyPlot days={days} names={names} />}
         <div className="pc-foot">
           <p className="hint">{pupil
-            ? 'Words correct per minute: how many words you read correctly in one minute. Higher is better, and practising a page makes it go up.'
+            ? 'Words a minute: how many words you read right in one minute. Practising a page makes it go up.'
             : 'WCPM = words read correctly per minute. Timed reads are the fairest measure over time. Page reads are first reads of new pages; re-reads are practised pages, so they run higher.'}</p>
           <button className="link" onClick={() => setTable(!table)}>{table ? 'Show as graph' : 'Show as table'}</button>
         </div>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { SayIt } from '../components/SayIt';
 import type { Story } from '../types';
 import type { Screen } from '../App';
 import PageView from '../components/PageView';
@@ -54,7 +55,8 @@ export function CheckBanner({ check, demo, hasReader = true }: { check: PageChec
   return (
     <div className={'banner ' + (check.verified ? 'ok' : 'retry')} role="status">
       <strong>{check.verified ? '✓ ' : ''}{check.message}</strong>
-      {check.verified && <span> {Math.round(check.accuracy * 100)}% of words read correctly{check.misread.length ? `. Tricky: ${check.misread.slice(0, 4).join(', ')}` : ''}.</span>}
+      {!check.verified && check.reason && <SayIt id={`retry-${check.reason}`} />}
+      {check.verified && <span> {Math.round(check.accuracy * 100)}% of words right{check.misread.length ? `. Tricky: ${check.misread.slice(0, 3).join(', ')}` : ''}.</span>}
       {!hasReader && <span> Save a reader code on the home screen to collect points.</span>}
     </div>
   );

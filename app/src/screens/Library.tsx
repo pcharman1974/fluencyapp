@@ -1,6 +1,7 @@
 import type { Screen } from '../App';
 import type { Reader } from '../lib/useReader';
 import { shelfStatus, STORIES } from '../lib/library';
+import { SayIt } from '../components/SayIt';
 
 /** The shelf: every story, how far the pupil has got, and which they're reading now. They choose. */
 export default function Library({ current, reader, choose, go, required = false }: { current: string; reader: Reader; choose: (id: string) => void; go: (s: Screen) => void; required?: boolean }) {
@@ -14,7 +15,7 @@ export default function Library({ current, reader, choose, go, required = false 
         <h1>Library</h1>
         {!required && <button className="btn btn-ghost" onClick={() => go({ name: 'home' })}>← Back</button>}
       </div>
-      <p className="hint">{currentDone ? `You finished ${info!.title}. Well done! Choose your next book.`
+      <p className="hint"><SayIt id="library" /> {currentDone ? `You finished ${info!.title}. Well done! Choose your next book.`
         : !info ? 'Choose a book to read. Tap a cover to start.'
         : 'Choose a book to read. You can swap at any time, and you keep your place in every book.'}</p>
       <ul className="shelf">
