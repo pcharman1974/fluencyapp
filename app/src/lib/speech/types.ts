@@ -8,6 +8,8 @@ export interface SpeechResult {
   /** Extra scores the service reports (0-100), shown to the adult as a guide only. */
   scores?: { fluency?: number; prosody?: number; pronunciation?: number };
   provider: string;
+  /** Set when the service stopped with an error (network, expired token, quota), for the test log. */
+  problem?: string;
 }
 
 export interface SpeechSession {

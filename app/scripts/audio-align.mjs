@@ -75,7 +75,12 @@ export function groupToPageWords(spokenTimes, counts) {
 
 /** Page text -> text to speak, plus how many spoken words each page word became. */
 export function spokenVersion(text, replacements = {}) {
-  const words = text.split(/\s+/).filter(Boolean);
+  // Same words as the app's tokenise(): punctuation standing alone (a dash) joins the word before it.
+  const words = [];
+  for (const w of text.split(/\s+/).filter(Boolean)) {
+    if (!/[\p{L}\p{N}]/u.test(w) && words.length) words[words.length - 1] += ' ' + w;
+    else words.push(w);
+  }
   const spoken = words.map(w => {
     for (const [from, to] of Object.entries(replacements)) if (w.includes(from)) return w.replace(from, to);
     return w;

@@ -1,8 +1,8 @@
 export interface StoryPage {
   page: number;
   heading: string;
-  image: string;
-  imageAlt: string;
+  image?: string;   // optional until a story's pictures are supplied
+  imageAlt?: string;
   text: string;
   highlightedWords: string[];
   /** Harder words from this page, chosen by the content team, practised before reading it. */

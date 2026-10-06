@@ -53,7 +53,7 @@ export default function ReadAloud({ text, provider, label = 'Read aloud', doneLa
     setState('idle');
     const check = checkPage(text, result, elapsed);
     onResult(check, result, audio);
-    if (qa) sendRecording(getReaderCode(), qa, { check, heard: result.words.map(w => w.text).join(' '), provider: result.provider, text }, audio);
+    if (qa) sendRecording(getReaderCode(), qa, { check, heard: result.words.map(w => w.text).join(' '), provider: result.provider, speechProblem: result.problem, text }, audio);
   };
 
   if (state === 'recording') return (

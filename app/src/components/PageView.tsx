@@ -112,7 +112,7 @@ export default function PageView({ story, base, pageNo, focusWords, recording, p
     });
   };
 
-  const showPicture = picture;
+  const showPicture = picture && !!page.image;
   return (
     <div className="reader" style={{ ['--reading-size' as string]: SIZES[size] + 'px' }}>
       <div className="reader-bar">
@@ -122,7 +122,7 @@ export default function PageView({ story, base, pageNo, focusWords, recording, p
           <button className="icon-btn" aria-label="Smaller text" disabled={size === 0} onClick={() => setSize(size - 1)}>A−</button>
           <button className="icon-btn" aria-label="Bigger text" disabled={size === SIZES.length - 1} onClick={() => setSize(size + 1)}>A+</button>
         </div>
-        {<button className={'icon-btn wide' + (picture ? ' on' : '')} aria-pressed={picture} onClick={() => setPicture(!picture)}>Picture</button>}
+        {page.image && <button className={'icon-btn wide' + (picture ? ' on' : '')} aria-pressed={picture} onClick={() => setPicture(!picture)}>Picture</button>}
         <button className={'icon-btn wide' + (ruler ? ' on' : '')} aria-pressed={ruler} onClick={() => setRuler(!ruler)}>Ruler</button>
         {(canSpeak() || recorded) && !plain && <>
           <button className={'icon-btn wide' + (speaking !== undefined ? ' on' : '') + (modelFirst ? ' top-listen' : '') + (modelFirst && !listened && speaking === undefined ? ' attention' : '')} disabled={recording} onClick={listen}

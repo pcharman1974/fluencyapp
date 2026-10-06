@@ -591,3 +591,6 @@ main.full { max-width: none; padding: 0; }
 .review-table th, .review-table td { text-align: left; padding: 4px 10px 4px 0; border-bottom: 1px solid #E1E8EC; vertical-align: top; }
 .dl-reviewed { background: #E3F4E8; color: #14532D; border-radius: 99px; padding: 2px 10px; font-size: .8rem; font-weight: 800; }
 .passage-title { margin: 0 0 10px; color: var(--lwc-navy-deep); }
+.cover-placeholder { display: flex; align-items: center; justify-content: center; text-align: center; padding: 16px; background: linear-gradient(135deg, var(--lwc-navy), var(--lwc-navy-deep)); color: #fff; font-weight: 800; font-size: 1.3rem; border-radius: 12px; min-height: 160px; }
+.card-noimg { display: flex; align-items: center; justify-content: center; aspect-ratio: 4 / 3; background: #EAF1F5; color: var(--lwc-navy); font-weight: 800; font-size: 1.4rem; border-radius: 8px; }
+.story-switch select { font: inherit; padding: 6px 8px; border: 2px solid var(--lwc-navy); border-radius: 10px; margin-left: 6px; max-width: 100%; }

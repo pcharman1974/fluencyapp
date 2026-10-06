@@ -18,7 +18,10 @@ correct per minute (WCPM). They earn Power points, levels, badges and story card
 | Thing | Location |
 |---|---|
 | App (Vite + React + TypeScript) | `app/` |
-| Story content: text, images, glossary, warm-up words | `content/secret-stones/story.json` + `images/` |
+| Stories: text, images, glossary, warm-up words | `content/<story>/story.json` (+ `images/`, `audio/`). Three stories: `secret-stones`, `womens-football`, `inclusive-design`; list in `app/src/App.tsx` (`STORIES`) and `app/scripts-artifact.mjs` |
+| Unseen passages for the timed read (drafts) | `content/timed-passages/passages.json` |
+| Content still to be reviewed | `content/REVIEW-NOTES.md` |
+| Azure switch-on and calibration plan | `AZURE-CALIBRATION.md` |
 | Brand tokens (colours; fonts: Nunito for reading text, Montserrat for headings) | `brand/tokens.css`, `brand/BRAND.md`, `brand/assets/` |
 | Scoring and speech alignment | `app/src/lib/scoring.ts` |
 | "Did they read it?" page check (thresholds) | `app/src/lib/verify.ts` |
@@ -32,7 +35,7 @@ correct per minute (WCPM). They earn Power points, levels, badges and story card
 | Render deployment | `render.yaml` (Blueprint, rootDir `app`) |
 | Published prototype | https://claude.ai/artifact/9PjFyJ8ceKsDcm8t9mWS1H, built into `artifact/` |
 
-Commands, run in `app/`: `npm ci`, `npm test` (33 tests), `npm run build`, `npm start`,
+Commands, run in `app/`: `npm ci`, `npm test` (66 tests), `npm run build`, `npm start`,
 `npm run build:artifact`, `npm run audio -- --story secret-stones [--dry-run] [--provider azure]`.
 
 ## Immediate task: generate the model-reading audio
@@ -110,6 +113,16 @@ The user has added ElevenLabs keys to this cloud environment: `ELEVENLABS_API_KE
 - **Timed reads are marked automatically** by the speech check (demo data if no Azure key). No adult
   marking step (changed 5 Oct 2026 at the user's request; previously adults reviewed the marking).
 - **Pupils are identified by a reader code, never a name.**
+
+## Added 6 Oct 2026
+
+- **Spoken forms:** numbers, years ("twenty twenty two"), money ("six hundred pounds"), letters (FA, WFA, USA), F.C., approx., COVID-19 and hyphenated words are matched to the printed text (`lib/spoken.ts`). A dash standing on its own is joined to the word before it (`lib/text.ts` and `scripts/audio-align.mjs`, which must stay in step). Tests read every page of every story as Azure would write it down and expect 100%.
+- **Upload outbox:** test data waits in IndexedDB until the server confirms it (`lib/outbox.ts`); the server ignores repeats (batchId / clientId).
+- **Teacher view across devices:** the class dashboard combines the server's records with this device's (`lib/classData.ts`).
+- **Marking review:** in Teacher view → Saved on the server, an adult listens to a recording and taps the words read wrong, blind to the app's marks; the panel totals agreement, right words marked wrong, errors missed and page decisions (`components/ReviewMarking.tsx`, `lib/review.ts`, PUT `/api/qa/recordings/:id/review`).
+- **Timed read uses unseen passages** (`lib/passages.ts`): the first the pupil hasn't read, then the one read longest ago. The gauge uses every timed read, whichever story is on.
+- **More than one story:** the home screen has a Story picker; each reader's choice is remembered on the device. Pages without a picture hide the Picture button.
+- **Azure:** errors that stop the speech service are saved with the recording (`speechProblem`). See `AZURE-CALIBRATION.md`.
 
 ## Testing data store (5 Oct 2026)
 

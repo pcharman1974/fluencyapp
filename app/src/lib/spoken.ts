@@ -27,6 +27,7 @@ export function sayNumber(n: number): string[] {
     // 1500 -> "fifteen hundred"; years: 1996 -> "nineteen ninety six", 1906 -> "nineteen oh six"
     if (n < 10000) {
       const hi = Math.floor(n / 100), lo = n % 100;
+      if (hi % 10 === 0 && lo >= 10) forms.add(`${under100(hi)} ${under100(lo)}`); // 2022 -> "twenty twenty two"
       if (hi % 10 !== 0) {
         if (lo === 0) forms.add(`${under100(hi)} hundred`);
         else forms.add(`${under100(hi)} ${lo < 10 ? 'oh ' + ONES[lo] : under100(lo)}`);
@@ -40,26 +41,51 @@ export function sayNumber(n: number): string[] {
 /** "sixty" -> "sixties", "seven" -> "sevens": for decades like 1960s. */
 const plural = (w: string) => (w.endsWith('y') ? w.slice(0, -1) + 'ies' : w + 's');
 
-/** Spoken forms of one printed token, as word lists; empty if it's an ordinary word. */
-export function spokenForms(display: string): string[][] {
+/** Words read out for abbreviations in the stories; each alternative is a word list. */
+const ALIASES: Record<string, string[][]> = {
+  approx: [['approximately'], ['approx']],
+  ms: [['miss'], ['mz'], ['ms']],
+  ii: [['two'], ['the', 'second'], ['2']],
+  fc: [['f', 'c'], ['football', 'club']],
+};
+
+/** Ways of saying one part of a word: a number in words, or the part itself. */
+const partForms = (part: string): string[][] => (/^\d+$/.test(part) ? sayNumber(Number(part)).map(f => f.split(' ')) : [[part]]);
+
+/** Spoken forms of one printed token, as word lists (may include single words); empty if it's an ordinary word. */
+function allForms(display: string): string[][] {
   const norm = normalise(display);
+  if (ALIASES[norm]) return ALIASES[norm];
+  // Capitals read as letters: FA, WFA, USA, TV (FIFA and UEFA are said as words, which matches as is).
+  const caps = display.replace(/[^\p{L}]/gu, '');
+  if (/^[A-Z]{2,4}$/.test(caps) && !['FIFA', 'UEFA'].includes(caps)) return [norm.split('')];
+  const poss = display.match(/^\W*([A-Z]{2,4})['’]s\W*$/); // FA's -> "f a's"
+  if (poss && !['FIFA', 'UEFA'].includes(poss[1])) { const l = poss[1].toLowerCase().split(''); l[l.length - 1] += 's'; return [l]; }
   const m = norm.match(/^(\d+)(s|m)?$/);
   if (m) {
     const n = Number(m[1]), base = sayNumber(n);
     if (m[2] === 's') return base.map(f => { const w = f.split(' '); w[w.length - 1] = plural(w[w.length - 1]); return w; });
     if (m[2] === 'm') return base.flatMap(f => ['metres', 'meters', 'metre', 'meter', 'm'].map(u => [...f.split(' '), u]));
-    return base.map(f => f.split(' ')).filter(w => w.length > 1); // a single spoken word (e.g. "forty") matches as itself below
+    // £600 is read "six hundred pounds"
+    if (/^\W*£/.test(display)) return base.flatMap(f => [f.split(' '), [...f.split(' '), 'pounds']]);
+    return base.map(f => f.split(' '));
   }
-  if (norm.includes('-')) return [norm.split('-').filter(Boolean)];
+  if (norm.includes('-')) {
+    // every combination of the parts' spoken forms: 30-year -> thirty year
+    return norm.split('-').filter(Boolean).reduce<string[][]>((acc, part) => acc.flatMap(a => partForms(part).map(f => [...a, ...f])), [[]]);
+  }
   return [];
 }
 
-/** Single words that stand for a printed number token ("forty" for 40). */
-function singleWordNumber(display: string): string | undefined {
-  const m = normalise(display).match(/^(\d+)$/);
-  if (!m) return undefined;
-  const one = sayNumber(Number(m[1])).find(f => !f.includes(' '));
-  return one;
+/** Multi-word spoken forms of a printed token; single words are matched separately below. */
+export function spokenForms(display: string): string[][] {
+  return allForms(display).filter(w => w.length > 1);
+}
+
+/** Single words that stand for a printed token ("forty" for 40, "approximately" for approx.). */
+function singleWords(display: string): string[] {
+  const norm = normalise(display);
+  return allForms(display).filter(w => w.length === 1 && w[0] !== norm).map(w => w[0]);
 }
 
 /**
@@ -79,8 +105,7 @@ export function mergeSpoken(ref: Token[], heard: HeardWord[]): HeardWord[] {
       list.push({ seq, text: t.norm });
       byFirst.set(seq[0], list);
     }
-    const one = singleWordNumber(t.display);
-    if (one) singles.set(one, t.norm);
+    for (const one of singleWords(t.display)) singles.set(one, t.norm);
   }
   if (!byFirst.size && !singles.size) return heard;
   const norms = split.map(w => normalise(w.text));

@@ -14,7 +14,7 @@ export default function StoryCards({ story, base, events, highlight = [] }: { st
         const have = got.has(p.page);
         return (
           <figure key={p.page} className={'card' + (have ? ' have' : '') + (highlight.includes(p.page) ? ' new' : '')}>
-            <img src={base + p.image} alt={have ? p.imageAlt : ''} />
+            {p.image ? <img src={base + p.image} alt={have ? p.imageAlt ?? '' : ''} /> : <span className="card-noimg">{p.page}</span>}
             {!have && <span className="card-lock" aria-hidden="true">?</span>}
             <figcaption>{have ? p.heading : `Page ${p.page}`}</figcaption>
           </figure>

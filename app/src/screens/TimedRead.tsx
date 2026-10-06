@@ -40,7 +40,7 @@ export default function TimedRead({ story, reader, state, go, onAward }: Props) 
   const recorder = useRef<Promise<QaRecorder | null> | null>(null);
   const audio = useRef<Blob | null>(null);
   useEffect(() => () => { recorder.current?.then(r => r?.cancel()); }, []);
-  const [history] = useState(() => getAttempts(reader).filter(a => a.storyId === story.id));
+  const [history] = useState(() => getAttempts(reader)); // every timed read: each is on an unseen passage
 
   const azure = providers.find(p => p.id === 'azure')!;
   const demo = providers.find(p => p.id === 'demo')!;
@@ -117,7 +117,7 @@ export default function TimedRead({ story, reader, state, go, onAward }: Props) 
       accuracy: r.accuracy, errorWords, speechScores: heard.scores,
     };
     saveAttempt(attempt);
-    sendRecording(reader, { type: 'timed', storyId: story.id }, { passageId: passage.id, attempt, check: { record }, text: tokens.map(t => t.display).join(' '), heard: heard.words.map(w => w.text).join(' '), provider: heard.provider }, audio.current);
+    sendRecording(reader, { type: 'timed', storyId: story.id }, { passageId: passage.id, attempt, check: { record }, text: tokens.map(t => t.display).join(' '), heard: heard.words.map(w => w.text).join(' '), provider: heard.provider, speechProblem: heard.problem }, audio.current);
     onAward(state.record({ type: 'timed', storyId: story.id, passageId: passage.id, wcpm: r.wcpm, errorWords, seconds: r.seconds }));
     saved.current = true;
   }

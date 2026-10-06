@@ -7,7 +7,7 @@ import type { HeardWord } from '../scoring';
 const LANG = 'en-GB';
 
 async function getToken(): Promise<{ token: string; region: string }> {
-  const r = await fetch('/api/speech-token');
+  const r = await fetch('api/speech-token'); // relative, like the other API calls
   if (!r.ok) throw new Error('Speech service is not set up on the server');
   return r.json();
 }
@@ -25,7 +25,7 @@ export const azureProvider: SpeechProvider = {
 
   async available() {
     try {
-      const r = await fetch('/api/speech-status');
+      const r = await fetch('api/speech-status');
       return r.ok && (await r.json()).configured === true;
     } catch { return false; }
   },
@@ -51,6 +51,9 @@ export const azureProvider: SpeechProvider = {
     const words: HeardWord[] = [];
     const startedAt = Date.now();
     const segScores: { fluency?: number; prosody?: number; pronunciation?: number }[] = [];
+    let problem: string | undefined;
+    // Network drop, expired token or quota: keep what was heard and say why it stopped.
+    recogniser.canceled = (_s, e) => { if (e.reason === sdk.CancellationReason.Error) problem = `${sdk.CancellationErrorCode[e.errorCode]}: ${e.errorDetails}`.slice(0, 300); };
 
     recogniser.recognized = (_s, e) => {
       if (e.result.reason !== sdk.ResultReason.RecognizedSpeech) return;
@@ -77,8 +80,8 @@ export const azureProvider: SpeechProvider = {
             const v = segScores.map(s => s[k]).filter((x): x is number => typeof x === 'number');
             return v.length ? Math.round(v.reduce((a, b) => a + b, 0) / v.length) : undefined;
           };
-          res({ words, durationSec: (Date.now() - startedAt) / 1000 - 1.2, provider: 'Azure AI Speech (en-GB)', scores: { fluency: avg('fluency'), prosody: avg('prosody'), pronunciation: avg('pronunciation') } });
-        }, () => res({ words, provider: 'Azure AI Speech (en-GB)' })), 1200);
+          res({ words, problem, durationSec: (Date.now() - startedAt) / 1000 - 1.2, provider: 'Azure AI Speech (en-GB)', scores: { fluency: avg('fluency'), prosody: avg('prosody'), pronunciation: avg('pronunciation') } });
+        }, err => res({ words, provider: 'Azure AI Speech (en-GB)', problem: problem ?? String(err).slice(0, 300) })), 1200);
       }),
     };
   },

@@ -22,7 +22,17 @@ import { TestNotice } from './components/ServerData';
 
 export type Screen = { name: 'home' } | { name: 'miccheck' } | { name: 'practice'; page?: number; focusWords?: string[] } | { name: 'timed' } | { name: 'progress' } | { name: 'session' } | { name: 'teacher' };
 
-const STORY_URL = 'secret-stones/story.json'; // relative, so it works on any host
+export interface StoryInfo { id: string; title: string }
+/** Stories in /content (paths are relative, so they work on any host). The first is the default. */
+export const STORIES: StoryInfo[] = [
+  { id: 'secret-stones', title: 'Secret Stones' },
+  { id: 'womens-football', title: 'The History of Women’s Football' },
+  { id: 'inclusive-design', title: 'Inclusive Design' },
+];
+const storyKey = (reader: string) => `btc.story.${reader || 'none'}`;
+const savedStory = (reader: string) => {
+  try { const v = localStorage.getItem(storyKey(reader)); return STORIES.some(s => s.id === v) ? v! : STORIES[0].id; } catch { return STORIES[0].id; }
+};
 
 export default function App() {
   const [story, setStory] = useState<Story | null>(null);
@@ -31,6 +41,8 @@ export default function App() {
   // Shared school devices: always ask who's reading when the app opens (not when moving between screens).
   const [picking, setPicking] = useState(true);
   const [reader, setReader] = useState(getReaderCode());
+  // Each reader carries on with the story they chose last on this device.
+  const [storyId, setStoryId] = useState(() => savedStory(getReaderCode()));
   const state = useReader(reader);
   const [provider, setProvider] = useState<SpeechProvider | null>(null);
   const [toast, setToast] = useState<Award | null>(null);
@@ -42,14 +54,16 @@ export default function App() {
   useEffect(() => { startUploads(); }, []); // send any test data left from a dropped connection
 
   useEffect(() => {
-    fetch(STORY_URL).then(r => r.json()).then(setStory).catch(() => setError('Could not load the story.'));
-  }, []);
+    setStory(s => (s?.id === storyId ? s : null));
+    fetch(`${storyId}/story.json`).then(r => r.json()).then(setStory).catch(() => setError('Could not load the story.'));
+  }, [storyId]);
 
-  const base = STORY_URL.replace(/story\.json$/, '');
+  const base = `${storyId}/`;
   if (error) return <div className="centre"><p>{error}</p></div>;
   if (!story) return <div className="centre"><p>Loading…</p></div>;
 
-  const updateReader = (c: string) => { setReader(c); setReaderCode(c); setPicking(false); };
+  const updateReader = (c: string) => { setReader(c); setReaderCode(c); setPicking(false); setStoryId(savedStory(c)); };
+  const chooseStory = (id: string) => { try { localStorage.setItem(storyKey(reader), id); } catch { /* not kept */ } setStoryId(id); };
   const go = (s: Screen) => { window.scrollTo(0, 0); setScreen(s); };
 
   return (
@@ -69,7 +83,7 @@ export default function App() {
       <main className={reader && micOk && ['practice', 'timed', 'session'].includes(screen.name) ? 'full' : ''}>
         {(screen.name === 'home' || (!reader && screen.name !== 'teacher')) && <>
           <TestNotice />
-          <Home story={story} base={base} readerCode={reader} reader={state} setReader={updateReader} go={go} picking={picking} setPicking={setPicking} />
+          <Home story={story} base={base} stories={STORIES} setStory={chooseStory} readerCode={reader} reader={state} setReader={updateReader} go={go} picking={picking} setPicking={setPicking} />
           <BuildInfo base={base} />
         </>}
         {reader && !micOk && ['practice', 'timed', 'session'].includes(screen.name) && (
