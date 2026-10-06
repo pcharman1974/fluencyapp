@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { loadManifest, manifestProblem, type AudioManifest } from '../lib/pageAudio';
+import { onPendingChange, pendingCount } from '../lib/outbox';
 
 const REPO = 'https://github.com/pcharman1974/fluencyapp';
 
@@ -7,6 +8,8 @@ const REPO = 'https://github.com/pcharman1974/fluencyapp';
 export default function BuildInfo({ base }: { base: string }) {
   const [audio, setAudio] = useState<AudioManifest | null | undefined>(undefined);
   useEffect(() => { loadManifest(base).then(setAudio); }, [base]);
+  const [waiting, setWaiting] = useState(0);
+  useEffect(() => { pendingCount().then(setWaiting); return onPendingChange(setWaiting); }, []);
   const b = __BUILD_INFO__;
   const built = new Date(b.builtAt).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   const voice = audio === undefined ? 'checking…'
@@ -18,6 +21,7 @@ export default function BuildInfo({ base }: { base: string }) {
         ? <a href={`${REPO}/commit/${b.commit}`} target="_blank" rel="noreferrer">{b.commit}</a>
         : 'unknown'}
       {b.message && <> · {b.message}</>} · built {built} ({b.target}) · Model reading: {voice}
+      {waiting > 0 && <> · <b>{waiting} upload{waiting === 1 ? '' : 's'} waiting (will send when online)</b></>}
     </p>
   );
 }

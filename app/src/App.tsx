@@ -17,6 +17,7 @@ import { pickProvider, type SpeechProvider } from './lib/speech';
 import type { Award } from './lib/rewards';
 import { holdingLogo, lwcLogo } from './brand';
 import BuildInfo from './components/BuildInfo';
+import { startUploads } from './lib/qa';
 import { TestNotice } from './components/ServerData';
 
 export type Screen = { name: 'home' } | { name: 'miccheck' } | { name: 'practice'; page?: number; focusWords?: string[] } | { name: 'timed' } | { name: 'progress' } | { name: 'session' } | { name: 'teacher' };
@@ -38,6 +39,7 @@ export default function App() {
   const micOk = micOkState || micChecked(); // one-off per device; re-run from the home screen
   const onAward = (a: RecordResult) => { setToast(a); if (a.levelUp) setLevelUp(a.levelUp); };
   useEffect(() => { pickProvider().then(setProvider); }, []);
+  useEffect(() => { startUploads(); }, []); // send any test data left from a dropped connection
 
   useEffect(() => {
     fetch(STORY_URL).then(r => r.json()).then(setStory).catch(() => setError('Could not load the story.'));

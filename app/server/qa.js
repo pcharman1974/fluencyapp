@@ -11,6 +11,7 @@ import crypto from 'node:crypto';
 const READER = /^[A-Z0-9-]{1,12}$/;
 const TYPES = new Set(['page', 'reread', 'warmup', 'timed']);
 const ID = /^[\w-]{10,120}$/;
+const CLIENT_ID = /^[a-z0-9]{8,40}$/;
 const AUDIO_EXT = { 'audio/webm': 'webm', 'audio/mp4': 'm4a', 'audio/ogg': 'ogg', 'audio/mpeg': 'mp3' };
 
 /** Adds the /api/qa routes. Call after the password check, so data is never public. */
@@ -36,8 +37,15 @@ export function qaRoutes(app, { root, enabled }) {
     const m = req.body || {};
     if (!READER.test(m.readerCode || '')) return res.status(400).json({ error: 'Bad reader code' });
     if (!TYPES.has(m.type)) return res.status(400).json({ error: 'Unknown type' });
-    const id = `${new Date().toISOString().replace(/[:.]/g, '-')}_${m.readerCode}_${m.type}_${crypto.randomBytes(3).toString('hex')}`;
-    await fsp.writeFile(metaFile(id), JSON.stringify({ ...m, id, savedAt: new Date().toISOString(), userAgent: req.get('user-agent') }, null, 2));
+    // A device's own id for the recording makes retries safe: the same upload gets the same record.
+    const clientId = typeof m.clientId === 'string' && CLIENT_ID.test(m.clientId) ? m.clientId : crypto.randomBytes(6).toString('hex');
+    const when = typeof m.date === 'string' && !Number.isNaN(Date.parse(m.date)) ? new Date(m.date) : new Date();
+    const id = `${when.toISOString().replace(/[:.]/g, '-')}_${m.readerCode}_${m.type}_${clientId}`;
+    try {
+      await fsp.writeFile(metaFile(id), JSON.stringify({ ...m, id, savedAt: new Date().toISOString(), userAgent: req.get('user-agent') }, null, 2), { flag: 'wx' });
+    } catch (e) {
+      if (e.code !== 'EEXIST') throw e; // already saved by an earlier try
+    }
     res.json({ id });
   });
 
@@ -74,11 +82,19 @@ export function qaRoutes(app, { root, enabled }) {
 
   // Every record a device saves (events and timed-read markings), appended per reader.
   app.post('/api/qa/records', guard, express.json({ limit: '1mb' }), async (req, res) => {
-    const { readerCode, events = [], attempts = [] } = req.body || {};
+    const { readerCode, events = [], attempts = [], batchId } = req.body || {};
     if (!READER.test(readerCode || '')) return res.status(400).json({ error: 'Bad reader code' });
+    const file = path.join(evDir, `${readerCode}.jsonl`);
+    // Devices retry uploads after a dropped connection: a batch already saved is not saved twice.
+    const batch = typeof batchId === 'string' && CLIENT_ID.test(batchId) ? batchId : undefined;
+    if (batch) {
+      let existing = '';
+      try { existing = await fsp.readFile(file, 'utf8'); } catch { /* new reader */ }
+      if (existing.includes(`"batchId":"${batch}"`)) return res.json({ ok: true, duplicate: true });
+    }
     const lines = [...events.map(e => ({ kind: 'event', ...e })), ...attempts.map(a => ({ kind: 'attempt', ...a }))]
-      .map(r => JSON.stringify({ ...r, readerCode, receivedAt: new Date().toISOString() })).join('\n');
-    if (lines) await fsp.appendFile(path.join(evDir, `${readerCode}.jsonl`), lines + '\n');
+      .map(r => JSON.stringify({ ...r, readerCode, receivedAt: new Date().toISOString(), ...(batch ? { batchId: batch } : {}) })).join('\n');
+    if (lines) await fsp.appendFile(file, lines + '\n');
     res.json({ ok: true });
   });
 

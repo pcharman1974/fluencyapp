@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { sayNumber, mergeSpoken } from './spoken';
 import { checkPage } from './verify';
 import { tokenise } from './text';
+import storyJson from '../../../content/secret-stones/story.json?raw';
 
 const heard = (t: string) => ({ words: t.split(' ').map(text => ({ text })), durationSec: 5, provider: 'azure' });
 const misread = (text: string, said: string) => checkPage(text, heard(said), 5).misread;
@@ -44,8 +45,7 @@ describe('marking spoken forms as correct', () => {
 
 describe('Secret Stones read aloud perfectly, as a speech service writes it down', () => {
   it('marks every page 100% correct', async () => {
-    const { readFileSync } = await import('node:fs');
-    const story = JSON.parse(readFileSync(new URL('../../../content/secret-stones/story.json', import.meta.url), 'utf8'));
+    const story = JSON.parse(storyJson);
     const { spokenForms } = await import('./spoken');
     for (const p of story.pages) {
       // How Azure's word list looks: numbers in words, hyphenated words split, no punctuation.

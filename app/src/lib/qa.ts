@@ -2,6 +2,7 @@
 // device is also sent to the server, with a recording of each read and what the speech check heard.
 // Switched on only when the server says so (it needs the site password and a disk); otherwise the
 // app works device-only, as in the Claude artifact.
+import { enqueue, newKey, startOutbox, update, type OutboxItem } from './outbox';
 
 export interface QaContext { type: 'page' | 'reread' | 'warmup' | 'timed'; storyId?: string; page?: number; word?: string }
 
@@ -12,13 +13,12 @@ export function qaEnabled(): Promise<boolean> {
   return status;
 }
 
-/** Sends records (events and timed-read markings) to the server. Never blocks or breaks the app. */
+/** Sends records (events and timed-read markings) to the server, via the outbox so nothing is lost offline. */
 export function sendRecords(readerCode: string, records: { events?: unknown[]; attempts?: unknown[] }) {
   if (!readerCode) return;
   qaEnabled().then(on => {
     if (!on) return;
-    fetch('api/qa/records', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ readerCode, ...records }), keepalive: true })
-      .catch(() => { /* testing data only: the device copy is still saved */ });
+    enqueue({ key: newKey(), kind: 'records', body: { readerCode, ...records } }, send);
   });
 }
 
@@ -46,17 +46,32 @@ export async function startRecording(): Promise<QaRecorder | null> {
   };
 }
 
-/** Saves a read's check result, what was heard, and its recording on the server. */
+/** Saves a read's check result, what was heard, and its recording on the server (via the outbox). */
 export async function sendRecording(readerCode: string, ctx: QaContext, detail: Record<string, unknown>, audio: Blob | null) {
   if (!readerCode || !(await qaEnabled())) return;
-  try {
-    const r = await fetch('api/qa/recordings', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ readerCode, ...ctx, date: new Date().toISOString(), ...detail }) });
-    if (!r.ok || !audio) return;
-    const { id } = await r.json();
-    await fetch(`api/qa/recordings/${id}/audio`, { method: 'PUT', headers: { 'Content-Type': audio.type || 'application/octet-stream' }, body: audio });
-  } catch { /* testing data only */ }
+  await enqueue({ key: newKey(), kind: 'recording', meta: { readerCode, ...ctx, date: new Date().toISOString(), ...detail }, audio }, send);
 }
+
+/** Sends one outbox item. 'retry' keeps it for later (no connection, server busy); 'drop' discards a bad one. */
+async function send(item: OutboxItem): Promise<'done' | 'retry' | 'drop'> {
+  const outcome = (r: Response) => (r.ok || r.status === 409 ? 'done' : r.status === 400 || r.status === 413 ? 'drop' : 'retry');
+  if (item.kind === 'records') {
+    const r = await fetch('api/qa/records', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...item.body, batchId: item.key }) });
+    return outcome(r);
+  }
+  if (!item.id) {
+    const r = await fetch('api/qa/recordings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...item.meta, clientId: item.key }) });
+    if (!r.ok) return outcome(r);
+    item.id = (await r.json()).id as string;
+    await update(item);
+  }
+  if (!item.audio) return 'done';
+  const r = await fetch(`api/qa/recordings/${item.id}/audio`, { method: 'PUT', headers: { 'Content-Type': item.audio.type || 'application/octet-stream' }, body: item.audio });
+  return outcome(r);
+}
+
+/** Starts retrying any uploads left from earlier (call once when the app opens). */
+export function startUploads() { qaEnabled().then(on => { if (on) startOutbox(send); }); }
 
 export interface QaRecording {
   id: string; readerCode: string; type: QaContext['type']; date: string; page?: number; word?: string;
