@@ -8,7 +8,8 @@ The text of three stories was typed from screenshots of FFT Tutoring with the Li
 
 - *The History of Women's Football* (Latoyah Innerarity);
 - *Inclusive Design* (Catherine Baker);
-- *The Once and Future Queen* (Joel Pollen).
+- *The Once and Future Queen* (Joel Pollen);
+- *Inventions That Changed The World* (Catherine Baker).
 
 Please check it word for word against the originals. Boxed words match the originals. Italics (thoughts, the sword's inscription) are shown as plain text.
 
@@ -38,6 +39,13 @@ Please check it word for word against the originals. Boxed words match the origi
 
 - Page 12 has a stray comma: "fixed to the side of the pool, allow people".
 - Page 14 says "the differently abled". The content team may prefer different wording.
+
+**Queries on *Inventions That Changed The World*** (copied as printed):
+
+- Page 8: "saves people's lifes" should be "lives".
+- Page 10: "The invention of smartphone" is missing "the".
+- Page 6 and page 8 mix spaced hyphens with dashes around "Velcro®" and "Kevlar®".
+- Dates and claims haven't been checked against sources: earmuffs 1873, sticky notes 1968/1980, Velcro 1948, Kevlar 1965 and "five times stronger than steel".
 
 **Length:** about 116 words a page (women's football), 104 (inclusive design) and 92 (*The Once and Future Queen*, over 20 pages), against 81 for Secret Stones. Longer pages mean longer reads in each session.
 

@@ -6,6 +6,7 @@ import storyJson from '../../../content/secret-stones/story.json?raw';
 import footballJson from '../../../content/womens-football/story.json?raw';
 import inclusiveJson from '../../../content/inclusive-design/story.json?raw';
 import queenJson from '../../../content/once-and-future-queen/story.json?raw';
+import inventionsJson from '../../../content/inventions/story.json?raw';
 
 const heard = (t: string) => ({ words: t.split(' ').map(text => ({ text })), durationSec: 5, provider: 'azure' });
 const misread = (text: string, said: string) => checkPage(text, heard(said), 5).misread;
@@ -89,10 +90,10 @@ describe("The History of Women's Football read aloud perfectly", () => {
   });
 });
 
-describe.each([['Inclusive Design', inclusiveJson], ['The Once and Future Queen', queenJson]])('%s read aloud perfectly', (_name, json) => {
+describe.each([['Inclusive Design', inclusiveJson], ['The Once and Future Queen', queenJson], ['Inventions That Changed The World', inventionsJson]])('%s read aloud perfectly', (_name, json) => {
   it('marks every page 100% correct', () => {
     for (const p of JSON.parse(json).pages) {
-      const said = (p.text as string).replace('COVID-19', 'covid nineteen').replace(/\b12\b/, 'twelve').replace(/\b10\b/, 'ten').replace(/\b15\b/, 'fifteen').replace(/\b20\b/, 'twenty').replace(/’/g, "'").replace(/[‘"“”.,!?;:()…–-]/g, ' ').split(/\s+/).filter(Boolean).join(' ');
+      const said = (p.text as string).replace('COVID-19', 'covid nineteen').replace(/\b12\b/, 'twelve').replace(/\b10\b/, 'ten').replace(/\b15\b/, 'fifteen').replace(/\b20\b/, 'twenty').replace(/\b150\b/g, 'a hundred and fifty').replace('1873', 'eighteen seventy three').replace('1968', 'nineteen sixty eight').replace('1980,', 'nineteen eighty').replace('1948', 'nineteen forty eight').replace('1965', 'nineteen sixty five').replace('1930s', 'nineteen thirties').replace('1980s', 'nineteen eighties').replace('1990s', 'nineteen nineties').replace('2000s', 'two thousands').replace(' UK ', ' u k ').replace(' TV ', ' t v ').replace(/®/g, '').replace(/’/g, "'").replace(/[‘"“”.,!?;:()…–-]/g, ' ').split(/\s+/).filter(Boolean).join(' ');
       const c = checkPage(p.text, heard(said), 40);
       expect({ page: p.page, misread: c.misread, accuracy: c.accuracy }).toEqual({ page: p.page, misread: [], accuracy: 1 });
     }

@@ -18,7 +18,7 @@ correct per minute (WCPM). They earn Power points, levels, badges and story card
 | Thing | Location |
 |---|---|
 | App (Vite + React + TypeScript) | `app/` |
-| Stories: text, images, glossary, warm-up words | `content/<story>/story.json` (+ `images/`, `audio/`). Four stories: `secret-stones`, `womens-football`, `inclusive-design`, `once-and-future-queen`; list in `app/src/lib/library.ts` (`STORIES`) and `app/scripts-artifact.mjs` |
+| Stories: text, images, glossary, warm-up words | `content/<story>/story.json` (+ `images/`, `audio/`). Five stories: `secret-stones`, `womens-football`, `inclusive-design`, `once-and-future-queen`, `inventions`; list in `app/src/lib/library.ts` (`STORIES`) and `app/scripts-artifact.mjs` |
 | Unseen passages for the timed read (drafts) | `content/timed-passages/passages.json` |
 | Content still to be reviewed | `content/REVIEW-NOTES.md` |
 | Azure switch-on and calibration plan | `AZURE-CALIBRATION.md` |
