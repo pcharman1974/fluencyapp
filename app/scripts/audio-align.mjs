@@ -82,7 +82,10 @@ export function spokenVersion(text, replacements = {}) {
     else words.push(w);
   }
   const spoken = words.map(w => {
-    for (const [from, to] of Object.entries(replacements)) if (w.includes(from)) return w.replace(from, to);
+    for (const [from, to] of Object.entries(replacements)) {
+      // '=word' replaces that whole word only; otherwise any word containing the text.
+      if (from.startsWith('=') ? w === from.slice(1) : w.includes(from)) return from.startsWith('=') ? to : w.replace(from, to);
+    }
     return w;
   });
   return { text: spoken.join(' '), counts: spoken.map(s => s.split(/\s+/).length) };

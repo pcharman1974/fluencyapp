@@ -18,7 +18,7 @@ correct per minute (WCPM). They earn Power points, levels, badges and story card
 | Thing | Location |
 |---|---|
 | App (Vite + React + TypeScript) | `app/` |
-| Stories: text, images, glossary, warm-up words | `content/<story>/story.json` (+ `images/`, `audio/`). Three stories: `secret-stones`, `womens-football`, `inclusive-design`; list in `app/src/App.tsx` (`STORIES`) and `app/scripts-artifact.mjs` |
+| Stories: text, images, glossary, warm-up words | `content/<story>/story.json` (+ `images/`, `audio/`). Four stories: `secret-stones`, `womens-football`, `inclusive-design`, `once-and-future-queen`; list in `app/src/lib/library.ts` (`STORIES`) and `app/scripts-artifact.mjs` |
 | Unseen passages for the timed read (drafts) | `content/timed-passages/passages.json` |
 | Content still to be reviewed | `content/REVIEW-NOTES.md` |
 | Azure switch-on and calibration plan | `AZURE-CALIBRATION.md` |
@@ -121,7 +121,8 @@ The user has added ElevenLabs keys to this cloud environment: `ELEVENLABS_API_KE
 - **Teacher view across devices:** the class dashboard combines the server's records with this device's (`lib/classData.ts`).
 - **Marking review:** in Teacher view → Saved on the server, an adult listens to a recording and taps the words read wrong, blind to the app's marks; the panel totals agreement, right words marked wrong, errors missed and page decisions (`components/ReviewMarking.tsx`, `lib/review.ts`, PUT `/api/qa/recordings/:id/review`).
 - **Timed read uses unseen passages** (`lib/passages.ts`): the first the pupil hasn't read, then the one read longest ago. The gauge uses every timed read, whichever story is on.
-- **More than one story:** the home screen has a Story picker; each reader's choice is remembered on the device. Pages without a picture hide the Picture button.
+- **Library (decided 6 Oct 2026):** pupils choose their story from a shelf (`screens/Library.tsx`). It shows covers, pages read and Finished / Reading now / New tags. Nothing is locked and there is no set order; progress is kept in every story. When a story is finished, home and the session-end screen send the pupil to the library to choose the next one ("Read this story again" stays available). Each reader's current story is remembered per device. Pages without a picture hide the Picture button.
+- **Audio replacements:** in `ttsReplacements`, a key starting with `=` replaces only that whole word (e.g. `"=east": "east."`).
 - **Azure:** errors that stop the speech service are saved with the recording (`speechProblem`). See `AZURE-CALIBRATION.md`.
 
 ## Testing data store (5 Oct 2026)

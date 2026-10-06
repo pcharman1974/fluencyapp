@@ -19,16 +19,12 @@ import { holdingLogo, lwcLogo } from './brand';
 import BuildInfo from './components/BuildInfo';
 import { startUploads } from './lib/qa';
 import { TestNotice } from './components/ServerData';
+import Library from './screens/Library';
+import { STORIES } from './lib/library';
 
-export type Screen = { name: 'home' } | { name: 'miccheck' } | { name: 'practice'; page?: number; focusWords?: string[] } | { name: 'timed' } | { name: 'progress' } | { name: 'session' } | { name: 'teacher' };
+export type Screen = { name: 'home' } | { name: 'miccheck' } | { name: 'practice'; page?: number; focusWords?: string[] } | { name: 'timed' } | { name: 'progress' } | { name: 'session' } | { name: 'teacher' } | { name: 'library' };
 
-export interface StoryInfo { id: string; title: string }
-/** Stories in /content (paths are relative, so they work on any host). The first is the default. */
-export const STORIES: StoryInfo[] = [
-  { id: 'secret-stones', title: 'Secret Stones' },
-  { id: 'womens-football', title: 'The History of Women’s Football' },
-  { id: 'inclusive-design', title: 'Inclusive Design' },
-];
+export type { StoryInfo } from './lib/library';
 const storyKey = (reader: string) => `btc.story.${reader || 'none'}`;
 const savedStory = (reader: string) => {
   try { const v = localStorage.getItem(storyKey(reader)); return STORIES.some(s => s.id === v) ? v! : STORIES[0].id; } catch { return STORIES[0].id; }
@@ -69,7 +65,7 @@ export default function App() {
   return (
     <div className="app">
       {/* Reading screens drop the header so the story gets the whole screen. */}
-      {(!reader || ['home', 'progress', 'teacher'].includes(screen.name)) && (
+      {(!reader || ['home', 'progress', 'teacher', 'library'].includes(screen.name)) && (
         <header className="topbar">
           <button className="wordmark" onClick={() => go({ name: 'home' })} aria-label="Power Reader home">
             <img src={holdingLogo} alt="Beyond the Code Power Reader" />
@@ -83,7 +79,7 @@ export default function App() {
       <main className={reader && micOk && ['practice', 'timed', 'session'].includes(screen.name) ? 'full' : ''}>
         {(screen.name === 'home' || (!reader && screen.name !== 'teacher')) && <>
           <TestNotice />
-          <Home story={story} base={base} stories={STORIES} setStory={chooseStory} readerCode={reader} reader={state} setReader={updateReader} go={go} picking={picking} setPicking={setPicking} />
+          <Home story={story} base={base} readerCode={reader} reader={state} setReader={updateReader} go={go} picking={picking} setPicking={setPicking} />
           <BuildInfo base={base} />
         </>}
         {reader && !micOk && ['practice', 'timed', 'session'].includes(screen.name) && (
@@ -97,6 +93,7 @@ export default function App() {
         {reader && micOk && screen.name === 'session' && <Session story={story} base={base} reader={state} provider={provider} go={go} onAward={onAward} />}
         {reader && micOk && screen.name === 'timed' && <TimedRead story={story} reader={reader} state={state} go={go} onAward={onAward} />}
         {screen.name === 'teacher' && <Teacher story={story} go={go} />}
+        {reader && screen.name === 'library' && <Library current={storyId} reader={state} choose={chooseStory} go={go} />}
         {reader && screen.name === 'progress' && <Progress story={story} base={base} readerCode={reader} reader={state} go={go} />}
       </main>
       <RewardToast award={toast} onDone={() => setToast(null)} />

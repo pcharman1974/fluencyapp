@@ -83,8 +83,12 @@ export default function Session({ story, base, reader, provider, go, onAward }: 
           <h3>Story cards collected</h3>
           <StoryCards story={story} base={base} events={reader.events} highlight={earned.current.pages} />
         </>}
+        {cardsCollected(reader.events, story.id).size >= story.pages.length && earned.current.pages.length > 0 && (
+          <p className="story-done">You've read every page of {story.title}! Choose your next story from the library.</p>
+        )}
         <div className="row wrap">
-          <button className="btn btn-orange" onClick={() => go({ name: 'home' })}>Finish</button>
+          {cardsCollected(reader.events, story.id).size >= story.pages.length && <button className="btn btn-orange" onClick={() => go({ name: 'library' })}>Choose your next story</button>}
+          <button className={'btn ' + (cardsCollected(reader.events, story.id).size >= story.pages.length ? 'btn-ghost' : 'btn-orange')} onClick={() => go({ name: 'home' })}>Finish</button>
           <button className="btn btn-navy" onClick={() => go({ name: 'timed' })}>Bonus: timed read (+10 Power)</button>
           <button className="btn btn-ghost" onClick={() => go({ name: 'progress' })}>My progress</button>
         </div>

@@ -4,7 +4,13 @@ Everything below was added for testing on 6 Oct 2026. It needs a check by the co
 
 ## Stories added from screenshots
 
-The text of *The History of Women's Football* (Latoyah Innerarity) and *Inclusive Design* (Catherine Baker) was typed from screenshots of FFT Tutoring with the Lightning Squad. Please check it word for word against the originals. Boxed words match the originals.
+The text of three stories was typed from screenshots of FFT Tutoring with the Lightning Squad:
+
+- *The History of Women's Football* (Latoyah Innerarity);
+- *Inclusive Design* (Catherine Baker);
+- *The Once and Future Queen* (Joel Pollen).
+
+Please check it word for word against the originals. Boxed words match the originals. Italics (thoughts, the sword's inscription) are shown as plain text.
 
 **Pictures:** none yet. The screenshots weren't supplied as image files, so these stories show text only, and the story cards show page numbers. Add images under `content/<story>/images/` and set `image`, `imageAlt` and `coverImage` in `story.json`.
 
@@ -12,7 +18,7 @@ The text of *The History of Women's Football* (Latoyah Innerarity) and *Inclusiv
 
 - glossary definitions for the boxed words in both stories;
 - warm-up words chosen for each page;
-- page headings in *The History of Women's Football* (the original pages have none).
+- page headings in *The History of Women's Football* and *The Once and Future Queen* (the original pages have none; *Inclusive Design* uses its own headings).
 
 **Queries on the women's football text** (copied as printed; not changed):
 
@@ -22,7 +28,18 @@ The text of *The History of Women's Football* (Latoyah Innerarity) and *Inclusiv
 - Page 7 has "a 50 year period" but "her 30-year career".
 - Facts and figures (games played and won, goals, money raised, today's equivalents, crowd sizes) haven't been checked against sources.
 
-**Length:** about 116 words a page (women's football) and 104 (inclusive design), against 81 for Secret Stones. Longer pages mean longer reads in each session.
+**Queries on *The Once and Future Queen*** (copied as printed):
+
+- Page 20 is missing a full stop after "the warring lands in the east". The audio adds the pause.
+- Page 20 opens the knights' words with a single quotation mark and closes with a double one.
+- Page 12: "and later Morgan, and not to mention the countless others" reads awkwardly.
+
+**Queries on *Inclusive Design*:**
+
+- Page 12 has a stray comma: "fixed to the side of the pool, allow people".
+- Page 14 says "the differently abled". The content team may prefer different wording.
+
+**Length:** about 116 words a page (women's football), 104 (inclusive design) and 92 (*The Once and Future Queen*, over 20 pages), against 81 for Secret Stones. Longer pages mean longer reads in each session.
 
 ## Timed-read passages
 
