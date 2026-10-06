@@ -16,7 +16,7 @@ The text of three stories was typed from screenshots of FFT Tutoring with the Li
 
 Please check it word for word against the originals. Boxed words match the originals. Italics (thoughts, the sword's inscription) are shown as plain text.
 
-**Pictures:** The History of Women's Football, Inclusive Design, The Once and Future Queen, Inventions That Changed The World and The Windrush Generation now have their covers and all their page pictures, cropped from screenshots, with descriptions written for screen readers (please check them). Carrot Girl and Home Invasion! have none yet, so they show text only and their story cards show page numbers. Add images under `content/<story>/images/` and set `image`, `imageAlt` and `coverImage` in `story.json`.
+**Pictures:** All eight stories now have their covers and page pictures, cropped from screenshots, with descriptions written for screen readers (please check them). Add images under `content/<story>/images/` and set `image`, `imageAlt` and `coverImage` in `story.json`.
 
 **Written for the app (drafts):**
 
@@ -59,7 +59,6 @@ Please check it word for word against the originals. Boxed words match the origi
 
 **Queries on *Home Invasion!*:**
 
-- Page 13 is missing its last line: the second screen hasn't been supplied yet.
 - Page 4: "stationary" should be "stationery".
 - Page 12: "“OK,” I admitted. “this is quite fun." uses a lower-case "this" after the quotation mark (also on page 11, "and this").
 

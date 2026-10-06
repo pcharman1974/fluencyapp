@@ -4,7 +4,7 @@
   "author": "Ewan Shepherd",
   "source": "FFT Tutoring with the Lightning Squad (tutoring.fft.org.uk), screenshots supplied 6 Oct 2026",
   "audience": "Secondary",
-  "coverImage": "",
+  "coverImage": "images/00-cover.jpg",
   "vocabulary": [
     "competitive",
     "recoiled",
@@ -28,7 +28,9 @@
         "catching",
         "wrestling",
         "competitive"
-      ]
+      ],
+      "image": "images/01.jpg",
+      "imageAlt": "A pixel-art boy looking bored on a holiday sofa, surrounded by his cousins and relatives."
     },
     {
       "page": 2,
@@ -67,7 +69,9 @@
         "horizon",
         "supermarkets",
         "reclaim"
-      ]
+      ],
+      "image": "images/04.jpg",
+      "imageAlt": "A pixel-art hand holding a phone with a question mark and 'Alex?' on the screen."
     },
     {
       "page": 5,
@@ -91,7 +95,9 @@
         "camera",
         "bolted",
         "doorframe"
-      ]
+      ],
+      "image": "images/06.jpg",
+      "imageAlt": "A pixel-art security camera above a front door, with a boy standing at the door."
     },
     {
       "page": 7,
@@ -118,7 +124,9 @@
         "overheating",
         "operational",
         "circuit-boards"
-      ]
+      ],
+      "image": "images/08.jpg",
+      "imageAlt": "A pixel-art boy at an old computer in a bedroom crammed with wires and gadgets."
     },
     {
       "page": 9,
@@ -143,7 +151,9 @@
         "bounded",
         "announced",
         "convinced"
-      ]
+      ],
+      "image": "images/10.jpg",
+      "imageAlt": "A pixel-art living room with a record player, armchairs and lamps."
     },
     {
       "page": 11,
@@ -156,7 +166,9 @@
         "catapult",
         "continued",
         "perched"
-      ]
+      ],
+      "image": "images/11.jpg",
+      "imageAlt": "A pixel-art catapult on a kitchen worktop, loaded with a tennis ball."
     },
     {
       "page": 12,
@@ -174,15 +186,18 @@
     {
       "page": 13,
       "heading": "Out of Control",
-      "text": "Alex’s head darted up. “What was that?” “Can you put this back on the slow setting, Alex?” “There is only one setting,” Alex said in a serious tone. I tried to look at him but was struggling to keep up with the game. The catapult was getting faster! Alex tried to get closer to the end of the island so he could grab the bucket but it was too late. The catapult was going crazy, sending tennis balls flying in every direction! “Duck!” I shouted. A plate shattered.",
+      "text": "Alex’s head darted up. “What was that?” “Can you put this back on the slow setting, Alex?” “There is only one setting,” Alex said in a serious tone. I tried to look at him but was struggling to keep up with the game. The catapult was getting faster! Alex tried to get closer to the end of the island so he could grab the bucket but it was too late. The catapult was going crazy, sending tennis balls flying in every direction! “Duck!” I shouted. A plate shattered. “We need to go upstairs and turn it off!” Alex yelled. BANG! BANG! BANG! The cupboard doors were being pelted. The toaster was sizzling… “The chef!” yelled Alex. It was keeping a firm hold on the lever. The toast was burning, and dark smoke clouded the room. Then, of course, the smoke alarm went off. I wafted smoke out of my face and tried to dodge tennis balls, while Alex tried to force his “live-in chef” away from the toaster. “This is bad,” he whined.",
       "highlightedWords": [
         "catapult"
       ],
       "warmupWords": [
         "darted",
-        "setting",
-        "shattered"
-      ]
+        "shattered",
+        "sizzling",
+        "wafted"
+      ],
+      "image": "images/13.jpg",
+      "imageAlt": "A pixel-art boy with a table tennis bat being pelted with tennis balls in a kitchen."
     },
     {
       "page": 14,
@@ -193,7 +208,9 @@
         "straining",
         "aggressively",
         "electricity"
-      ]
+      ],
+      "image": "images/14.jpg",
+      "imageAlt": "A pixel-art living room in chaos, with tangled wires and knocked-over furniture."
     },
     {
       "page": 15,
@@ -207,7 +224,9 @@
         "panicking",
         "infinite",
         "vibrations"
-      ]
+      ],
+      "image": "images/15.jpg",
+      "imageAlt": "A pixel-art old computer on fire and smoking on a messy desk."
     },
     {
       "page": 16,
@@ -219,7 +238,9 @@
         "confessed",
         "understanding",
         "ordinary"
-      ]
+      ],
+      "image": "images/16.jpg",
+      "imageAlt": "A pixel-art picture of two friends laughing together at the cinema."
     }
   ],
   "glossary": {
@@ -235,8 +256,7 @@
   },
   "glossaryNote": "DRAFT definitions written by Claude for this test; to be checked by the content team.",
   "headingNote": "Page headings are not in the original screens; they were added for the app and need content-team review.",
-  "incompleteNote": "Page 13 is missing its last line (second screen not yet supplied).",
-  "imagesNote": "Images not yet supplied as files: the app shows the pages without pictures until they are added under images/.",
+  "imagesNote": "Pictures cropped from screenshots of the original screens (supplied 6 Oct 2026). Pages without a picture have none in the original either. Replace with the original image files when available, for sharper pictures.",
   "ttsReplacements": {},
   "ttsNote": "ttsReplacements: how to say printed text that a voice may misread. Used only when generating audio; page text is unchanged."
 }

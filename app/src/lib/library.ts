@@ -10,8 +10,8 @@ export const STORIES: StoryInfo[] = [
   { id: 'inclusive-design', title: 'Inclusive Design', author: 'Catherine Baker', pages: 14, cover: 'images/00-cover.jpg', colour: '#1D6FB0', topic: 'Design · Everyday life' },
   { id: 'inventions', title: 'Inventions That Changed The World', author: 'Catherine Baker', pages: 10, cover: 'images/00-cover.jpg', colour: '#2F6B3A', topic: 'Science · Inventions' },
   { id: 'windrush', title: 'The Windrush Generation', author: 'Latoyah Innerarity', pages: 14, cover: 'images/00-cover.jpg', colour: '#8A5A00', topic: 'History · People' },
-  { id: 'carrot-girl', title: 'Carrot Girl', author: 'Catherine Baker', pages: 21, colour: '#D9631E', topic: 'Superheroes · Family' },
-  { id: 'home-invasion', title: 'Home Invasion!', author: 'Ewan Shepherd', pages: 16, colour: '#2B4C7E', topic: 'Technology · Friendship' },
+  { id: 'carrot-girl', title: 'Carrot Girl', author: 'Catherine Baker', pages: 21, cover: 'images/00-cover.jpg', colour: '#D9631E', topic: 'Superheroes · Family' },
+  { id: 'home-invasion', title: 'Home Invasion!', author: 'Ewan Shepherd', pages: 16, cover: 'images/00-cover.jpg', colour: '#2B4C7E', topic: 'Technology · Friendship' },
   { id: 'once-and-future-queen', title: 'The Once and Future Queen', author: 'Joel Pollen', pages: 20, cover: 'images/00-cover.jpg', colour: '#5B3A7A', topic: 'Legend · Adventure' },
 ];
 

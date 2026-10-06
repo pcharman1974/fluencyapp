@@ -4,7 +4,7 @@
   "author": "Catherine Baker",
   "source": "FFT Tutoring with the Lightning Squad (tutoring.fft.org.uk), screenshots supplied 6 Oct 2026",
   "audience": "Secondary",
-  "coverImage": "",
+  "coverImage": "images/00-cover.jpg",
   "vocabulary": [
     "pathetic",
     "lairs",
@@ -37,7 +37,9 @@
         "impressive",
         "Splashwoman",
         "instantly"
-      ]
+      ],
+      "image": "images/02.jpg",
+      "imageAlt": "A cartoon of three superheroes running: a woman with flowing red hair, a boy in a red suit and cape, and a man in a blue suit."
     },
     {
       "page": 3,
@@ -49,7 +51,9 @@
         "carroty",
         "darkness",
         "supervillain"
-      ]
+      ],
+      "image": "images/03.jpg",
+      "imageAlt": "A girl with glowing blue eyes in the dark, resting her chin on her hand."
     },
     {
       "page": 4,
@@ -60,7 +64,9 @@
         "orangey",
         "theory",
         "situation"
-      ]
+      ],
+      "image": "images/04.jpg",
+      "imageAlt": "Close-up of folded arms, with the skin glowing bright orange."
     },
     {
       "page": 5,
@@ -88,7 +94,9 @@
         "turrets",
         "underground",
         "enthusiastic"
-      ]
+      ],
+      "image": "images/06.jpg",
+      "imageAlt": "A girl in headphones looking out of a car window at pine trees."
     },
     {
       "page": 7,
@@ -151,7 +159,9 @@
         "sneered",
         "remembered",
         "refuse"
-      ]
+      ],
+      "image": "images/11.jpg",
+      "imageAlt": "A long back garden with a stone path between bright flower beds."
     },
     {
       "page": 12,
@@ -189,7 +199,9 @@
         "queue-jump",
         "delivered",
         "embarrassed"
-      ]
+      ],
+      "image": "images/14.jpg",
+      "imageAlt": "A man being swept through the air by a huge jet of water above a theme park queue."
     },
     {
       "page": 15,
@@ -226,7 +238,9 @@
         "scented",
         "console’s",
         "masterclass"
-      ]
+      ],
+      "image": "images/17.jpg",
+      "imageAlt": "A girl reading in an armchair by candlelight."
     },
     {
       "page": 18,
@@ -238,7 +252,9 @@
         "whirled",
         "tornado",
         "flicker"
-      ]
+      ],
+      "image": "images/18.jpg",
+      "imageAlt": "A fallen candle setting fire to a carpet."
     },
     {
       "page": 19,
@@ -276,7 +292,9 @@
         "wonderful",
         "grounded",
         "emergency"
-      ]
+      ],
+      "image": "images/21.jpg",
+      "imageAlt": "A smiling girl tucked up in bed."
     }
   ],
   "glossary": {
@@ -291,7 +309,7 @@
   },
   "glossaryNote": "DRAFT definitions written by Claude for this test; to be checked by the content team.",
   "headingNote": "Page headings are not in the original screens; they were added for the app and need content-team review.",
-  "imagesNote": "Images not yet supplied as files: the app shows the pages without pictures until they are added under images/.",
+  "imagesNote": "Pictures cropped from screenshots of the original screens (supplied 6 Oct 2026). Pages without a picture have none in the original either. Replace with the original image files when available, for sharper pictures.",
   "ttsReplacements": {},
   "ttsNote": "ttsReplacements: how to say printed text that a voice may misread. Used only when generating audio; page text is unchanged."
 }
