@@ -8,7 +8,7 @@ export interface Token {
 }
 
 export function normalise(word: string): string {
-  return word
+  const n = word
     .toLowerCase()
     .replace(/[’‘`]/g, "'")
     .replace(/(\d),(\d)/g, '$1$2')       // 5,000 -> 5000
@@ -16,6 +16,7 @@ export function normalise(word: string): string {
     .replace(/([a-z])\.(?=[a-z])/g, '$1')  // F.C. -> fc
     .replace(/'s$/, 's')
     .replace(/'/g, '');
+  return n === 'ok' ? 'okay' : n; // printed "OK" and "okay" are the same word read aloud
 }
 
 export function tokenise(text: string, page = 0, startIndex = 0): Token[] {

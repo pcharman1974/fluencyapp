@@ -9,7 +9,10 @@ The text of three stories was typed from screenshots of FFT Tutoring with the Li
 - *The History of Women's Football* (Latoyah Innerarity);
 - *Inclusive Design* (Catherine Baker);
 - *The Once and Future Queen* (Joel Pollen);
-- *Inventions That Changed The World* (Catherine Baker).
+- *Inventions That Changed The World* (Catherine Baker);
+- *The Windrush Generation* (Latoyah Innerarity);
+- *Carrot Girl* (Catherine Baker);
+- *Home Invasion!* (Ewan Shepherd).
 
 Please check it word for word against the originals. Boxed words match the originals. Italics (thoughts, the sword's inscription) are shown as plain text.
 
@@ -46,6 +49,24 @@ Please check it word for word against the originals. Boxed words match the origi
 - Page 10: "The invention of smartphone" is missing "the".
 - Page 6 and page 8 mix spaced hyphens with dashes around "Velcro®" and "Kevlar®".
 - Dates and claims haven't been checked against sources: earmuffs 1873, sticky notes 1968/1980, Velcro 1948, Kevlar 1965 and "five times stronger than steel".
+
+**Queries on *The Windrush Generation*** (copied as printed):
+
+- Page 9: "un-used air aid shelters" is probably meant to be "air raid shelters".
+- Page 2: "Where hundreds of Caribbean people left..." is a sentence fragment.
+- Page 8: "much different"; page 14: "no-matter"; page 3: "un-affected". These are minor style points.
+- Dates and figures haven't been checked against sources: fare £28, about £850 today; 8,000 miles; 22 days; nearly half a million people, 1948–1971; Sam King mayor 1983; Claudia Jones 1955 and 1958.
+
+**Queries on *Home Invasion!*:**
+
+- Page 13 is missing its last line: the second screen hasn't been supplied yet.
+- Page 4: "stationary" should be "stationery".
+- Page 12: "“OK,” I admitted. “this is quite fun." uses a lower-case "this" after the quotation mark (also on page 11, "and this").
+
+**Queries on *Carrot Girl*:**
+
+- Page 12: "Marks, set, go!" may be deliberate wordplay on "On your marks".
+- Page 20: "My skin grows orange" may be meant to be "glows".
 
 **Length:** about 116 words a page (women's football), 104 (inclusive design) and 92 (*The Once and Future Queen*, over 20 pages), against 81 for Secret Stones. Longer pages mean longer reads in each session.
 

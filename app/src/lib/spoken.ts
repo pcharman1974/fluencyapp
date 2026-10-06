@@ -109,6 +109,7 @@ export function mergeSpoken(ref: Token[], heard: HeardWord[]): HeardWord[] {
   }
   if (!byFirst.size && !singles.size) return heard;
   const norms = split.map(w => normalise(w.text));
+  const refNorms = new Set(ref.map(t => t.norm));
   const out: HeardWord[] = [];
   for (let j = 0; j < split.length; ) {
     let best: { len: number; text: string } | undefined;
@@ -120,7 +121,7 @@ export function mergeSpoken(ref: Token[], heard: HeardWord[]): HeardWord[] {
       const scores = run.map(w => w.accuracyScore).filter((x): x is number => x !== undefined);
       out.push({ text: best.text, startSec: run[0].startSec, accuracyScore: scores.length ? Math.min(...scores) : undefined });
       j += best.len;
-    } else if (singles.has(norms[j])) {
+    } else if (singles.has(norms[j]) && !refNorms.has(norms[j])) { // "okay" stays "okay" if the text has it too
       out.push({ ...split[j], text: singles.get(norms[j])! });
       j++;
     } else {

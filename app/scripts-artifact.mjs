@@ -27,5 +27,5 @@ ${fontImports.map(u => `<link rel="stylesheet" href="${u}">`).join('\n')}
 fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
 fs.writeFileSync(path.join(out, 'index.html'), page);
-for (const id of ['secret-stones', 'womens-football', 'inclusive-design', 'once-and-future-queen', 'inventions']) fs.cpSync(path.join('../content', id), path.join(out, id), { recursive: true });
+for (const id of ['secret-stones', 'womens-football', 'inclusive-design', 'once-and-future-queen', 'inventions', 'windrush', 'carrot-girl', 'home-invasion']) fs.cpSync(path.join('../content', id), path.join(out, id), { recursive: true });
 console.log('artifact/index.html', (page.length / 1024).toFixed(0) + ' KB');

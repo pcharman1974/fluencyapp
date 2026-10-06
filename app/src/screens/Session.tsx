@@ -13,20 +13,18 @@ import type { Reader, RecordResult } from '../lib/useReader';
 import { checkDetail, type PageCheck } from '../lib/verify';
 import { canSpeak, speak } from '../lib/voice';
 import { normalise } from '../lib/text';
+import { sessionPages } from '../lib/sessionPlan';
 import { loadManifest, playWord, preloadAudio, type AudioManifest } from '../lib/pageAudio';
 
 interface Props { story: Story; base: string; reader: Reader; provider: SpeechProvider | null; go: (s: Screen) => void; onAward: (a: RecordResult) => void }
 
 type Step = 'warmup' | 'read' | 'reread' | 'done';
 const SHORT: Record<Step, string> = { read: 'Read', reread: 'Best', warmup: 'Words', done: 'Done' };
-const PAGES_PER_SESSION = 3;
 
 /** Today's session: read pages aloud (listen first), your best reading of one page, then practise words. */
 export default function Session({ story, base, reader, provider, go, onAward }: Props) {
   const plan = useMemo(() => {
-    const got = cardsCollected(reader.events, story.id);
-    const unread = story.pages.map(p => p.page).filter(p => !got.has(p));
-    const pages = (unread.length ? unread : story.pages.map(p => p.page)).slice(0, PAGES_PER_SESSION);
+    const pages = sessionPages(story, cardsCollected(reader.events, story.id));
     // Word practice at the end: 2 chosen words from today's pages, then 2 the pupil got wrong before.
     const chosen = pages.flatMap(p => story.pages[p - 1].warmupWords ?? []).slice(0, 2);
     const tricky = trickyWords(reader.events, 6).filter(w => !chosen.some(c => c.toLowerCase() === w.toLowerCase())).slice(0, 2);

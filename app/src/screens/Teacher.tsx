@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { Attempt, Story } from '../types';
+import type { Attempt } from '../types';
+import { STORIES } from '../lib/library';
 import { fromServer, mergeClass, type PupilData } from '../lib/classData';
 import { listRecords, qaEnabled } from '../lib/qa';
 import type { Screen } from '../App';
@@ -13,7 +14,7 @@ import { weekKey, WEEKLY_TARGET, LEVELS, type ReadingEvent } from '../lib/reward
 import { GoalRing } from '../components/Rewards';
 import { FluencyChart, PowerChart } from '../components/ProgressCharts';
 
-interface Props { story: Story; go: (s: Screen) => void }
+interface Props { go: (s: Screen) => void }
 
 const STATUS: Record<Status, { label: string; icon: string }> = {
   'on-track': { label: 'On track', icon: '✓' },
@@ -22,7 +23,7 @@ const STATUS: Record<Status, { label: string; icon: string }> = {
   holiday: { label: 'Holiday', icon: '–' },
 };
 
-export default function Teacher({ story, go }: Props) {
+export default function Teacher({ go }: Props) {
   const now = new Date().toISOString();
   const [holidays, setHol] = useState(getHolidays());
   // Every pupil saved on the server (any device), plus anything on this device not uploaded yet.
@@ -61,7 +62,7 @@ export default function Teacher({ story, go }: Props) {
   const mins = sorted.reduce((t, s) => t + s.minutesThisWeek, 0);
   const detail = open ? pupils.find(p => p.s.code === open) : null;
 
-  if (detail) return <PupilDetail p={detail.s} events={detail.events} attempts={detail.attempts} story={story} onBack={() => setOpen(null)} />;
+  if (detail) return <PupilDetail p={detail.s} events={detail.events} attempts={detail.attempts} onBack={() => setOpen(null)} />;
 
   return (
     <div className="teacher">
@@ -122,7 +123,7 @@ function ago(iso: string) {
   return days <= 0 ? 'Today' : days === 1 ? 'Yesterday' : `${days} days ago`;
 }
 
-function PupilDetail({ p, events, attempts, story, onBack }: { p: PupilSummary; events: ReadingEvent[]; attempts: Attempt[]; story: Story; onBack: () => void }) {
+function PupilDetail({ p, events, attempts, onBack }: { p: PupilSummary; events: ReadingEvent[]; attempts: Attempt[]; onBack: () => void }) {
   const [log, setLog] = useState(false);
   const recent = events.filter(e => e.type === 'page' || e.type === 'reread' || e.type === 'timed').slice(-12).reverse();
   return (
@@ -148,7 +149,7 @@ function PupilDetail({ p, events, attempts, story, onBack }: { p: PupilSummary; 
       <section className="progress-charts">
         <div className="panel">
           <h3>Reading speed (words correct per minute)</h3>
-          <FluencyChart events={events} storyId={story.id} audience="teacher" />
+          <FluencyChart events={events} audience="teacher" />
         </div>
         <div className="panel">
           <h3>Power over time</h3>
@@ -166,7 +167,7 @@ function PupilDetail({ p, events, attempts, story, onBack }: { p: PupilSummary; 
             {recent.map((e, i) => (
               <li key={i}>
                 <span className="when">{new Date(e.date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
-                {e.type === 'page' && <span>{e.verified ? '✓' : '✗'} Page {e.page} ({story.pages[e.page - 1]?.heading}) · heard {Math.round(e.coverage * 100)}%{e.verified ? `, ${Math.round(e.accuracy * 100)}% correct` : ''}</span>}
+                {e.type === 'page' && <span>{e.verified ? '✓' : '✗'} {STORIES.find(s => s.id === e.storyId)?.title ?? e.storyId}, page {e.page} · heard {Math.round(e.coverage * 100)}%{e.verified ? `, ${Math.round(e.accuracy * 100)}% correct` : ''}</span>}
                 {e.type === 'reread' && <span>{e.verified ? '✓' : '✗'} Re-read page {e.page} · {e.wcpm} WCPM</span>}
                 {e.type === 'timed' && <span>Timed read · {e.wcpm} WCPM</span>}
               </li>

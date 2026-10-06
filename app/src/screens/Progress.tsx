@@ -29,7 +29,7 @@ export default function Progress({ story, base, readerCode, reader, go }: Props)
       <section className="progress-charts">
         <div className="panel">
           <h2>Your reading speed</h2>
-          <FluencyChart events={reader.events} storyId={story.id} audience="pupil" />
+          <FluencyChart events={reader.events} audience="pupil" />
         </div>
         <div className="panel">
           <h2>Your Power</h2>

@@ -18,7 +18,7 @@ correct per minute (WCPM). They earn Power points, levels, badges and story card
 | Thing | Location |
 |---|---|
 | App (Vite + React + TypeScript) | `app/` |
-| Stories: text, images, glossary, warm-up words | `content/<story>/story.json` (+ `images/`, `audio/`). Five stories: `secret-stones`, `womens-football`, `inclusive-design`, `once-and-future-queen`, `inventions`; list in `app/src/lib/library.ts` (`STORIES`) and `app/scripts-artifact.mjs` |
+| Stories: text, images, glossary, warm-up words | `content/<story>/story.json` (+ `images/`, `audio/`). Eight stories: `secret-stones`, `womens-football`, `inclusive-design`, `once-and-future-queen`, `inventions`, `windrush`, `carrot-girl`, `home-invasion`; list in `app/src/lib/library.ts` (`STORIES`) and `app/scripts-artifact.mjs` |
 | Unseen passages for the timed read (drafts) | `content/timed-passages/passages.json` |
 | Content still to be reviewed | `content/REVIEW-NOTES.md` |
 | Azure switch-on and calibration plan | `AZURE-CALIBRATION.md` |
@@ -122,6 +122,8 @@ The user has added ElevenLabs keys to this cloud environment: `ELEVENLABS_API_KE
 - **Marking review:** in Teacher view → Saved on the server, an adult listens to a recording and taps the words read wrong, blind to the app's marks; the panel totals agreement, right words marked wrong, errors missed and page decisions (`components/ReviewMarking.tsx`, `lib/review.ts`, PUT `/api/qa/recordings/:id/review`).
 - **Timed read uses unseen passages** (`lib/passages.ts`): the first the pupil hasn't read, then the one read longest ago. The gauge uses every timed read, whichever story is on.
 - **Library (decided 6 Oct 2026):** pupils choose their story from a shelf (`screens/Library.tsx`). It shows covers, pages read and Finished / Reading now / New tags. Nothing is locked and there is no set order; progress is kept in every story. When a story is finished, home and the session-end screen send the pupil to the library to choose the next one ("Read this story again" stays available). Each reader's current story is remembered per device. Pages without a picture hide the Picture button.
+- **Choosing a book (decided 6 Oct 2026):** a reader has no book until they choose one from the library, which opens straight away with no Back button. Home then shows only that book, with a "Change book" button. When a book is finished, the reader must choose another: finished books show as Finished and can't be picked again, unless every book is finished. Pupil and teacher charts now cover all books.
+- **Sessions are measured in words, not pages (decided 6 Oct 2026):** pages are kept exactly as supplied (about 50 to 170 words each). Each session takes the next unread pages up to about 240 words, never more than 20% over, with 1 to 5 pages (`lib/sessionPlan.ts`).
 - **Audio replacements:** in `ttsReplacements`, a key starting with `=` replaces only that whole word (e.g. `"=east": "east."`).
 - **Azure:** errors that stop the speech service are saved with the recording (`speechProblem`). See `AZURE-CALIBRATION.md`.
 

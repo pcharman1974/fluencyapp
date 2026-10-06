@@ -20,14 +20,15 @@ import BuildInfo from './components/BuildInfo';
 import { startUploads } from './lib/qa';
 import { TestNotice } from './components/ServerData';
 import Library from './screens/Library';
-import { STORIES } from './lib/library';
+import { STORIES, shelfStatus } from './lib/library';
 
 export type Screen = { name: 'home' } | { name: 'miccheck' } | { name: 'practice'; page?: number; focusWords?: string[] } | { name: 'timed' } | { name: 'progress' } | { name: 'session' } | { name: 'teacher' } | { name: 'library' };
 
 export type { StoryInfo } from './lib/library';
 const storyKey = (reader: string) => `btc.story.${reader || 'none'}`;
+/** The book this reader chose on this device ('' = none yet: they choose from the library first). */
 const savedStory = (reader: string) => {
-  try { const v = localStorage.getItem(storyKey(reader)); return STORIES.some(s => s.id === v) ? v! : STORIES[0].id; } catch { return STORIES[0].id; }
+  try { const v = localStorage.getItem(storyKey(reader)); return STORIES.some(s => s.id === v) ? v! : ''; } catch { return ''; }
 };
 
 export default function App() {
@@ -51,12 +52,17 @@ export default function App() {
 
   useEffect(() => {
     setStory(s => (s?.id === storyId ? s : null));
+    if (!storyId) return;
     fetch(`${storyId}/story.json`).then(r => r.json()).then(setStory).catch(() => setError('Could not load the story.'));
   }, [storyId]);
 
   const base = `${storyId}/`;
   if (error) return <div className="centre"><p>{error}</p></div>;
-  if (!story) return <div className="centre"><p>Loading…</p></div>;
+  // A reader with no book, or who has finished theirs, chooses one from the library before anything else.
+  const info = STORIES.find(s => s.id === storyId);
+  const needsBook = !!reader && !picking && (!info || shelfStatus(state.events, info).finished);
+  const choosing = needsBook && !['teacher', 'miccheck'].includes(screen.name);
+  if (storyId && !story && !choosing && reader && !picking && screen.name !== 'teacher') return <div className="centre"><p>Loading…</p></div>;
 
   const updateReader = (c: string) => { setReader(c); setReaderCode(c); setPicking(false); setStoryId(savedStory(c)); };
   const chooseStory = (id: string) => { try { localStorage.setItem(storyKey(reader), id); } catch { /* not kept */ } setStoryId(id); };
@@ -77,24 +83,30 @@ export default function App() {
         </header>
       )}
       <main className={reader && micOk && ['practice', 'timed', 'session'].includes(screen.name) ? 'full' : ''}>
-        {(screen.name === 'home' || (!reader && screen.name !== 'teacher')) && <>
+        {choosing && <Library current={storyId} reader={state} choose={chooseStory} go={go} required />}
+        {!choosing && story && (screen.name === 'home' || (!reader && screen.name !== 'teacher')) && <>
           <TestNotice />
           <Home story={story} base={base} readerCode={reader} reader={state} setReader={updateReader} go={go} picking={picking} setPicking={setPicking} />
           <BuildInfo base={base} />
         </>}
-        {reader && !micOk && ['practice', 'timed', 'session'].includes(screen.name) && (
+        {(picking || !reader) && screen.name === 'home' && !story && <>
+          <TestNotice />
+          <Home story={null} base={base} readerCode={reader} reader={state} setReader={updateReader} go={go} picking={picking} setPicking={setPicking} />
+          <BuildInfo base={base} />
+        </>}
+        {!choosing && story && reader && !micOk && ['practice', 'timed', 'session'].includes(screen.name) && (
           <div className="timed"><MicCheck provider={provider} onDone={() => setMicOk(true)} onCancel={() => go({ name: 'home' })} /></div>
         )}
         {screen.name === 'miccheck' && (
           <div className="timed"><MicCheck provider={provider} onDone={() => { setMicOk(true); go({ name: 'home' }); }} onCancel={() => go({ name: 'home' })} /></div>
         )}
-        {reader && micOk && screen.name === 'practice' && <Practice story={story} base={base} startPage={screen.page} focusWords={screen.focusWords}
+        {!choosing && story && reader && micOk && screen.name === 'practice' && <Practice story={story} base={base} startPage={screen.page} focusWords={screen.focusWords}
           reader={state} hasReader={!!reader} provider={provider} go={go} onAward={onAward} />}
-        {reader && micOk && screen.name === 'session' && <Session story={story} base={base} reader={state} provider={provider} go={go} onAward={onAward} />}
-        {reader && micOk && screen.name === 'timed' && <TimedRead story={story} reader={reader} state={state} go={go} onAward={onAward} />}
-        {screen.name === 'teacher' && <Teacher story={story} go={go} />}
-        {reader && screen.name === 'library' && <Library current={storyId} reader={state} choose={chooseStory} go={go} />}
-        {reader && screen.name === 'progress' && <Progress story={story} base={base} readerCode={reader} reader={state} go={go} />}
+        {!choosing && story && reader && micOk && screen.name === 'session' && <Session story={story} base={base} reader={state} provider={provider} go={go} onAward={onAward} />}
+        {!choosing && story && reader && micOk && screen.name === 'timed' && <TimedRead story={story} reader={reader} state={state} go={go} onAward={onAward} />}
+        {screen.name === 'teacher' && <Teacher go={go} />}
+        {!choosing && reader && screen.name === 'library' && <Library current={storyId} reader={state} choose={chooseStory} go={go} />}
+        {!choosing && story && reader && screen.name === 'progress' && <Progress story={story} base={base} readerCode={reader} reader={state} go={go} />}
       </main>
       <RewardToast award={toast} onDone={() => setToast(null)} />
       <LevelUp level={levelUp} onClose={() => setLevelUp(null)} />

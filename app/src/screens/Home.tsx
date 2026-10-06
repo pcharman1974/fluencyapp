@@ -12,15 +12,15 @@ import type { ReadingEvent } from '../lib/rewards';
 import { cardsCollected } from '../components/StoryCards';
 import type { Reader } from '../lib/useReader';
 
-interface Props { story: Story; base: string; readerCode: string; reader: Reader; setReader: (c: string) => void; go: (s: Screen) => void; picking: boolean; setPicking: (on: boolean) => void }
+interface Props { story: Story | null; base: string; readerCode: string; reader: Reader; setReader: (c: string) => void; go: (s: Screen) => void; picking: boolean; setPicking: (on: boolean) => void }
 
 export default function Home({ story, base, readerCode, reader, setReader, go, picking, setPicking }: Props) {
   // Timed reads use unseen passages, so the gauge follows every timed read, whichever story is on.
   const attempts = readerCode ? getAttempts(readerCode) : [];
   const latest = attempts.at(-1), first = attempts[0], best = attempts.reduce((m, a) => Math.max(m, a.wcpm), 0);
-  const cards = cardsCollected(reader.events, story.id).size;
+  const cards = story ? cardsCollected(reader.events, story.id).size : 0;
 
-  if (picking || !readerCode) return (
+  if (picking || !readerCode || !story) return (
     <div className="home">
       <section className="hero">
         <div>
@@ -51,19 +51,15 @@ export default function Home({ story, base, readerCode, reader, setReader, go, p
         <div className="story-card-body">
           <h2>{story.title}</h2>
           <p className="byline">Written by {story.author} · {cards}/{story.pages.length} story cards collected</p>
-          {cards >= story.pages.length && <p className="story-done">You've finished this story! Pick your next one from the library, or keep practising this one.</p>}
           <div className="steps">
-            {cards >= story.pages.length
-              ? <button className="btn btn-orange btn-big" onClick={() => go({ name: 'library' })}>Choose your next story</button>
-              : <button className="btn btn-orange btn-big" onClick={() => go({ name: 'session' })}>Start today's session</button>}
-            <p className="hint centre-text">Listen and read 3 pages, give your best reading, then practise a few words. About 5 to 10 minutes.</p>
+            <button className="btn btn-orange btn-big" onClick={() => go({ name: 'session' })}>Start today's session</button>
+            <p className="hint centre-text">Listen and read today's pages (about 240 words), give your best reading, then practise a few words. About 5 to 10 minutes.</p>
             <div className="row wrap even">
               <button className="btn btn-ghost" onClick={() => go({ name: 'practice' })}>Practise any page</button>
               <button className="btn btn-navy" onClick={() => go({ name: 'timed' })}>Bonus: timed read</button>
               <button className="btn btn-ghost" onClick={() => go({ name: 'progress' })}>My progress</button>
-              <button className="btn btn-ghost" onClick={() => go({ name: 'library' })}>Library</button>
+              <button className="btn btn-ghost" onClick={() => go({ name: 'library' })}>Change book</button>
             </div>
-            {cards >= story.pages.length && <button className="link" onClick={() => go({ name: 'session' })}>Read this story again</button>}
           </div>
         </div>
       </section>
