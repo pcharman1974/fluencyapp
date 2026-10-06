@@ -2,6 +2,7 @@
 // Shows exactly what is stored on this device; nothing here is sent anywhere.
 import type { Attempt } from '../types';
 import { BADGES, type ReadingEvent } from './rewards';
+import { badgeInfo } from './milestones';
 
 export type LogKind = 'page' | 'reread' | 'selfcheck' | 'warmup' | 'timed' | 'marking' | 'points' | 'badge';
 
@@ -60,7 +61,7 @@ function eventRow(e: ReadingEvent): LogRow {
     case 'points':
       return { date: e.date, kind: 'points', what: `+${e.amount}`, details: [e.reason], raw };
     case 'badge':
-      return { date: e.date, kind: 'badge', what: BADGES.find(b => b.id === e.id)?.name ?? e.id, details: [], raw };
+      return { date: e.date, kind: 'badge', what: badgeInfo(e.id, BADGES).name, details: [], raw };
   }
 }
 

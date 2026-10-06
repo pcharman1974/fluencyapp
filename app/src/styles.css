@@ -618,3 +618,32 @@ main.full { max-width: none; padding: 0; }
 .book.done { cursor: default; opacity: .75; }
 .book.done:hover { border-color: transparent; }
 .btn-danger { color: #B91C1C; border-color: #B91C1C; }
+
+/* Reading counters (words and minutes) and the volume chart */
+.dash-counters { margin-top: 0; }
+.rc { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.rc-counter { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; min-width: 0; }
+.rc-ring { position: relative; width: min(190px, 100%); aspect-ratio: 1; }
+.rc-ring svg { width: 100%; height: 100%; display: block; }
+.rc-ring-bg { fill: none; stroke: #EAF1F5; stroke-width: 9; }
+.rc-ring-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.rc-big { font: 800 1.9rem var(--font-family); color: var(--lwc-navy-deep); line-height: 1.1; }
+.rc-unit { color: #4A5B66; font-weight: 700; font-size: .85rem; }
+.rc-next { margin: 4px 0 0; color: #33444F; font-size: .95rem; }
+.rc-week { margin: 0; color: #4A5B66; font-size: .85rem; }
+.today-words { margin: 4px 0; color: #33444F; }
+.rv { margin-top: 18px; display: flex; flex-direction: column; gap: 10px; }
+.rv-bars { list-style: none; margin: 0; padding: 22px 0 0; display: flex; align-items: flex-end; gap: 6px; height: 210px; border-bottom: 2px solid #C3CDD3; }
+.rv-bars li { flex: 1; min-width: 0; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; position: relative; }
+.rv-bar { width: 100%; max-width: 46px; border-radius: 6px 6px 0 0; min-height: 2px; }
+.rv-bar.best { outline: 3px solid var(--lwc-orange); outline-offset: 1px; }
+.rv-val { font-size: .75rem; font-weight: 700; color: #33444F; white-space: nowrap; }
+.rv-key { position: absolute; bottom: -22px; font-size: .72rem; color: #4A5B66; white-space: nowrap; }
+.rv-bars { margin-bottom: 22px; }
+.badge-num { fill: #fff; font: 800 24px var(--font-family); }
+.badge-unit { fill: #fff; font: 800 9px var(--font-family); letter-spacing: .5px; }
+.badge:not(.earned) .badge-num, .badge:not(.earned) .badge-unit { fill: #fff; opacity: .9; }
+.badge.earned.milestone.words .badge-shield { fill: #1D6FB0; }
+.badge.earned.milestone.minutes .badge-shield { fill: #7A5BC0; }
+.sub { display: block; color: #4A5B66; font-size: .78rem; font-weight: 600; }
+@media (max-width: 600px) { .rc-big { font-size: 1.4rem; } .rv-val { font-size: .62rem; } .rv-key { font-size: .6rem; } }

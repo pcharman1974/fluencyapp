@@ -2,6 +2,8 @@ import type { Story } from '../types';
 import type { Screen } from '../App';
 import { getAttempts } from '../lib/storage';
 import { BADGES, earnedBadges } from '../lib/rewards';
+import { MILESTONES, milestoneCounts } from '../lib/milestones';
+import { ReadingCounters, ReadingVolumeChart } from '../components/ReadingCounters';
 import { Badge, WeekSummary } from '../components/Rewards';
 import { PowerPanel } from '../components/PowerCore';
 import StoryCards from '../components/StoryCards';
@@ -17,6 +19,7 @@ export default function Progress({ story, base, readerCode, reader, go }: Props)
   const attempts = getAttempts(readerCode).filter(a => a.storyId === story.id);
   const best = attempts.reduce((m, a) => Math.max(m, a.wcpm), 0);
   const have = earnedBadges(reader.events);
+  const counts = milestoneCounts(reader.events);
   const recent = reader.events.filter(e => e.type === 'points').slice(-8).reverse() as { date: string; amount: number; reason: string }[];
   return (
     <div className="progress-page">
@@ -24,6 +27,12 @@ export default function Progress({ story, base, readerCode, reader, go }: Props)
       <section className="dash">
         <div className="panel dash-level power-card"><PowerPanel events={reader.events} /></div>
         <div className="panel dash-week"><WeekSummary events={reader.events} holidays={reader.holidays} /></div>
+      </section>
+
+      <section className="panel">
+        <h2>Your reading</h2>
+        <ReadingCounters events={reader.events} />
+        <ReadingVolumeChart events={reader.events} />
       </section>
 
       <section className="progress-charts">
@@ -38,8 +47,18 @@ export default function Progress({ story, base, readerCode, reader, go }: Props)
       </section>
 
       <section className="panel">
-        <h2>Badges <span className="count">{have.size}/{BADGES.length}</span></h2>
+        <h2>Badges <span className="count">{BADGES.filter(b => have.has(b.id)).length}/{BADGES.length}</span></h2>
         <div className="badges">{BADGES.map(b => <Badge key={b.id} id={b.id} earned={have.has(b.id)} />)}</div>
+        {(['total', 'week', 'month'] as const).map(scope => {
+          const list = MILESTONES.filter(m => m.scope === scope);
+          return (
+            <div key={scope}>
+              <h3>{scope === 'total' ? 'Reading milestones' : scope === 'week' ? 'Big weeks (earn again every week)' : 'Big months (earn again every month)'}
+                {' '}<span className="count">{list.filter(m => counts.has(m.id)).length}/{list.length}</span></h3>
+              <div className="badges">{list.map(m => <Badge key={m.id} id={m.id} earned={counts.has(m.id)} times={counts.get(m.id)} />)}</div>
+            </div>
+          );
+        })}
       </section>
 
       <section className="panel">

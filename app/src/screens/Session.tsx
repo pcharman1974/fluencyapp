@@ -14,6 +14,7 @@ import { checkDetail, type PageCheck } from '../lib/verify';
 import { canSpeak, speak } from '../lib/voice';
 import { normalise } from '../lib/text';
 import { sessionPages } from '../lib/sessionPlan';
+import { formatWords, totals } from '../lib/milestones';
 import { loadManifest, playWord, preloadAudio, type AudioManifest } from '../lib/pageAudio';
 
 interface Props { story: Story; base: string; reader: Reader; provider: SpeechProvider | null; go: (s: Screen) => void; onAward: (a: RecordResult) => void }
@@ -75,6 +76,7 @@ export default function Session({ story, base, reader, provider, go, onAward }: 
           <p className="big-msg">{week >= WEEKLY_TARGET && startedWeek.current < WEEKLY_TARGET ? 'Weekly goal hit!' : week >= WEEKLY_TARGET ? 'Goal already hit this week. Extra reading still earns Power.' : `Fill your bar on ${WEEKLY_TARGET - week} more day${WEEKLY_TARGET - week === 1 ? '' : 's'} this week`}</p>
         </div>
         <TodayBar events={reader.events} />
+        <p className="today-words">Today you read <b>{formatWords(totals(reader.events, e => dayKey(e.date) === dayKey(new Date().toISOString())).words)} words</b> aloud. That's <b>{formatWords(totals(reader.events).words)}</b> altogether.</p>
         {!todayFull && <button className="btn btn-navy" onClick={() => go({ name: 'practice' })}>Keep reading to fill today's bar</button>}
         {earned.current.badges.length > 0 && <div className="badges">{[...new Set(earned.current.badges)].map(id => <Badge key={id} id={id} earned />)}</div>}
         {earned.current.pages.length > 0 && <>

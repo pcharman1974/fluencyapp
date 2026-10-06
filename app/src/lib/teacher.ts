@@ -1,4 +1,5 @@
 // Usage summary for the teacher dashboard. Pure functions over a pupil's events.
+import { totals, weekTotals } from './milestones';
 import { dayKey, levelFor, sessionDays, sessionsInWeek, totalPoints, trickyWords, weekKey, weekStreak, WEEKLY_TARGET, type ReadingEvent } from './rewards';
 
 export type Status = 'on-track' | 'behind' | 'not-started' | 'holiday';
@@ -20,6 +21,9 @@ export interface PupilSummary {
   level: number;
   levelName: string;
   lastActive?: string;
+  wordsTotal: number;
+  wordsThisWeek: number;
+  minutesTotal: number;
   weeks: { week: string; sessions: number; holiday: boolean }[]; // oldest first
   tricky: string[];
   needsAttention: boolean;
@@ -53,6 +57,7 @@ export function summarise(code: string, ev: ReadingEvent[], nowIso: string, holi
     latestWcpm: timed.at(-1)?.wcpm, firstWcpm: timed.length > 1 ? timed[0].wcpm : undefined,
     power: pts, level: lv.level, levelName: lv.name,
     lastActive: reading.at(-1)?.date,
+    wordsTotal: totals(ev).words, wordsThisWeek: weekTotals(ev, nowIso).words, minutesTotal: Math.round(totals(ev).seconds / 60),
     weeks, tricky: trickyWords(ev, 6),
     needsAttention: !holiday && (status === 'not-started' || (checks.length >= 3 && failedShare >= 0.4)),
   };

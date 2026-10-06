@@ -1,4 +1,5 @@
 // Power points, levels, weekly goal, week streak and badges.
+import { milestonesReached } from './milestones';
 // Principle: reward reading practice and personal improvement, never raw speed against others.
 
 /** Everything a speech check measured, saved with each read for checking (QA). Older records may lack some fields. */
@@ -48,10 +49,12 @@ export const LEVELS = [
 ];
 export type Level = (typeof LEVELS)[number];
 
-export type BadgeId = 'first-page' | 'perfect-page' | 'story-finished' | 'personal-best' | 're-reader'
+export type CoreBadgeId = 'first-page' | 'perfect-page' | 'story-finished' | 'personal-best' | 're-reader'
   | 'goal-week' | 'streak-3' | 'sessions-10' | 'word-fixer';
+/** Core badges, plus reading milestones (see milestones.ts), e.g. 'total-words-1000' or 'week-minutes-20'. */
+export type BadgeId = CoreBadgeId | `${'total' | 'week' | 'month'}-${'words' | 'minutes'}-${number}`;
 
-export const BADGES: { id: BadgeId; name: string; how: string }[] = [
+export const BADGES: { id: CoreBadgeId; name: string; how: string }[] = [
   { id: 'first-page', name: 'First page', how: 'Read your first page aloud' },
   { id: 'perfect-page', name: 'Perfect page', how: 'Read every word on a page correctly' },
   { id: 'story-finished', name: 'Story finished', how: 'Read every page of a story aloud' },
@@ -218,6 +221,8 @@ export function award(before: ReadingEvent[], e: ReadingEvent, ctx: { storyPages
   add('word-fixer', after.filter(x => x.type === 'warmup' && x.correct).length >= 10);
   const withGoal = [...after, ...pts.map(p => ({ type: 'points' as const, date: e.date, ...p }))];
   add('streak-3', weekStreak(withGoal, e.date, ctx.holidays) >= 3);
+  // Words and minutes milestones (week and month ones can be earned again each week or month).
+  badges.push(...(milestonesReached(before, e) as BadgeId[]));
 
   return { points: pts, badges };
 }

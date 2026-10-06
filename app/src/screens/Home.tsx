@@ -5,6 +5,7 @@ import { gerbil } from '../brand';
 import { WeekSummary } from '../components/Rewards';
 import { PowerPanel } from '../components/PowerCore';
 import Gauge from '../components/Gauge';
+import { ReadingCounters } from '../components/ReadingCounters';
 import { getAllReaderCodes, getAttempts, getEvents, importRecords } from '../lib/storage';
 import { claimReader, fetchReader, listReaders, type ServerReader } from '../lib/qa';
 import type { Attempt } from '../types';
@@ -45,6 +46,7 @@ export default function Home({ story, base, readerCode, reader, setReader, go, p
             : <p className="hint">Do a timed read to see your fluency gauge.</p>}
         </div>
       </section>
+      <section className="panel dash-counters"><ReadingCounters events={reader.events} /></section>
 
       <section className="story-card panel">
         {story.coverImage ? <img src={base + story.coverImage} alt="" /> : <div className="cover-placeholder" aria-hidden="true">{story.title}</div>}

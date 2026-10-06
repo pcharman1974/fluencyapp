@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { badgeInfo, MILESTONES } from '../lib/milestones';
 import { BADGES, dayKey, DAILY_TARGET_MIN, levelFor, MAX_EXTRA_MINUTES, POINTS, readingByDay, sessionsInWeek, totalPoints, weekStreak, WEEKLY_TARGET, type Award, type BadgeId, type ReadingEvent } from '../lib/rewards';
 
 /** Ring that fills one third per session this week. */
@@ -16,7 +17,7 @@ export function GoalRing({ done, size = 96 }: { done: number; size?: number }) {
 }
 
 /** Simple original badge emblem: a shield with a symbol per badge. */
-const SYMBOL: Record<BadgeId, string> = {
+const SYMBOL: Record<string, string> = {
   'first-page': 'M38 30h24v40H38z M44 40h12 M44 48h12 M44 56h8',
   'perfect-page': 'M36 52l10 10 20-24',
   'story-finished': 'M34 34h14v34H34z M52 34h14v34H52z',
@@ -28,16 +29,21 @@ const SYMBOL: Record<BadgeId, string> = {
   'word-fixer': 'M40 64l24-24 M58 34l8 8 M36 68l6-2-4-4z',
 };
 
-export function Badge({ id, earned }: { id: BadgeId; earned: boolean }) {
-  const b = BADGES.find(x => x.id === id)!;
+/** A badge. Milestone badges show their number (e.g. "5k") on the shield, and how many times they've been earned. */
+export function Badge({ id, earned, times = 0 }: { id: BadgeId | string; earned: boolean; times?: number }) {
+  const b = badgeInfo(id, BADGES);
+  const m = MILESTONES.find(x => x.id === id);
   return (
-    <div className={'badge' + (earned ? ' earned' : '')}>
+    <div className={'badge' + (earned ? ' earned' : '') + (m ? ` milestone ${m.measure}` : '')}>
       <svg viewBox="0 0 100 100" aria-hidden="true">
         <path d="M50 6l38 14v28c0 24-17 38-38 46C29 86 12 72 12 48V20z" className="badge-shield" />
-        <path d={SYMBOL[id]} className="badge-symbol" />
+        {m ? <>
+          <text x="50" y={m.label.length > 3 ? 56 : 58} textAnchor="middle" className="badge-num" style={{ fontSize: m.label.length > 3 ? 20 : 24 }}>{m.label}</text>
+          <text x="50" y="74" textAnchor="middle" className="badge-unit">{m.measure === 'words' ? 'WORDS' : m.scope === 'total' ? 'READING' : 'MINUTES'}</text>
+        </> : <path d={SYMBOL[id]} className="badge-symbol" />}
       </svg>
       <strong>{b.name}</strong>
-      <span>{earned ? 'Earned' : b.how}</span>
+      <span>{earned ? (times > 1 ? `Earned ×${times}` : 'Earned') : b.how}</span>
     </div>
   );
 }
@@ -115,7 +121,7 @@ export function RewardToast({ award, onDone }: { award: Award | null; onDone: ()
     <div className="toast" role="status" onClick={onDone}>
       {total > 0 && <div className="toast-points"><span className="bolt" aria-hidden="true" />+{total} Power</div>}
       {shown.points.map((p, i) => <div key={i} className="toast-line">{p.reason} <b>+{p.amount}</b></div>)}
-      {shown.badges.map(id => <div key={id} className="toast-badge">New badge: {BADGES.find(b => b.id === id)!.name}</div>)}
+      {shown.badges.map(id => <div key={id} className="toast-badge">New badge: {badgeInfo(id, BADGES).name}</div>)}
     </div>
   );
 }

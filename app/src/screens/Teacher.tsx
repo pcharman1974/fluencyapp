@@ -13,6 +13,7 @@ import { exampleClass } from '../lib/exampleData';
 import { weekKey, WEEKLY_TARGET, LEVELS, type ReadingEvent } from '../lib/rewards';
 import { GoalRing } from '../components/Rewards';
 import { FluencyChart, PowerChart } from '../components/ProgressCharts';
+import { ReadingCounters, ReadingVolumeChart } from '../components/ReadingCounters';
 
 interface Props { go: (s: Screen) => void }
 
@@ -94,7 +95,7 @@ export default function Teacher({ go }: Props) {
         <div className="table-wrap">
           <table className="table t-table">
             <thead><tr>
-              <th>Reader</th><th>This week</th><th>Week streak</th><th>Pages read</th><th>Minutes</th><th>Failed checks</th><th>Fluency (WCPM)</th><th>Level</th><th>Last active</th>
+              <th>Reader</th><th>This week</th><th>Week streak</th><th>Pages read</th><th>Minutes</th><th>Failed checks</th><th>Fluency (WCPM)</th><th>Words read</th><th>Total time</th><th>Level</th><th>Last active</th>
             </tr></thead>
             <tbody>
               {sorted.map(s => (
@@ -106,11 +107,13 @@ export default function Teacher({ go }: Props) {
                   <td className="num">{s.minutesThisWeek}</td>
                   <td className="num">{s.checksThisWeek ? <span className={s.failedShare >= 0.4 && s.checksThisWeek >= 3 ? 'flag' : ''}>{s.failedThisWeek} of {s.checksThisWeek}</span> : '–'}</td>
                   <td className="num">{s.latestWcpm ?? '–'}{s.firstWcpm !== undefined && s.latestWcpm !== undefined && <Change d={s.latestWcpm - s.firstWcpm} />}</td>
+                  <td className="num">{s.wordsTotal.toLocaleString('en-GB')}{s.wordsThisWeek > 0 && <span className="sub"> +{s.wordsThisWeek.toLocaleString('en-GB')} this week</span>}</td>
+                  <td className="num">{s.minutesTotal >= 60 ? `${Math.floor(s.minutesTotal / 60)}h ${s.minutesTotal % 60}m` : `${s.minutesTotal} min`}</td>
                   <td>{s.level} · {s.levelName}</td>
                   <td>{s.lastActive ? ago(s.lastActive) : 'Never'}</td>
                 </tr>
               ))}
-              {sorted.length === 0 && <tr><td colSpan={9}>No pupils have used this device yet. Tick "Show example pupils" to see how the dashboard works.</td></tr>}
+              {sorted.length === 0 && <tr><td colSpan={11}>No pupils have used this device yet. Tick "Show example pupils" to see how the dashboard works.</td></tr>}
             </tbody>
           </table>
         </div>
@@ -165,6 +168,11 @@ function PupilDetail({ p, events, attempts, onBack, onRemove }: { p: PupilSummar
           <h3>Power over time</h3>
           <PowerChart events={events} audience="teacher" />
         </div>
+      </section>
+      <section className="panel">
+        <h3>Reading volume: words and minutes read aloud</h3>
+        <ReadingCounters events={events} />
+        <ReadingVolumeChart events={events} audience="teacher" />
       </section>
       <div className="t-cols">
         <section className="panel">
