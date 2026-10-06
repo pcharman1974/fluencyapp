@@ -4,7 +4,7 @@
   "author": "Latoyah Innerarity",
   "source": "FFT Tutoring with the Lightning Squad (tutoring.fft.org.uk), screenshots supplied 6 Oct 2026",
   "audience": "Secondary",
-  "coverImage": "",
+  "coverImage": "images/00-cover.jpg",
   "vocabulary": [
     "frenzy",
     "tense",
@@ -34,7 +34,9 @@
         "Championship",
         "Wembley",
         "prospect"
-      ]
+      ],
+      "image": "images/01.jpg",
+      "imageAlt": "Wembley stadium packed with fans for the final, with smoke drifting over the pitch."
     },
     {
       "page": 2,
@@ -51,7 +53,9 @@
         "sensations",
         "recognition",
         "discrimination"
-      ]
+      ],
+      "image": "images/02.jpg",
+      "imageAlt": "England players in white celebrating together on the pitch, with flags in the stands behind them."
     },
     {
       "page": 3,
@@ -69,7 +73,9 @@
         "enthusiastically",
         "inexperienced",
         "spectators"
-      ]
+      ],
+      "image": "images/03.jpg",
+      "imageAlt": "An old photograph of a young woman in a loose football shirt and knee-length shorts, leaning on a rock."
     },
     {
       "page": 4,
@@ -85,7 +91,9 @@
         "Industrial",
         "independence",
         "stereotype"
-      ]
+      ],
+      "image": "images/04.jpg",
+      "imageAlt": "An old photograph of the British Ladies football team in front of a brick wall, with a ball at their feet."
     },
     {
       "page": 5,
@@ -104,7 +112,9 @@
         "belittled",
         "ridiculed",
         "financial"
-      ]
+      ],
+      "image": "images/05.jpg",
+      "imageAlt": "An old drawing of women in long skirts playing football in front of a crowd."
     },
     {
       "page": 6,
@@ -122,7 +132,9 @@
         "majority",
         "vacancies",
         "ammunition"
-      ]
+      ],
+      "image": "images/06.jpg",
+      "imageAlt": "A black-and-white photograph of women building engines in a wartime factory."
     },
     {
       "page": 7,
@@ -138,7 +150,9 @@
         "manufacturer",
         "established",
         "featured"
-      ]
+      ],
+      "image": "images/07.jpg",
+      "imageAlt": "An old photograph of a woman footballer in a striped cap, kicking her leg high."
     },
     {
       "page": 8,
@@ -154,7 +168,9 @@
         "equivalent",
         "spectators",
         "suspended"
-      ]
+      ],
+      "image": "images/08.jpg",
+      "imageAlt": "Four Dick, Kerr Ladies players in white shirts and striped caps, one holding a football."
     },
     {
       "page": 9,
@@ -170,7 +186,9 @@
         "celebrities",
         "generated",
         "popularity"
-      ]
+      ],
+      "image": "images/09.jpg",
+      "imageAlt": "An old photograph of a women's team in checked shorts lined up by a goalpost, with a crowd behind."
     },
     {
       "page": 10,
@@ -185,7 +203,9 @@
         "statements",
         "unsuitable",
         "capacity"
-      ]
+      ],
+      "image": "images/10.jpg",
+      "imageAlt": "A black-and-white photograph of a women's team in striped shirts, with their coach beside them."
     },
     {
       "page": 11,
@@ -203,7 +223,9 @@
         "Propelled",
         "prosperity",
         "traditional"
-      ]
+      ],
+      "image": "images/11.jpg",
+      "imageAlt": "Young people in bright 1960s fashions chatting outside a shop."
     },
     {
       "page": 12,
@@ -221,7 +243,9 @@
         "optimistic",
         "atmosphere",
         "Undeterred"
-      ]
+      ],
+      "image": "images/12.jpg",
+      "imageAlt": "The Football Association crest, three lions, on a large banner on a building."
     },
     {
       "page": 13,
@@ -238,7 +262,9 @@
         "development",
         "established",
         "international"
-      ]
+      ],
+      "image": "images/13.jpg",
+      "imageAlt": "Blue and yellow FIFA banners."
     },
     {
       "page": 14,
@@ -254,7 +280,9 @@
         "continents",
         "tournament",
         "attendance"
-      ]
+      ],
+      "image": "images/14.jpg",
+      "imageAlt": "Two women footballers racing for the ball, one in an Arsenal kit."
     },
     {
       "page": 15,
@@ -270,7 +298,9 @@
         "participation",
         "landmark",
         "legacy"
-      ]
+      ],
+      "image": "images/15.jpg",
+      "imageAlt": "The England women's team in red kit lined up for a photograph before a match."
     }
   ],
   "glossary": {
@@ -285,7 +315,7 @@
   },
   "glossaryNote": "DRAFT definitions written by Claude for this test; to be checked by the content team.",
   "headingNote": "Page headings are not in the original screens; they were added for the app and need content-team review.",
-  "imagesNote": "Images not yet supplied as files: the app shows the pages without pictures until they are added under images/.",
+  "imagesNote": "Pictures cropped from screenshots of the original screens (supplied 6 Oct 2026). Replace with the original image files when available, for sharper pictures.",
   "ttsReplacements": {
     "approx.": "approximately",
     "II": "Two"

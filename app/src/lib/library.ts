@@ -6,7 +6,7 @@ export interface StoryInfo { id: string; title: string; author: string; pages: n
 /** Stories in /content (paths are relative, so they work on any host). The first is the default. */
 export const STORIES: StoryInfo[] = [
   { id: 'secret-stones', title: 'Secret Stones', author: 'Elizabeth Charman', pages: 10, cover: 'images/00-cover.jpg', colour: '#7A5C3E', topic: 'History · Mysteries' },
-  { id: 'womens-football', title: 'The History of Women’s Football', author: 'Latoyah Innerarity', pages: 15, colour: '#B4232A', topic: 'Sport · History' },
+  { id: 'womens-football', title: 'The History of Women’s Football', author: 'Latoyah Innerarity', pages: 15, cover: 'images/00-cover.jpg', colour: '#B4232A', topic: 'Sport · History' },
   { id: 'inclusive-design', title: 'Inclusive Design', author: 'Catherine Baker', pages: 14, colour: '#1D6FB0', topic: 'Design · Everyday life' },
   { id: 'inventions', title: 'Inventions That Changed The World', author: 'Catherine Baker', pages: 10, colour: '#2F6B3A', topic: 'Science · Inventions' },
   { id: 'windrush', title: 'The Windrush Generation', author: 'Latoyah Innerarity', pages: 14, colour: '#8A5A00', topic: 'History · People' },

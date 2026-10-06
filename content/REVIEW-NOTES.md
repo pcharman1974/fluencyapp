@@ -16,7 +16,7 @@ The text of three stories was typed from screenshots of FFT Tutoring with the Li
 
 Please check it word for word against the originals. Boxed words match the originals. Italics (thoughts, the sword's inscription) are shown as plain text.
 
-**Pictures:** none yet. The screenshots weren't supplied as image files, so these stories show text only, and the story cards show page numbers. Add images under `content/<story>/images/` and set `image`, `imageAlt` and `coverImage` in `story.json`.
+**Pictures:** The History of Women's Football now has its cover and all 15 page pictures, cropped from screenshots, with descriptions written for screen readers (please check them). The other stories have none yet. The screenshots weren't supplied as image files, so these stories show text only, and the story cards show page numbers. Add images under `content/<story>/images/` and set `image`, `imageAlt` and `coverImage` in `story.json`.
 
 **Written for the app (drafts):**
 
