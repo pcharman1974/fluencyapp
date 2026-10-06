@@ -22,6 +22,7 @@ export interface Story {
 export interface Attempt {
   readerCode: string;
   storyId: string;
+  passageId?: string; // unseen passage used for a timed read
   date: string;      // ISO
   method: 'adult' | 'speech' | 'demo';
   seconds: number;

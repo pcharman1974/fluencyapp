@@ -84,7 +84,7 @@ export function logRows(events: ReadingEvent[], attempts: Attempt[]): LogRow[] {
 // Within the same moment: the reading first, then what it earned.
 const order = (k: LogKind) => ['page', 'reread', 'selfcheck', 'warmup', 'timed', 'marking', 'points', 'badge'].indexOf(k);
 
-const COLUMNS = ['readerCode', 'date', 'type', 'storyId', 'page', 'word', 'verified', 'correct', 'coverage', 'accuracy', 'words', 'durationSec',
+const COLUMNS = ['readerCode', 'date', 'type', 'storyId', 'passageId', 'page', 'word', 'verified', 'correct', 'coverage', 'accuracy', 'words', 'durationSec',
   'wpm', 'wcpm', 'misread', 'message', 'checkedBy', 'errorWords', 'seconds', 'wordsRead', 'errors', 'method', 'speechScores', 'amount', 'reason', 'id'];
 
 /** CSV with one row per record and one column per stored field. */

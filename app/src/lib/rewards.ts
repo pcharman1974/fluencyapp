@@ -16,7 +16,7 @@ export type ReadingEvent =
   | ({ type: 'page'; date: string; storyId: string; page: number; verified: boolean; coverage: number; accuracy: number; words: number; durationSec: number; misread: string[] } & Partial<CheckDetail>)
   | ({ type: 'reread'; date: string; storyId: string; page: number; verified: boolean; wcpm: number; scores?: SpeechScores } & Partial<CheckDetail>)
   | { type: 'selfcheck'; date: string; storyId: string; page: number; smooth: SelfAnswer; pauses: SelfAnswer; meaning: SelfAnswer }
-  | { type: 'timed'; date: string; storyId: string; wcpm: number; errorWords: string[]; seconds?: number }
+  | { type: 'timed'; date: string; storyId: string; passageId?: string; wcpm: number; errorWords: string[]; seconds?: number }
   | ({ type: 'warmup'; date: string; word: string; correct: boolean } & Partial<CheckDetail>)
   | { type: 'points'; date: string; amount: number; reason: string }
   | { type: 'badge'; date: string; id: BadgeId };

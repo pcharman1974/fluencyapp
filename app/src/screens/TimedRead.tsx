@@ -7,6 +7,7 @@ import { providers, type SpeechProvider, type SpeechResult } from '../lib/speech
 import { saveAttempt, getAttempts } from '../lib/storage';
 import { sendRecording, startRecording, type QaRecorder } from '../lib/qa';
 import { runningRecord, type RecordMark } from '../lib/verify';
+import { asStory, nextPassage } from '../lib/passages';
 import Gauge from '../components/Gauge';
 import type { Reader, RecordResult } from '../lib/useReader';
 import { POINTS, type Award } from '../lib/rewards';
@@ -19,7 +20,10 @@ type Phase = 'setup' | 'countdown' | 'reading' | 'analysing' | 'results';
 
 
 export default function TimedRead({ story, reader, state, go, onAward }: Props) {
-  const tokens = useMemo(() => tokenisePages(story.pages), [story]);
+  // An unseen passage, not the story: a practised page would overstate the pupil's fluency.
+  const [passage] = useState(() => nextPassage(getAttempts(reader).map(a => a.passageId)));
+  const text = useMemo(() => asStory(passage, story), [passage, story]);
+  const tokens = useMemo(() => tokenisePages(text.pages), [text]);
   const [phase, setPhase] = useState<Phase>('setup');
   const [speechReady, setSpeechReady] = useState(false);
   const [count, setCount] = useState(3);
@@ -108,13 +112,13 @@ export default function TimedRead({ story, reader, state, go, onAward }: Props) 
     if (saved.current) return;
     const errorWords = [...errs].filter(i => i <= last).sort((a, b) => a - b).map(i => tokens[i].display);
     const attempt: Attempt = {
-      readerCode: reader, storyId: story.id, date: new Date().toISOString(), method: speechReady ? 'speech' : 'demo',
+      readerCode: reader, storyId: story.id, passageId: passage.id, date: new Date().toISOString(), method: speechReady ? 'speech' : 'demo',
       seconds: r.seconds, wordsRead: r.wordsRead, errors: r.errors, wcpm: r.wcpm,
       accuracy: r.accuracy, errorWords, speechScores: heard.scores,
     };
     saveAttempt(attempt);
-    sendRecording(reader, { type: 'timed', storyId: story.id }, { attempt, check: { record }, text: tokens.map(t => t.display).join(' '), heard: heard.words.map(w => w.text).join(' '), provider: heard.provider }, audio.current);
-    onAward(state.record({ type: 'timed', storyId: story.id, wcpm: r.wcpm, errorWords, seconds: r.seconds }));
+    sendRecording(reader, { type: 'timed', storyId: story.id }, { passageId: passage.id, attempt, check: { record }, text: tokens.map(t => t.display).join(' '), heard: heard.words.map(w => w.text).join(' '), provider: heard.provider }, audio.current);
+    onAward(state.record({ type: 'timed', storyId: story.id, passageId: passage.id, wcpm: r.wcpm, errorWords, seconds: r.seconds }));
     saved.current = true;
   }
 
@@ -125,7 +129,8 @@ export default function TimedRead({ story, reader, state, go, onAward }: Props) 
       <button className="btn btn-ghost" onClick={() => go({ name: 'home' })}>← Back</button>
       <section className="panel setup">
         <h2>Bonus: one-minute timed read</h2>
-        <p>Read <strong>{story.title}</strong> aloud from the start until the time is up. Read carefully and at a steady pace. Don't rush. If you get stuck on a word, have a go and carry on.</p>
+        <p>Read <strong>{passage.title}</strong> aloud from the start until the time is up. It's a new piece you haven't seen before. Read carefully and at a steady pace. Don't rush. If you get stuck on a word, have a go and carry on.</p>
+        {passage.status === 'draft' && <p className="hint"><span className="tag">draft passage</span> Test text, still to be checked by the content team.</p>}
         <p className="hint">One minute. Earns +{POINTS.timedRead} Power and counts towards today's bar.</p>
         <p className="hint">{speechReady
           ? 'The app listens and marks your reading automatically.'
@@ -195,7 +200,8 @@ export default function TimedRead({ story, reader, state, go, onAward }: Props) 
       </div>
       {problem && <p className="problem">{problem}</p>}
       <section className="panel passage" aria-label="Reading passage">
-        {story.pages.map(p => (
+        <h2 className="passage-title">{passage.title}</h2>
+        {text.pages.map(p => (
           <p key={p.page} className="reading-text">
             {tokens.filter(t => t.page === p.page).map(t => {
               const cls = ['word', 'tappable',
