@@ -2,7 +2,7 @@
 // device is also sent to the server, with a recording of each read and what the speech check heard.
 // Switched on only when the server says so (it needs the site password and a disk); otherwise the
 // app works device-only, as in the Claude artifact.
-import { enqueue, newKey, startOutbox, update, type OutboxItem } from './outbox';
+import { dropPending, enqueue, newKey, startOutbox, update, type OutboxItem } from './outbox';
 import type { Review } from './review';
 
 export interface QaContext { type: 'page' | 'reread' | 'warmup' | 'timed'; storyId?: string; page?: number; word?: string }
@@ -91,6 +91,12 @@ export const listReaders = (): Promise<ServerReader[]> =>
   qaEnabled().then(on => (on ? fetch('api/qa/readers').then(r => (r.ok ? r.json() : [])) : [])).catch(() => []);
 export const fetchReader = (code: string): Promise<{ events: unknown[]; attempts: unknown[] }> =>
   fetch(`api/qa/records/${encodeURIComponent(code)}`).then(r => (r.ok ? r.json() : { events: [], attempts: [] }));
+
+/** Deletes all of a pupil's records and recordings from the server, and any of their uploads still waiting on this device. */
+export async function removeReader(code: string): Promise<boolean> {
+  await dropPending(i => (i.kind === 'records' ? i.body.readerCode : i.meta.readerCode) === code);
+  return fetch(`api/qa/readers/${encodeURIComponent(code)}`, { method: 'DELETE' }).then(r => r.ok).catch(() => false);
+}
 
 /** Claims a new reader number on the server. 'taken' if someone already has it; 'offline' when there is no server to ask. */
 export async function claimReader(code: string): Promise<'ok' | 'taken' | 'offline'> {

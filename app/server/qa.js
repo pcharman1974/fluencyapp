@@ -130,6 +130,19 @@ export function qaRoutes(app, { root, enabled }) {
     }
   });
 
+  /** Removes a pupil (teacher tidy-up): deletes all their records and recordings. The number becomes free to reuse. */
+  app.delete('/api/qa/readers/:code', guard, async (req, res) => {
+    const code = req.params.code;
+    if (!READER.test(code)) return res.status(400).json({ error: 'Bad reader code' });
+    let deleted = 0;
+    try { await fsp.rm(path.join(evDir, `${code}.jsonl`)); deleted++; } catch { /* no records */ }
+    for (const n of await fsp.readdir(recDir)) {
+      if (n.split('_')[1] !== code) continue; // ids are <date>_<code>_<type>_<clientId>
+      await fsp.rm(path.join(recDir, n), { force: true }); deleted++;
+    }
+    res.json({ ok: true, deleted });
+  });
+
   /** Every reader the server has records for, most recently active first. */
   app.get('/api/qa/readers', guard, async (_req, res) => {
     const out = [];

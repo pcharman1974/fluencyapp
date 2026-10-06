@@ -2,9 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import type { Attempt } from '../types';
 import { STORIES } from '../lib/library';
 import { fromServer, mergeClass, type PupilData } from '../lib/classData';
-import { listRecords, qaEnabled } from '../lib/qa';
+import { listRecords, qaEnabled, removeReader } from '../lib/qa';
 import type { Screen } from '../App';
-import { getAllReaderCodes, getAttempts, getEvents, getHolidays, setHolidays } from '../lib/storage';
+import { getAllReaderCodes, getAttempts, getEvents, getHolidays, removeLocalReader, setHolidays } from '../lib/storage';
 import DataLog from '../components/DataLog';
 import ServerData from '../components/ServerData';
 import { download, logRows, toCsv } from '../lib/dataLog';
@@ -31,11 +31,18 @@ export default function Teacher({ go }: Props) {
   const [serverOn, setServerOn] = useState(false);
   const loadServer = () => qaEnabled().then(on => { setServerOn(on); if (on) listRecords().then(r => setServer(fromServer(r))).catch(() => setServer({})); });
   useEffect(() => { loadServer(); }, []);
+  const [removedTick, setRemovedTick] = useState(0);
+  const remove = async (code: string) => {
+    if (!confirm(`Remove pupil ${code}? This deletes all their data: reading records, timed reads and recordings, from the server and this device. It can't be undone.`)) return;
+    if (serverOn && !(await removeReader(code))) { alert('Could not remove the pupil from the server. Check the connection and try again.'); return; }
+    removeLocalReader(code);
+    setOpen(null); setRemovedTick(t => t + 1); loadServer();
+  };
   const classData = useMemo(() => {
     const local: Record<string, PupilData> = {};
     for (const code of getAllReaderCodes()) local[code] = { events: getEvents(code), attempts: getAttempts(code) };
     return mergeClass(server ?? {}, local);
-  }, [server]);
+  }, [server, removedTick]);
   const real = Object.keys(classData).filter(c => classData[c].events.length || classData[c].attempts.length || server?.[c]);
   const [showExamples, setShowExamples] = useState(() => getAllReaderCodes().length < 3);
   const [open, setOpen] = useState<string | null>(null);
@@ -48,7 +55,7 @@ export default function Teacher({ go }: Props) {
     });
     if (showExamples) list.push(...examples.map(e => ({ s: summarise(e.code, e.events, now, holidays, true), events: e.events, attempts: [] })));
     return list;
-  }, [holidays, showExamples, classData]);
+  }, [holidays, showExamples, classData, removedTick]);
   const sorted = sortForTeacher(pupils.map(p => p.s));
   const thisWeek = weekKey(now);
   const isHoliday = holidays.includes(thisWeek);
@@ -62,7 +69,7 @@ export default function Teacher({ go }: Props) {
   const mins = sorted.reduce((t, s) => t + s.minutesThisWeek, 0);
   const detail = open ? pupils.find(p => p.s.code === open) : null;
 
-  if (detail) return <PupilDetail p={detail.s} events={detail.events} attempts={detail.attempts} onBack={() => setOpen(null)} />;
+  if (detail) return <PupilDetail p={detail.s} events={detail.events} attempts={detail.attempts} onBack={() => setOpen(null)} onRemove={detail.s.example ? undefined : () => remove(detail.s.code)} />;
 
   return (
     <div className="teacher">
@@ -123,14 +130,17 @@ function ago(iso: string) {
   return days <= 0 ? 'Today' : days === 1 ? 'Yesterday' : `${days} days ago`;
 }
 
-function PupilDetail({ p, events, attempts, onBack }: { p: PupilSummary; events: ReadingEvent[]; attempts: Attempt[]; onBack: () => void }) {
+function PupilDetail({ p, events, attempts, onBack, onRemove }: { p: PupilSummary; events: ReadingEvent[]; attempts: Attempt[]; onBack: () => void; onRemove?: () => void }) {
   const [log, setLog] = useState(false);
   const recent = events.filter(e => e.type === 'page' || e.type === 'reread' || e.type === 'timed').slice(-12).reverse();
   return (
     <div className="teacher">
       <div className="row wrap between">
         <button className="btn btn-ghost" onClick={onBack}>← Class</button>
-        <button className={'btn ' + (log ? 'btn-navy' : 'btn-ghost')} aria-pressed={log} onClick={() => setLog(!log)}>Data log (QA)</button>
+        <div className="row wrap">
+          <button className={'btn ' + (log ? 'btn-navy' : 'btn-ghost')} aria-pressed={log} onClick={() => setLog(!log)}>Data log (QA)</button>
+          {onRemove && <button className="btn btn-ghost btn-danger" onClick={onRemove}>Remove pupil</button>}
+        </div>
       </div>
       {log && <DataLog code={p.code} events={events} attempts={attempts} example={p.example} />}
       <section className="panel">

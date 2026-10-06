@@ -62,6 +62,12 @@ export async function flush() {
     }
   } finally { flushing = false; notify(); }
 }
+/** Discards waiting uploads that match (e.g. a pupil the teacher has removed). */
+export async function dropPending(match: (i: OutboxItem) => boolean) {
+  const items = (await tx<OutboxItem[]>('readonly', s => s.getAll())) ?? [];
+  for (const i of items.filter(match)) await tx('readwrite', s => s.delete(i.key));
+  notify();
+}
 /** Saves progress on an item (e.g. the server's id once a recording's details are saved). */
 export const update = (item: OutboxItem) => tx('readwrite', s => s.put(item));
 

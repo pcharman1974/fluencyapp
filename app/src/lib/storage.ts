@@ -36,6 +36,14 @@ export const getAllReaderCodes = (): string[] => [...new Set([
   ...read<Attempt[]>(KEY_ATTEMPTS, []).map(a => a.readerCode),
 ])].filter(Boolean).sort();
 
+/** Removes a pupil's records from this device (and forgets them as the current reader). */
+export function removeLocalReader(readerCode: string) {
+  write(KEY_EVENTS, read<Stored[]>(KEY_EVENTS, []).filter(e => e.readerCode !== readerCode));
+  write(KEY_ATTEMPTS, read<Attempt[]>(KEY_ATTEMPTS, []).filter(a => a.readerCode !== readerCode));
+  if (getReaderCode() === readerCode) setReaderCode('');
+  try { localStorage.removeItem(`btc.story.${readerCode}`); } catch { /* not kept */ }
+}
+
 /** Merges a reader's records from the server into this device (no duplicates; nothing is re-sent). */
 export function importRecords(readerCode: string, events: ReadingEvent[], attempts: Attempt[]) {
   const key = (r: object) => JSON.stringify(r, Object.keys(r).filter(k => k !== 'readerCode').sort());
