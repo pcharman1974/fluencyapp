@@ -14,6 +14,7 @@ How it was done for The History of Women's Football (6 Oct 2026):
 4. Set `image` and `imageAlt` for each page and `coverImage` in `story.json`, and `cover` in
    `app/src/lib/library.ts`.
 
-Done: The History of Women's Football, Inclusive Design (pages 6, 10 and 12 cropped by hand: pictures with white backgrounds).
-Still to do: The Once and Future Queen, Inventions, The Windrush Generation,
-Carrot Girl, Home Invasion!
+Done: The History of Women's Football; Inclusive Design (pages 6, 10, 12 cropped by hand); The Once
+and Future Queen; Inventions That Changed The World (pages 2 and 6 by hand); The Windrush Generation
+(page 11 trimmed by hand).
+Still to do: Carrot Girl, Home Invasion! (plus the second screen of Home Invasion! page 13).

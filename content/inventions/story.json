@@ -4,7 +4,7 @@
   "author": "Catherine Baker",
   "source": "FFT Tutoring with the Lightning Squad (tutoring.fft.org.uk), screenshots supplied 6 Oct 2026",
   "audience": "Secondary",
-  "coverImage": "",
+  "coverImage": "images/00-cover.jpg",
   "vocabulary": [
     "fascinating",
     "inspired",
@@ -28,7 +28,9 @@
         "research",
         "televisions",
         "ordinary"
-      ]
+      ],
+      "image": "images/01.jpg",
+      "imageAlt": "A boy sitting on a sofa playing a video game with a controller."
     },
     {
       "page": 2,
@@ -44,7 +46,9 @@
         "outdoors",
         "grandmother",
         "popular"
-      ]
+      ],
+      "image": "images/02.jpg",
+      "imageAlt": "A pen drawing of a pair of fluffy earmuffs."
     },
     {
       "page": 3,
@@ -58,7 +62,9 @@
         "extra-strong",
         "accident",
         "convince"
-      ]
+      ],
+      "image": "images/03.jpg",
+      "imageAlt": "Brightly coloured sticky notes on a clipboard and a desk."
     },
     {
       "page": 4,
@@ -71,7 +77,9 @@
         "colleague",
         "brilliant",
         "damage"
-      ]
+      ],
+      "image": "images/04.jpg",
+      "imageAlt": "A girl writing at a desk with sticky notes and page markers beside her."
     },
     {
       "page": 5,
@@ -84,7 +92,9 @@
         "Mestral",
         "noticed",
         "surprisingly"
-      ]
+      ],
+      "image": "images/05.jpg",
+      "imageAlt": "A close-up of a spiky burr seed head."
     },
     {
       "page": 6,
@@ -97,7 +107,9 @@
         "microscope",
         "realised",
         "fastening"
-      ]
+      ],
+      "image": "images/06.jpg",
+      "imageAlt": "Close-ups of Velcro: the hooked side and the looped side, plus a strap and the tiny hooks under a microscope."
     },
     {
       "page": 7,
@@ -111,7 +123,9 @@
         "produce",
         "experiments",
         "eventually"
-      ]
+      ],
+      "image": "images/07.jpg",
+      "imageAlt": "A close-up of woven Kevlar fibre."
     },
     {
       "page": 8,
@@ -125,7 +139,9 @@
         "bulletproof",
         "helmets",
         "equipment"
-      ]
+      ],
+      "image": "images/08.jpg",
+      "imageAlt": "A black bulletproof vest."
     },
     {
       "page": 9,
@@ -137,7 +153,9 @@
         "originally",
         "wealthier",
         "cordless"
-      ]
+      ],
+      "image": "images/09.jpg",
+      "imageAlt": "An old black telephone with a dial, fixed to a wall."
     },
     {
       "page": 10,
@@ -149,7 +167,9 @@
         "everything",
         "handheld",
         "amazed"
-      ]
+      ],
+      "image": "images/10.jpg",
+      "imageAlt": "A smartphone floating above an outstretched hand."
     }
   ],
   "glossary": {
@@ -163,7 +183,7 @@
     "fibre": "A thin thread, used to make cloth and other materials."
   },
   "glossaryNote": "DRAFT definitions written by Claude for this test; to be checked by the content team.",
-  "imagesNote": "Images not yet supplied as files: the app shows the pages without pictures until they are added under images/.",
+  "imagesNote": "Pictures cropped from screenshots of the original screens (supplied 6 Oct 2026). Replace with the original image files when available, for sharper pictures.",
   "ttsReplacements": {},
   "ttsNote": "ttsReplacements: how to say printed text that a voice may misread. Used only when generating audio; page text is unchanged."
 }

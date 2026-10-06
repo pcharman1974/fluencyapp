@@ -4,7 +4,7 @@
   "author": "Joel Pollen",
   "source": "FFT Tutoring with the Lightning Squad (tutoring.fft.org.uk), screenshots supplied 6 Oct 2026",
   "audience": "Secondary",
-  "coverImage": "",
+  "coverImage": "images/00-cover.jpg",
   "vocabulary": [
     "shiver",
     "gleaming",
@@ -27,7 +27,9 @@
         "untouched",
         "silently",
         "attention"
-      ]
+      ],
+      "image": "images/01.jpg",
+      "imageAlt": "A painting of a young woman in a laced dress standing at the edge of a misty lake."
     },
     {
       "page": 2,
@@ -42,7 +44,9 @@
         "earliest",
         "transformed",
         "drawbridge"
-      ]
+      ],
+      "image": "images/02.jpg",
+      "imageAlt": "A painting of a woman in armour riding a horse."
     },
     {
       "page": 3,
@@ -52,7 +56,9 @@
       "warmupWords": [
         "predict",
         "movements"
-      ]
+      ],
+      "image": "images/03.jpg",
+      "imageAlt": "A painting of an old wizard in a pointed hat talking to two children."
     },
     {
       "page": 4,
@@ -65,7 +71,9 @@
         "poisoned",
         "injuries",
         "succeeded"
-      ]
+      ],
+      "image": "images/04.jpg",
+      "imageAlt": "A painting of a grey-bearded knight comforting a sad young woman."
     },
     {
       "page": 5,
@@ -78,7 +86,9 @@
         "forbidding",
         "bitterness",
         "gradually"
-      ]
+      ],
+      "image": "images/05.jpg",
+      "imageAlt": "A painting of a woman lying ill in bed with two children beside her."
     },
     {
       "page": 6,
@@ -89,7 +99,9 @@
         "legendary",
         "Excalibur",
         "Pendragon"
-      ]
+      ],
+      "image": "images/06.jpg",
+      "imageAlt": "A painting of a sword standing upright in rocky ground under a stormy sky."
     },
     {
       "page": 7,
@@ -99,7 +111,9 @@
       "warmupWords": [
         "directly",
         "heir"
-      ]
+      ],
+      "image": "images/07.jpg",
+      "imageAlt": "A painting of a hand holding a sword up towards bright clouds."
     },
     {
       "page": 8,
@@ -110,7 +124,9 @@
         "solstice",
         "surrounding",
         "respects"
-      ]
+      ],
+      "image": "images/08.jpg",
+      "imageAlt": "A painting of a girl crying with her hands over her face."
     },
     {
       "page": 9,
@@ -121,7 +137,9 @@
         "promising",
         "tunic",
         "cup-bearer"
-      ]
+      ],
+      "image": "images/09.jpg",
+      "imageAlt": "A painting of a young woman and a knight in golden armour."
     },
     {
       "page": 10,
@@ -131,7 +149,9 @@
       "warmupWords": [
         "purposeful",
         "possible"
-      ]
+      ],
+      "image": "images/10.jpg",
+      "imageAlt": "A painting of a woman in armour wading into a lake."
     },
     {
       "page": 11,
@@ -143,7 +163,9 @@
       "warmupWords": [
         "nervously",
         "location"
-      ]
+      ],
+      "image": "images/11.jpg",
+      "imageAlt": "A painting of a woman swimming underwater."
     },
     {
       "page": 12,
@@ -154,7 +176,9 @@
         "attempts",
         "surface",
         "motherly"
-      ]
+      ],
+      "image": "images/12.jpg",
+      "imageAlt": "A painting of a woman standing in calm water up to her waist."
     },
     {
       "page": 13,
@@ -165,7 +189,9 @@
         "plunged",
         "outlines",
         "dizzy"
-      ]
+      ],
+      "image": "images/13.jpg",
+      "imageAlt": "A painting of mossy rocks on a sandy lakebed."
     },
     {
       "page": 14,
@@ -175,7 +201,9 @@
       "warmupWords": [
         "several",
         "anywhere"
-      ]
+      ],
+      "image": "images/14.jpg",
+      "imageAlt": "A painting of a dark, empty lakebed."
     },
     {
       "page": 15,
@@ -186,7 +214,9 @@
         "instinct",
         "portion",
         "concealed"
-      ]
+      ],
+      "image": "images/15.jpg",
+      "imageAlt": "A painting of tall green reeds underwater."
     },
     {
       "page": 16,
@@ -198,7 +228,9 @@
         "unmistakable",
         "astonishment",
         "inscription"
-      ]
+      ],
+      "image": "images/16.jpg",
+      "imageAlt": "A painting of a glowing sword buried in the lakebed among reeds."
     },
     {
       "page": 17,
@@ -211,7 +243,9 @@
         "greedy",
         "countless",
         "echoed"
-      ]
+      ],
+      "image": "images/17.jpg",
+      "imageAlt": "A painting of a determined woman in the water holding a sword."
     },
     {
       "page": 18,
@@ -222,7 +256,9 @@
         "securely",
         "revealed",
         "stunned"
-      ]
+      ],
+      "image": "images/18.jpg",
+      "imageAlt": "A painting of a woman holding a sword on the shore as knights kneel around her."
     },
     {
       "page": 19,
@@ -233,7 +269,9 @@
         "Embarrassed",
         "stubbornly",
         "knowing"
-      ]
+      ],
+      "image": "images/19.jpg",
+      "imageAlt": "A painting of a smiling woman being hugged by a man in a brown robe."
     },
     {
       "page": 20,
@@ -246,7 +284,9 @@
         "expectation",
         "brandished",
         "triumphantly"
-      ]
+      ],
+      "image": "images/20.jpg",
+      "imageAlt": "A painting of a woman holding a shining sword above her head, surrounded by knights."
     }
   ],
   "glossary": {
@@ -261,7 +301,7 @@
   },
   "glossaryNote": "DRAFT definitions written by Claude for this test; to be checked by the content team.",
   "headingNote": "Page headings are not in the original screens; they were added for the app and need content-team review.",
-  "imagesNote": "Images not yet supplied as files: the app shows the pages without pictures until they are added under images/.",
+  "imagesNote": "Pictures cropped from screenshots of the original screens (supplied 6 Oct 2026). Replace with the original image files when available, for sharper pictures.",
   "ttsReplacements": {
     "=east": "east."
   },

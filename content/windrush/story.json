@@ -4,7 +4,7 @@
   "author": "Latoyah Innerarity",
   "source": "FFT Tutoring with the Lightning Squad (tutoring.fft.org.uk), screenshots supplied 6 Oct 2026",
   "audience": "Secondary",
-  "coverImage": "",
+  "coverImage": "images/00-cover.jpg",
   "vocabulary": [
     "perched",
     "diverse",
@@ -28,7 +28,9 @@
         "Jamaican",
         "voyage",
         "equivalent"
-      ]
+      ],
+      "image": "images/01.jpg",
+      "imageAlt": "An old black-and-white photograph of a large white ship at sea."
     },
     {
       "page": 2,
@@ -42,7 +44,9 @@
         "destination",
         "immigration",
         "cultural"
-      ]
+      ],
+      "image": "images/02.jpg",
+      "imageAlt": "An old photograph of passengers crowded on the deck of a ship."
     },
     {
       "page": 3,
@@ -54,7 +58,9 @@
         "transportation",
         "population",
         "Commonwealth"
-      ]
+      ],
+      "image": "images/03.jpg",
+      "imageAlt": "Firefighters spraying water on a bombed building during the war."
     },
     {
       "page": 4,
@@ -66,7 +72,9 @@
         "Nationality",
         "colonies",
         "opportunities"
-      ]
+      ],
+      "image": "images/04.jpg",
+      "imageAlt": "A magnifying glass over a newspaper advert saying 'We are hiring'."
     },
     {
       "page": 5,
@@ -78,7 +86,9 @@
         "unemployment",
         "hurricane",
         "aspired"
-      ]
+      ],
+      "image": "images/05.jpg",
+      "imageAlt": "An old photograph of a palm tree beside a bay with hills behind."
     },
     {
       "page": 6,
@@ -92,7 +102,9 @@
         "portrayed",
         "superior",
         "rationed"
-      ]
+      ],
+      "image": "images/06.jpg",
+      "imageAlt": "Three children sitting on the rubble of bombed houses."
     },
     {
       "page": 7,
@@ -103,7 +115,9 @@
         "disappointment",
         "encountered",
         "socialised"
-      ]
+      ],
+      "image": "images/07.jpg",
+      "imageAlt": "An old photograph of a shop window with a sign saying 'White only'."
     },
     {
       "page": 8,
@@ -115,7 +129,9 @@
         "mechanics",
         "menial",
         "over-qualified"
-      ]
+      ],
+      "image": "images/08.jpg",
+      "imageAlt": "Two men digging in a park."
     },
     {
       "page": 9,
@@ -129,7 +145,9 @@
         "accommodation",
         "mortgages",
         "aspirations"
-      ]
+      ],
+      "image": "images/09.jpg",
+      "imageAlt": "People sleeping on rows of beds in a crowded air raid shelter."
     },
     {
       "page": 10,
@@ -143,7 +161,9 @@
         "inferior",
         "underachieving",
         "persuaded"
-      ]
+      ],
+      "image": "images/10.jpg",
+      "imageAlt": "An old leaflet headed 'They tried putting a colour ban on harvests', with a photograph of a young woman."
     },
     {
       "page": 11,
@@ -157,7 +177,9 @@
         "gatherings",
         "reverted",
         "collective"
-      ]
+      ],
+      "image": "images/11.jpg",
+      "imageAlt": "A smartly dressed man in a hat and suit eating in the street."
     },
     {
       "page": 12,
@@ -169,7 +191,9 @@
         "significant",
         "ingredients",
         "accessories"
-      ]
+      ],
+      "image": "images/12.jpg",
+      "imageAlt": "A laughing young woman with long braids in front of a brightly painted wall."
     },
     {
       "page": 13,
@@ -183,7 +207,9 @@
         "co-founded",
         "contributions",
         "activist"
-      ]
+      ],
+      "image": "images/13.jpg",
+      "imageAlt": "A black-and-white photograph of a smiling woman in a jacket and necklace."
     },
     {
       "page": 14,
@@ -197,7 +223,9 @@
         "ingrained",
         "campaigning",
         "discrimination"
-      ]
+      ],
+      "image": "images/14.jpg",
+      "imageAlt": "A smiling woman in a carnival headdress and face jewels."
     }
   ],
   "glossary": {
@@ -211,7 +239,7 @@
     "relentless": "Never stopping or giving up."
   },
   "glossaryNote": "DRAFT definitions written by Claude for this test; to be checked by the content team.",
-  "imagesNote": "Images not yet supplied as files: the app shows the pages without pictures until they are added under images/.",
+  "imagesNote": "Pictures cropped from screenshots of the original screens (supplied 6 Oct 2026). Replace with the original image files when available, for sharper pictures.",
   "ttsReplacements": {
     "HMT": "H M T"
   },
