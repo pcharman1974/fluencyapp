@@ -28,4 +28,13 @@ fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
 fs.writeFileSync(path.join(out, 'index.html'), page);
 for (const id of ['secret-stones', 'womens-football', 'inclusive-design', 'once-and-future-queen', 'inventions', 'windrush', 'carrot-girl', 'home-invasion']) fs.cpSync(path.join('../content', id), path.join(out, id), { recursive: true });
+// A Claude artifact holds at most 511 files per version. For these stories the artifact leaves out the
+// recorded single words (warm-up words then use the browser's own voice); the full site keeps them.
+for (const id of ['carrot-girl', 'home-invasion']) {
+  fs.rmSync(path.join(out, id, 'audio', 'words'), { recursive: true, force: true });
+  const file = path.join(out, id, 'audio', 'manifest.json');
+  const m = JSON.parse(fs.readFileSync(file, 'utf8'));
+  m.words = {};
+  fs.writeFileSync(file, JSON.stringify(m));
+}
 console.log('artifact/index.html', (page.length / 1024).toFixed(0) + ' KB');
