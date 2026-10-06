@@ -1,5 +1,7 @@
-import { useMemo, useState } from 'react';
-import type { Story } from '../types';
+import { useEffect, useMemo, useState } from 'react';
+import type { Attempt, Story } from '../types';
+import { fromServer, mergeClass, type PupilData } from '../lib/classData';
+import { listRecords, qaEnabled } from '../lib/qa';
 import type { Screen } from '../App';
 import { getAllReaderCodes, getAttempts, getEvents, getHolidays, setHolidays } from '../lib/storage';
 import DataLog from '../components/DataLog';
@@ -23,19 +25,29 @@ const STATUS: Record<Status, { label: string; icon: string }> = {
 export default function Teacher({ story, go }: Props) {
   const now = new Date().toISOString();
   const [holidays, setHol] = useState(getHolidays());
-  const real = getAllReaderCodes();
-  const [showExamples, setShowExamples] = useState(real.length < 3);
+  // Every pupil saved on the server (any device), plus anything on this device not uploaded yet.
+  const [server, setServer] = useState<Record<string, PupilData> | null>(null);
+  const [serverOn, setServerOn] = useState(false);
+  const loadServer = () => qaEnabled().then(on => { setServerOn(on); if (on) listRecords().then(r => setServer(fromServer(r))).catch(() => setServer({})); });
+  useEffect(() => { loadServer(); }, []);
+  const classData = useMemo(() => {
+    const local: Record<string, PupilData> = {};
+    for (const code of getAllReaderCodes()) local[code] = { events: getEvents(code), attempts: getAttempts(code) };
+    return mergeClass(server ?? {}, local);
+  }, [server]);
+  const real = Object.keys(classData).filter(c => classData[c].events.length || classData[c].attempts.length || server?.[c]);
+  const [showExamples, setShowExamples] = useState(() => getAllReaderCodes().length < 3);
   const [open, setOpen] = useState<string | null>(null);
   const examples = useMemo(() => exampleClass(), []);
 
   const pupils = useMemo(() => {
-    const list: { s: PupilSummary; events: ReadingEvent[] }[] = real.map(code => {
-      const events = getEvents(code);
-      return { s: summarise(code, events, now, holidays), events };
+    const list: { s: PupilSummary; events: ReadingEvent[]; attempts: Attempt[] }[] = real.map(code => {
+      const { events, attempts } = classData[code];
+      return { s: summarise(code, events, now, holidays), events, attempts };
     });
-    if (showExamples) list.push(...examples.map(e => ({ s: summarise(e.code, e.events, now, holidays, true), events: e.events })));
+    if (showExamples) list.push(...examples.map(e => ({ s: summarise(e.code, e.events, now, holidays, true), events: e.events, attempts: [] })));
     return list;
-  }, [holidays, showExamples]);
+  }, [holidays, showExamples, classData]);
   const sorted = sortForTeacher(pupils.map(p => p.s));
   const thisWeek = weekKey(now);
   const isHoliday = holidays.includes(thisWeek);
@@ -49,7 +61,7 @@ export default function Teacher({ story, go }: Props) {
   const mins = sorted.reduce((t, s) => t + s.minutesThisWeek, 0);
   const detail = open ? pupils.find(p => p.s.code === open) : null;
 
-  if (detail) return <PupilDetail p={detail.s} events={detail.events} story={story} onBack={() => setOpen(null)} />;
+  if (detail) return <PupilDetail p={detail.s} events={detail.events} attempts={detail.attempts} story={story} onBack={() => setOpen(null)} />;
 
   return (
     <div className="teacher">
@@ -59,13 +71,13 @@ export default function Teacher({ story, go }: Props) {
           <label className="check"><input type="checkbox" checked={showExamples} onChange={e => setShowExamples(e.target.checked)} /> Show example pupils</label>
           <label className="check"><input type="checkbox" checked={isHoliday} onChange={toggleHoliday} /> This week is a school holiday</label>
           {real.length > 0 && <button className="link" onClick={() => download(`power-reader-all-${now.slice(0, 10)}.csv`,
-            toCsv(real.flatMap(code => logRows(getEvents(code), getAttempts(code)).map(row => ({ readerCode: code, row })))), 'text/csv')}>Download all data (QA, CSV)</button>}
+            toCsv(real.flatMap(code => logRows(classData[code].events, classData[code].attempts).map(row => ({ readerCode: code, row })))), 'text/csv')}>Download all data (QA, CSV)</button>}
         </div>
       </div>
       <section className="panel">
         <h2>Class reading this week</h2>
         <p className="hint">Week starting {new Date(thisWeek + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })} · Goal: reading bar filled (5 minutes of checked reading aloud) on {WEEKLY_TARGET} days per pupil.
-          {' '}Prototype: shows pupils who have used this device{showExamples ? ', plus example pupils' : ''}.</p>
+          {' '}{serverOn ? 'Shows every pupil saved on the server, from any device' : 'Shows pupils who have used this device'}{showExamples ? ', plus example pupils' : ''}. {serverOn && <button className="link" onClick={loadServer}>Refresh</button>}</p>
         <div className="t-summary">
           <div><b>{onTrack} of {sorted.length}</b><span>pupils have hit their goal</span></div>
           <div><b>{attention}</b><span>{attention === 1 ? 'pupil needs' : 'pupils need'} a look</span></div>
@@ -110,7 +122,7 @@ function ago(iso: string) {
   return days <= 0 ? 'Today' : days === 1 ? 'Yesterday' : `${days} days ago`;
 }
 
-function PupilDetail({ p, events, story, onBack }: { p: PupilSummary; events: ReadingEvent[]; story: Story; onBack: () => void }) {
+function PupilDetail({ p, events, attempts, story, onBack }: { p: PupilSummary; events: ReadingEvent[]; attempts: Attempt[]; story: Story; onBack: () => void }) {
   const [log, setLog] = useState(false);
   const recent = events.filter(e => e.type === 'page' || e.type === 'reread' || e.type === 'timed').slice(-12).reverse();
   return (
@@ -119,7 +131,7 @@ function PupilDetail({ p, events, story, onBack }: { p: PupilSummary; events: Re
         <button className="btn btn-ghost" onClick={onBack}>← Class</button>
         <button className={'btn ' + (log ? 'btn-navy' : 'btn-ghost')} aria-pressed={log} onClick={() => setLog(!log)}>Data log (QA)</button>
       </div>
-      {log && <DataLog code={p.code} events={events} attempts={p.example ? [] : getAttempts(p.code)} example={p.example} />}
+      {log && <DataLog code={p.code} events={events} attempts={attempts} example={p.example} />}
       <section className="panel">
         <div className="row wrap between">
           <h2>{p.code} {p.example && <span className="tag ex">Example</span>}</h2>
