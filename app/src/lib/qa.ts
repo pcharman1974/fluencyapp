@@ -3,6 +3,7 @@
 // Switched on only when the server says so (it needs the site password and a disk); otherwise the
 // app works device-only, as in the Claude artifact.
 import { enqueue, newKey, startOutbox, update, type OutboxItem } from './outbox';
+import type { Review } from './review';
 
 export interface QaContext { type: 'page' | 'reread' | 'warmup' | 'timed'; storyId?: string; page?: number; word?: string }
 
@@ -76,8 +77,11 @@ export function startUploads() { qaEnabled().then(on => { if (on) startOutbox(se
 export interface QaRecording {
   id: string; readerCode: string; type: QaContext['type']; date: string; page?: number; word?: string;
   heard?: string; provider?: string; check?: Record<string, unknown>; attempt?: Record<string, unknown>;
-  audio?: string; audioBytes?: number; userAgent?: string;
+  audio?: string; audioBytes?: number; userAgent?: string; text?: string; review?: Review;
 }
+export const saveReview = (id: string, review: Omit<Review, 'date'>): Promise<Review> =>
+  fetch(`api/qa/recordings/${id}/review`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(review) })
+    .then(r => { if (!r.ok) throw new Error('Not saved'); return r.json(); }).then(j => j.review);
 export const listRecordings = (): Promise<QaRecording[]> => fetch('api/qa/recordings').then(r => (r.ok ? r.json() : []));
 export const listRecords = (): Promise<Record<string, Record<string, unknown>[]>> => fetch('api/qa/records').then(r => (r.ok ? r.json() : {}));
 export const deleteRecording = (id: string) => fetch(`api/qa/recordings/${id}`, { method: 'DELETE' });

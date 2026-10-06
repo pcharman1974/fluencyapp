@@ -3,6 +3,7 @@ import { deleteRecording, listRecordings, listRecords, qaEnabled, type QaRecordi
 import { download } from '../lib/dataLog';
 import RunningRecord from './RunningRecord';
 import type { RecordMark } from '../lib/verify';
+import ReviewMarking, { ReviewSummary, reviewable } from './ReviewMarking';
 
 const TYPE = { page: 'Page read', reread: 'Re-read', warmup: 'Warm-up word', timed: 'Timed read' } as const;
 const stamp = (iso: string) => new Date(iso).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -14,12 +15,15 @@ export default function ServerData() {
   const [list, setList] = useState<QaRecording[] | null>(null);
   const [reader, setReader] = useState('');
   const [busy, setBusy] = useState(false);
+  const [show, setShow] = useState<'all' | 'todo' | 'done'>('all');
+  const [open, setOpen] = useState<string | null>(null);
   const load = () => listRecordings().then(setList).catch(() => setList([]));
   useEffect(() => { qaEnabled().then(e => { setOn(e); if (e) load(); }); }, []);
   if (!on) return null;
 
   const readers = [...new Set((list ?? []).map(r => r.readerCode))].sort();
-  const shown = (list ?? []).filter(r => !reader || r.readerCode === reader);
+  const shown = (list ?? []).filter(r => (!reader || r.readerCode === reader)
+    && (show === 'all' || (show === 'done' ? !!r.review : reviewable(r) && !!r.audio && !r.review)));
   const downloadAll = async () => {
     setBusy(true);
     try {
@@ -44,11 +48,19 @@ export default function ServerData() {
               {readers.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </label>
+          <label className="check">Show{' '}
+            <select value={show} onChange={e => setShow(e.target.value as typeof show)}>
+              <option value="all">All reads</option>
+              <option value="todo">Waiting for review</option>
+              <option value="done">Reviewed</option>
+            </select>
+          </label>
           <button className="btn btn-ghost" onClick={load}>Refresh</button>
           <button className="btn btn-navy" disabled={busy} onClick={downloadAll}>{busy ? 'Preparing…' : 'Download all data (JSON)'}</button>
         </div>
       </div>
       <p className="hint">This test version saves every reader's records on FFT's server, with a recording of each read and the words the speech check heard. Listen and compare with the result to check the speech check. Newest first; the latest 500 recordings are shown.</p>
+      {list && <ReviewSummary list={list} />}
       {list === null ? <p className="hint">Loading…</p> : shown.length === 0 ? <p className="hint">No recordings yet.</p> : (
         <ol className="datalog-list">
           {shown.map(r => {
@@ -61,6 +73,7 @@ export default function ServerData() {
                   <span className="dl-kind">{TYPE[r.type]}</span>
                   <strong className="dl-what">{[r.readerCode, r.word ?? (r.page ? `Page ${r.page}` : '')].filter(Boolean).join(' · ')}</strong>
                   {ok !== undefined && r.type !== 'timed' && <span className={'status ' + (ok ? 'on-track' : 'behind')}>{ok ? '✓ Counted' : '✗ Not counted'}</span>}
+                  {r.review && <span className="dl-reviewed">Reviewed{r.review.reviewer ? ` by ${r.review.reviewer}` : ''}</span>}
                   <button className="link dl-del" onClick={() => remove(r)}>Delete</button>
                 </div>
                 <p className="dl-details">
@@ -69,8 +82,14 @@ export default function ServerData() {
                   {r.provider && ` · ${r.provider}`}
                 </p>
                 {r.heard !== undefined && <p className="dl-details"><b>Speech check heard:</b> {r.heard || '(nothing)'}</p>}
-                {Array.isArray(c.record) && <RunningRecord record={c.record as RecordMark[]} audience="teacher" />}
+                {open === r.id ? (
+                  <ReviewMarking r={r} onClose={() => setOpen(null)}
+                    onSaved={rv => setList(l => (l ?? []).map(x => (x.id === r.id ? { ...x, review: rv } : x)))} />
+                ) : <>
+                {Array.isArray(c.record) && r.type !== 'timed' && <RunningRecord record={c.record as RecordMark[]} audience="teacher" />}
+                {reviewable(r) && r.audio && <button className="btn btn-ghost" onClick={() => setOpen(r.id)}>{r.review ? 'See or change review' : 'Review marking'}</button>}
                 {r.audio ? <audio controls preload="none" src={`api/qa/recordings/${r.id}/audio`} className="dl-audio" /> : <p className="hint">No recording (microphone recording not available on this device).</p>}
+                </>}
                 <details className="dl-raw"><summary>All fields</summary><pre>{JSON.stringify(r, null, 2)}</pre></details>
               </li>
             );

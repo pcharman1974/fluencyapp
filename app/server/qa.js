@@ -75,6 +75,25 @@ export function qaRoutes(app, { root, enabled }) {
     res.type(meta.audioType || 'application/octet-stream').sendFile(path.join(recDir, meta.audio));
   });
 
+  // An adult's marking of a recording, to compare with the app's (see src/lib/review.ts).
+  app.put('/api/qa/recordings/:id/review', guard, validId, express.json({ limit: '50kb' }), async (req, res) => {
+    let meta;
+    try { meta = await readMeta(req.params.id); } catch { return res.status(404).json({ error: 'No such record' }); }
+    const r = req.body || {};
+    const ints = v => Array.isArray(v) && v.every(n => Number.isInteger(n) && n >= 0 && n < 5000);
+    if (!ints(r.wrong) || (r.stoppedAt !== undefined && !ints([r.stoppedAt]))) return res.status(400).json({ error: 'Bad review' });
+    const review = {
+      wrong: [...new Set(r.wrong)].sort((a, b) => a - b),
+      ...(r.stoppedAt !== undefined ? { stoppedAt: r.stoppedAt } : {}),
+      counted: typeof r.counted === 'boolean' ? r.counted : null,
+      note: typeof r.note === 'string' ? r.note.slice(0, 1000) : '',
+      reviewer: typeof r.reviewer === 'string' ? r.reviewer.slice(0, 60) : '',
+      date: new Date().toISOString(),
+    };
+    await fsp.writeFile(metaFile(req.params.id), JSON.stringify({ ...meta, review }, null, 2));
+    res.json({ ok: true, review });
+  });
+
   app.delete('/api/qa/recordings/:id', guard, validId, async (req, res) => {
     for (const n of await fsp.readdir(recDir)) if (n.startsWith(req.params.id + '.')) await fsp.rm(path.join(recDir, n), { force: true });
     res.json({ ok: true });

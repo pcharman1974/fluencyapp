@@ -6,6 +6,7 @@ import { alignHeard, errorsFromAlignment, scoreReading } from '../lib/scoring';
 import { providers, type SpeechProvider, type SpeechResult } from '../lib/speech';
 import { saveAttempt, getAttempts } from '../lib/storage';
 import { sendRecording, startRecording, type QaRecorder } from '../lib/qa';
+import { runningRecord, type RecordMark } from '../lib/verify';
 import Gauge from '../components/Gauge';
 import type { Reader, RecordResult } from '../lib/useReader';
 import { POINTS, type Award } from '../lib/rewards';
@@ -96,14 +97,14 @@ export default function TimedRead({ story, reader, state, go, onAward }: Props) 
     setErrors(errs);
     setChecks(new Set(a.words.filter(w => w.check).map(w => w.refIndex)));
     setLastWord(a.lastWordIndex);
-    save(scoreReading(a.lastWordIndex, errs, Math.round(secs)), a.lastWordIndex, errs, heard);
+    save(scoreReading(a.lastWordIndex, errs, Math.round(secs)), a.lastWordIndex, errs, heard, runningRecord(tokens, a));
     setPhase('results');
   }
 
   const result = lastWord !== null ? scoreReading(lastWord, errors, Math.round(elapsed)) : null;
 
   /** Saves the automatically marked result (no adult marking step). */
-  function save(r: NonNullable<typeof result>, last: number, errs: Set<number>, heard: SpeechResult) {
+  function save(r: NonNullable<typeof result>, last: number, errs: Set<number>, heard: SpeechResult, record: RecordMark[]) {
     if (saved.current) return;
     const errorWords = [...errs].filter(i => i <= last).sort((a, b) => a - b).map(i => tokens[i].display);
     const attempt: Attempt = {
@@ -112,7 +113,7 @@ export default function TimedRead({ story, reader, state, go, onAward }: Props) 
       accuracy: r.accuracy, errorWords, speechScores: heard.scores,
     };
     saveAttempt(attempt);
-    sendRecording(reader, { type: 'timed', storyId: story.id }, { attempt, heard: heard.words.map(w => w.text).join(' '), provider: heard.provider }, audio.current);
+    sendRecording(reader, { type: 'timed', storyId: story.id }, { attempt, check: { record }, text: tokens.map(t => t.display).join(' '), heard: heard.words.map(w => w.text).join(' '), provider: heard.provider }, audio.current);
     onAward(state.record({ type: 'timed', storyId: story.id, wcpm: r.wcpm, errorWords, seconds: r.seconds }));
     saved.current = true;
   }

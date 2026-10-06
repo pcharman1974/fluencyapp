@@ -570,3 +570,23 @@ main.full { max-width: none; padding: 0; }
   .banner { padding: 6px 12px; font-size: .9rem; }
   .reader-nav { padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px)); }
 }
+
+/* Marking review (teacher, testing) */
+.review { margin-top: 8px; padding: 12px; border: 2px solid #E1E8EC; border-radius: 12px; display: grid; gap: 10px; }
+.review .check input:not([type=checkbox]) { width: auto; height: auto; font: inherit; padding: 6px 8px; border: 2px solid #C3CDD3; border-radius: 8px; }
+.review .check.grow { flex: 1; min-width: 220px; }
+.review .check.grow input { flex: 1; }
+.review-words { font-family: var(--font-reading); font-size: 1.15rem; line-height: 1.3; display: flex; flex-wrap: wrap; gap: 4px 4px; margin: 0; }
+.rv-w { font: inherit; background: none; border: 2px solid transparent; border-radius: 6px; padding: 1px 4px; cursor: pointer; color: var(--lwc-navy-deep); }
+.rv-w:hover { border-color: #C3CDD3; }
+.rv-w.wrong { background: #FEE2E2; border-color: #B91C1C; color: #7F1D1D; text-decoration: line-through; }
+.rv-w.after { color: #C3CDD3; }
+.rv-w.stop { border-color: var(--lwc-navy); border-right-width: 5px; }
+.review-result { background: #F5F8FA; border-radius: 10px; padding: 10px 14px; }
+.review-result h4 { margin: 0 0 4px; }
+.review-result ul { margin: 4px 0; padding-left: 20px; }
+.review-summary { background: #F5F8FA; border-radius: 12px; padding: 12px 14px; margin: 10px 0; }
+.review-summary h3 { margin: 0 0 4px; }
+.review-table { border-collapse: collapse; font-size: .9rem; width: 100%; display: block; overflow-x: auto; }
+.review-table th, .review-table td { text-align: left; padding: 4px 10px 4px 0; border-bottom: 1px solid #E1E8EC; vertical-align: top; }
+.dl-reviewed { background: #E3F4E8; color: #14532D; border-radius: 99px; padding: 2px 10px; font-size: .8rem; font-weight: 800; }
