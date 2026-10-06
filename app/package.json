@@ -11,7 +11,8 @@
     "server": "node server/index.js",
     "build:artifact": "tsc --noEmit && vite build --mode artifact && node scripts-artifact.mjs",
     "start": "npm run build && node server/index.js",
-    "audio": "node scripts/generate-audio.mjs"
+    "audio": "node scripts/generate-audio.mjs",
+    "compare:mai": "rolldown scripts/compare-mai.ts -o .qa-compare/compare-mai.mjs -f esm -p node -e dotenv/config && node .qa-compare/compare-mai.mjs"
   },
   "dependencies": {
     "dotenv": "^18.0.5",

@@ -3,3 +3,4 @@ dist
 dist-artifact
 .env
 .qa-data
+.qa-compare
