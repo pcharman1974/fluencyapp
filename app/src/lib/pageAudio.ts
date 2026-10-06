@@ -53,6 +53,13 @@ export function wordAt(words: { start: number; end: number }[], t: number): numb
   return ans;
 }
 
+/**
+ * How far ahead of the voice the highlight moves (seconds). Measured on a screen recording (6 Oct 2026): the
+ * word timings match the audio to about 0.02 s and the box followed them to about 0.05 s, yet it still looked
+ * late. Readers see a box that lands as the word starts as lagging, so it moves a little early.
+ */
+export const HIGHLIGHT_LEAD_SEC = 0.15;
+
 export function playPage(src: string, words: { start: number; end: number }[], opts: { rate?: number; onWord?: (i: number) => void; onEnd?: () => void; onFail?: (why: string) => void } = {}) {
   stopAudio();
   const a = new Audio(ready.get(src) ?? src);
@@ -61,7 +68,7 @@ export function playPage(src: string, words: { start: number; end: number }[], o
   (a as HTMLAudioElement & { preservesPitch?: boolean }).preservesPitch = true;
   let last = -2;
   const tick = () => {
-    const i = wordAt(words, a.currentTime);
+    const i = wordAt(words, a.currentTime + HIGHLIGHT_LEAD_SEC * a.playbackRate);
     if (i !== last) { last = i; if (i >= 0) opts.onWord?.(i); }
     raf = requestAnimationFrame(tick);
   };
