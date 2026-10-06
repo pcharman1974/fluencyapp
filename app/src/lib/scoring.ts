@@ -7,6 +7,7 @@
 //  - WCPM = (words read - errors) / minutes
 
 import { normalise, type Token } from './text';
+import { mergeSpoken } from './spoken';
 
 export interface FluencyResult {
   seconds: number;
@@ -67,7 +68,8 @@ function subCost(a: string, b: string): number {
 /** Word-level edit-distance alignment of heard words against the reference text. */
 export function alignHeard(ref: Token[], heard: HeardWord[], opts: { checkBelow?: number } = {}): Alignment {
   const checkBelow = opts.checkBelow ?? 60;
-  const h = heard.map(w => ({ ...w, norm: normalise(w.text) })).filter(w => w.norm);
+  // Spoken numbers and hyphenated words ("nineteen sixties", "modern day") become the printed word first.
+  const h = mergeSpoken(ref, heard).map(w => ({ ...w, norm: normalise(w.text) })).filter(w => w.norm);
   const n = ref.length, m = h.length;
   // cost[i][j] = cost of aligning ref[0..i) with heard[0..j)
   const cost: Uint32Array[] = Array.from({ length: n + 1 }, () => new Uint32Array(m + 1));
