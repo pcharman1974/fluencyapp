@@ -14,13 +14,15 @@ export const asStory = (p: Passage, from: Story): Story =>
   ({ ...from, id: p.id, title: p.title, vocabulary: [], glossary: {}, pages: [{ ...from.pages[0], page: 1, text: p.text }] });
 
 /**
- * Next passage for a pupil: the first one they haven't read; once they've read them all, the one
- * read longest ago. `used` is the passage ids of their earlier timed reads, oldest first.
+ * Next passage for a pupil, chosen at random from those they haven't read. Once they've read them all,
+ * any passage except the one they read last time. `used` is the passage ids of their earlier timed
+ * reads, oldest first.
  */
-export function nextPassage(used: (string | undefined)[], list: Passage[] = PASSAGES): Passage {
-  const last = new Map<string, number>();
-  used.forEach((id, i) => { if (id) last.set(id, i); });
-  const fresh = list.find(p => !last.has(p.id));
-  if (fresh) return fresh;
-  return [...list].sort((a, b) => last.get(a.id)! - last.get(b.id)!)[0];
+export function nextPassage(used: (string | undefined)[], list: Passage[] = PASSAGES, random: () => number = Math.random): Passage {
+  const seen = new Set(used.filter(Boolean));
+  const last = [...used].reverse().find(Boolean);
+  let pool = list.filter(p => !seen.has(p.id));
+  if (!pool.length) pool = list.filter(p => p.id !== last);
+  if (!pool.length) pool = list;
+  return pool[Math.floor(random() * pool.length) % pool.length];
 }

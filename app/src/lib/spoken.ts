@@ -99,6 +99,20 @@ export function mergeSpoken(ref: Token[], heard: HeardWord[]): HeardWord[] {
   });
   const byFirst = new Map<string, { seq: string[]; text: string }[]>();
   const singles = new Map<string, string>();
+  // When a spoken form also appears word for word in the text ("throw out" beside "throw-out"),
+  // runs heard are matched to the text in order: plain words stay plain, the hyphenated one merges.
+  const norms0 = ref.map(t => t.norm);
+  const order = new Map<string, boolean[]>(); // spoken form -> for each place it occurs in the text: merge or not
+  for (const t of ref) for (const seq of spokenForms(t.display)) order.set(seq.join(' '), []);
+  for (const k of [...order.keys()]) {
+    const seq = k.split(' '), marks: { at: number; merge: boolean }[] = [];
+    ref.forEach((t, i) => {
+      if (spokenForms(t.display).some(f => f.join(' ') === k)) marks.push({ at: i, merge: true });
+      if (seq.every((w, n) => norms0[i + n] === w)) marks.push({ at: i, merge: false });
+    });
+    if (marks.every(m => m.merge)) order.delete(k);
+    else order.set(k, marks.sort((x, y) => x.at - y.at).map(m => m.merge));
+  }
   for (const t of ref) {
     for (const seq of spokenForms(t.display)) {
       const list = byFirst.get(seq[0]) ?? [];
@@ -116,7 +130,11 @@ export function mergeSpoken(ref: Token[], heard: HeardWord[]): HeardWord[] {
     for (const c of byFirst.get(norms[j]) ?? []) {
       if (c.seq.length > (best?.len ?? 0) && c.seq.every((s, k) => norms[j + k] === s)) best = { len: c.seq.length, text: c.text };
     }
-    if (best) {
+    const queue = best && order.get(norms.slice(j, j + best.len).join(' '));
+    if (best && queue && queue.length && !queue.shift()) {
+      out.push(...split.slice(j, j + best.len)); // these are the plain words in the text
+      j += best.len;
+    } else if (best) {
       const run = split.slice(j, j + best.len);
       const scores = run.map(w => w.accuracyScore).filter((x): x is number => x !== undefined);
       out.push({ text: best.text, startSec: run[0].startSec, accuracyScore: scores.length ? Math.min(...scores) : undefined });

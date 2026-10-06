@@ -1,20 +1,23 @@
 import { describe, expect, it } from 'vitest';
 import { nextPassage, PASSAGES } from './passages';
 
-const list = [{ id: 'a', title: '', status: '', text: '' }, { id: 'b', title: '', status: '', text: '' }, { id: 'c', title: '', status: '', text: '' }];
+const list = ['a', 'b', 'c'].map(id => ({ id, title: '', status: '', text: '' }));
+const ids = (used: (string | undefined)[], n = 300) => new Set(Array.from({ length: n }, () => nextPassage(used, list).id));
 
-describe('timed-read passages', () => {
-  it('gives each pupil a passage they have not read', () => {
-    expect(nextPassage([], list).id).toBe('a');
-    expect(nextPassage([undefined, 'a'], list).id).toBe('b');
-    expect(nextPassage(['b', 'a'], list).id).toBe('c');
+describe('bonus-read passages', () => {
+  it('picks at random from the passages the pupil has not read', () => {
+    expect(ids([])).toEqual(new Set(['a', 'b', 'c']));
+    expect(ids([undefined, 'a'])).toEqual(new Set(['b', 'c']));
+    expect(ids(['b', 'a'])).toEqual(new Set(['c']));
   });
-  it('once all are read, repeats the one read longest ago', () => {
-    expect(nextPassage(['a', 'b', 'c'], list).id).toBe('a');
-    expect(nextPassage(['a', 'b', 'c', 'a'], list).id).toBe('b');
+  it('once all are read, picks at random but never the one just read', () => {
+    expect(ids(['a', 'b', 'c'])).toEqual(new Set(['a', 'b']));
+    expect(nextPassage(['a', 'b', 'c'], list, () => 0).id).toBe('a');
+    expect(nextPassage(['a', 'b', 'c'], list, () => 0.99).id).toBe('b');
   });
-  it('has drafts long enough for a minute of fast reading', () => {
-    expect(PASSAGES.length).toBeGreaterThanOrEqual(6);
-    for (const p of PASSAGES) expect(p.text.split(/\s+/).length).toBeGreaterThanOrEqual(230);
+  it('has ten passages of about 250 words', () => {
+    expect(PASSAGES).toHaveLength(10);
+    for (const p of PASSAGES) expect(p.text.split(/\s+/).length).toBeGreaterThanOrEqual(240);
+    for (const p of PASSAGES) expect(p.text.split(/\s+/).length).toBeLessThanOrEqual(260);
   });
 });

@@ -70,14 +70,20 @@ Please check it word for word against the originals. Boxed words match the origi
 
 **Length:** about 116 words a page (women's football), 104 (inclusive design) and 92 (*The Once and Future Queen*, over 20 pages), against 81 for Secret Stones. Longer pages mean longer reads in each session.
 
-## Timed-read passages
+## Bonus-read passages (timed read)
 
-`timed-passages/passages.json` holds six short passages (about 250 words each), written by Claude as placeholders. The timed read uses one the pupil hasn't seen before, so the score isn't inflated by practice.
+`timed-passages/passages.json` holds ten passages of about 245 words each, written by Claude as drafts:
 
-They need:
+- seven short stories: The Last Bus, The New Kid, Lost in the Fog, The Phone on the Bench, Grandad's Shed, Stage Fright, The Fox and The Power Cut;
+- two how-to pieces: Looking After Your Bike and Growing a Giant Sunflower.
 
-- editing;
-- difficulty matching: rough readability estimates vary from about age 7 to age 10, and the bee passage is the hardest;
-- ideally, replacing with levelled passages from the content team.
+**Level.** They're levelled to match *Home Invasion!*, at roughly Flesch–Kincaid grade 4.2 to 5.8 against 4.7 for *Home Invasion!*, with around 10 to 14 words a sentence. That's the easier end of the library (*Windrush* is about grade 11). If pupils move on to harder books, a second, harder set will be needed.
 
-Until they're matched, scores from different passages aren't strictly comparable.
+**How they're used.** The bonus read picks one at random that the pupil hasn't read. Once they've read all ten, it picks at random again, never repeating the one they read last time.
+
+**Checks needed:**
+
+- The content team should edit and check them before pupils see them.
+- The sunflower piece says the flower bud turns to follow the sun. This is true of young sunflowers, but it should be checked against a source.
+
+Until the passages are checked for equal difficulty, scores from different passages are only roughly comparable.

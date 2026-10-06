@@ -39,6 +39,11 @@ describe('marking spoken forms as correct', () => {
     expect(misread('In modern-day Turkey', 'in modern day turkey')).toEqual([]);
     expect(misread('in north-west France', 'in north-west france')).toEqual([]);
   });
+  it('keeps plain words separate when the text also has them hyphenated', () => {
+    const c = checkPage('keep and throw out. The throw-out box.', heard('keep and throw out the throw out box'), 5);
+    expect(c.misread).toEqual([]);
+  });
+
   it('still marks a wrong number wrong', () => {
     expect(misread('about 11,000 years', 'about eleven hundred years').length).toBeGreaterThan(0);
   });
@@ -99,6 +104,17 @@ describe.each([['Inclusive Design', inclusiveJson], ['The Once and Future Queen'
       const said = (p.text as string).replace('COVID-19', 'covid nineteen').replace(/\b12\b/, 'twelve').replace(/\b10\b/, 'ten').replace(/\b15\b/, 'fifteen').replace(/\b20\b/, 'twenty').replace(/\b150\b/g, 'a hundred and fifty').replace('1873', 'eighteen seventy three').replace('1968', 'nineteen sixty eight').replace('1980,', 'nineteen eighty').replace('1948', 'nineteen forty eight').replace('1965', 'nineteen sixty five').replace('1930s', 'nineteen thirties').replace('1980s', 'nineteen eighties').replace('1990s', 'nineteen nineties').replace('2000s', 'two thousands').replace(' UK ', ' u k ').replace(' TV ', ' t v ').replace(/®/g, '').replace('HMT', 'h m t').replace('DIY', 'd i y').replace(/OK,/g, 'okay').replace(/\b1948\b/g, 'nineteen forty eight').replace(/\b22\b/, 'twenty two').replace('£28,', 'twenty eight pounds').replace('£850', 'eight hundred and fifty pounds').replace('8,000', 'eight thousand').replace(/ UK([ .])/g, ' u k$1').replace(' II,', ' two').replace('1940s', 'nineteen forties').replace('1971', 'nineteen seventy one').replace('1983', 'nineteen eighty three').replace('1955', 'nineteen fifty five').replace('1958', 'nineteen fifty eight').replace(/’/g, "'").replace(/[‘"“”.,!?;:()…–-]/g, ' ').split(/\s+/).filter(Boolean).join(' ');
       const c = checkPage(p.text, heard(said), 40);
       expect({ page: p.page, misread: c.misread, accuracy: c.accuracy }).toEqual({ page: p.page, misread: [], accuracy: 1 });
+    }
+  });
+});
+
+describe('bonus-read passages read aloud perfectly', () => {
+  it('marks every passage 100% correct', async () => {
+    const { PASSAGES } = await import('./passages');
+    for (const p of PASSAGES) {
+      const said = p.text.replace(/’/g, "'").replace(/[‘"“”.,!?;:()…–-]/g, ' ').split(/\s+/).filter(Boolean).join(' ');
+      const c = checkPage(p.text, heard(said), 90);
+      expect({ id: p.id, misread: c.misread, accuracy: c.accuracy }).toEqual({ id: p.id, misread: [], accuracy: 1 });
     }
   });
 });
