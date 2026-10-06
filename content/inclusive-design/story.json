@@ -4,7 +4,7 @@
   "author": "Catherine Baker",
   "source": "FFT Tutoring with the Lightning Squad (tutoring.fft.org.uk), screenshots supplied 6 Oct 2026",
   "audience": "Secondary",
-  "coverImage": "",
+  "coverImage": "images/00-cover.jpg",
   "vocabulary": [
     "accessible",
     "mobility",
@@ -27,7 +27,9 @@
         "accessibility",
         "circumstances",
         "enjoyment"
-      ]
+      ],
+      "image": "images/01.jpg",
+      "imageAlt": "A wheelchair user and friends using a ramp beside the steps into a building."
     },
     {
       "page": 2,
@@ -40,7 +42,9 @@
         "constructed",
         "pushchairs",
         "libraries"
-      ]
+      ],
+      "image": "images/02.jpg",
+      "imageAlt": "An old-fashioned grand staircase with an iron railing."
     },
     {
       "page": 3,
@@ -57,7 +61,9 @@
         "essential",
         "inaccessible",
         "effectively"
-      ]
+      ],
+      "image": "images/03.jpg",
+      "imageAlt": "A wheelchair user at the bottom of a long flight of stairs between escalators."
     },
     {
       "page": 4,
@@ -71,7 +77,9 @@
         "ensuring",
         "impairments",
         "universal"
-      ]
+      ],
+      "image": "images/04.jpg",
+      "imageAlt": "Designers looking at a building plan on a tablet, with a hard hat and tape measure."
     },
     {
       "page": 5,
@@ -82,7 +90,9 @@
         "old-fashioned",
         "unaided",
         "approaches"
-      ]
+      ],
+      "image": "images/05.jpg",
+      "imageAlt": "An automatic door with a 'wave to open' sign showing a hand and a wheelchair symbol."
     },
     {
       "page": 6,
@@ -96,7 +106,9 @@
         "pavement",
         "uncomfortable",
         "visually"
-      ]
+      ],
+      "image": "images/06.jpg",
+      "imageAlt": "A drawing of a man with a white cane at a road crossing with traffic lights and a raised kerb."
     },
     {
       "page": 7,
@@ -110,7 +122,9 @@
         "particular",
         "activated",
         "physically"
-      ]
+      ],
+      "image": "images/07.jpg",
+      "imageAlt": "A hand holding a phone with an app for switching on the living room lights."
     },
     {
       "page": 8,
@@ -123,7 +137,9 @@
       "warmupWords": [
         "potentially",
         "comfortable"
-      ]
+      ],
+      "image": "images/08.jpg",
+      "imageAlt": "An accessible bathroom with grab rails beside the toilet and a walk-in shower with a seat."
     },
     {
       "page": 9,
@@ -137,7 +153,9 @@
         "varying",
         "sensory",
         "overwhelming"
-      ]
+      ],
+      "image": "images/09.jpg",
+      "imageAlt": "A man in a wheelchair cooking at a lowered kitchen worktop."
     },
     {
       "page": 10,
@@ -148,7 +166,9 @@
         "technology",
         "opportunities",
         "reminders"
-      ]
+      ],
+      "image": "images/10.jpg",
+      "imageAlt": "A smart speaker and other small smart devices on a table."
     },
     {
       "page": 11,
@@ -162,7 +182,9 @@
         "flexibly",
         "environment",
         "commute"
-      ]
+      ],
+      "image": "images/11.jpg",
+      "imageAlt": "A woman on a video call with colleagues on her laptop."
     },
     {
       "page": 12,
@@ -174,7 +196,9 @@
       "warmupWords": [
         "extremely",
         "whenever"
-      ]
+      ],
+      "image": "images/12.jpg",
+      "imageAlt": "A white chair lift fixed to the side of a swimming pool."
     },
     {
       "page": 13,
@@ -188,7 +212,9 @@
       "warmupWords": [
         "equipment",
         "surfaced"
-      ]
+      ],
+      "image": "images/13.jpg",
+      "imageAlt": "Two wheelchair basketball players reaching for the ball."
     },
     {
       "page": 14,
@@ -202,7 +228,9 @@
         "aspects",
         "differently",
         "fulfilling"
-      ]
+      ],
+      "image": "images/14.jpg",
+      "imageAlt": "A smiling group of friends, one in a wheelchair, making heart shapes with their hands."
     }
   ],
   "glossary": {
@@ -216,7 +244,7 @@
     "contribute": "Give or add something to help."
   },
   "glossaryNote": "DRAFT definitions written by Claude for this test; to be checked by the content team.",
-  "imagesNote": "Images not yet supplied as files: the app shows the pages without pictures until they are added under images/.",
+  "imagesNote": "Pictures cropped from screenshots of the original screens (supplied 6 Oct 2026). Replace with the original image files when available, for sharper pictures.",
   "ttsReplacements": {},
   "ttsNote": "ttsReplacements: how to say printed text that a voice may misread. Used only when generating audio; page text is unchanged."
 }
