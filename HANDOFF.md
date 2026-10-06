@@ -33,7 +33,7 @@ correct per minute (WCPM). They earn Power points, levels, badges and story card
 | Recorded model reading: generation | `app/scripts/generate-audio.mjs`, `app/scripts/audio-align.mjs` |
 | Server (token endpoint, optional password) | `app/server/index.js` |
 | Render deployment | `render.yaml` (Blueprint, rootDir `app`) |
-| Published prototype | https://claude.ai/artifact/9PjFyJ8ceKsDcm8t9mWS1H, built into `artifact/` |
+| Where it's published | **Render only** (service power-reader; redeploys automatically from `master`). Since 6 Oct 2026 the Claude artifact (https://claude.ai/artifact/9PjFyJ8ceKsDcm8t9mWS1H, built into `artifact/`) is no longer updated, and is frozen at version 31. |
 
 Commands, run in `app/`: `npm ci`, `npm test` (66 tests), `npm run build`, `npm start`,
 `npm run build:artifact`, `npm run audio -- --story secret-stones [--dry-run] [--provider azure]`.
@@ -157,7 +157,7 @@ their history from the server. **Before real pupils use it: DPIA, consent, reten
 The user is FFT's Managing Director: non-developer, decisive, often sends follow-ups mid-task.
 - Give plain-English replies with a clear recommendation.
 - Test in a browser before publishing.
-- Publish updates to the same artifact link.
+- Publish by pushing to `master`; Render redeploys. Don't update the Claude artifact unless asked.
 - Commit and push to `master` after each change. Don't open PRs unless asked.
 - Don't invent statistics or cite research without a verifiable source.
 - Customer-facing text is a draft for human review.
